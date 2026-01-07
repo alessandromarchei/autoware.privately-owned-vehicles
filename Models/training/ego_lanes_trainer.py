@@ -11,10 +11,10 @@ import cv2
 from typing import Literal, get_args
 import sys
 
-sys.path.append('..')
-from model_components.ego_lanes_network import EgoLanesNetwork
-from data_utils.augmentations import Augmentations
-from data_utils.load_data_ego_lanes import VALID_DATASET_LIST
+
+from Models.model_components.ego_lanes_network import EgoLanesNetwork
+from Models.data_utils.augmentations import Augmentations
+from Models.data_utils.load_data_ego_lanes import VALID_DATASET_LIST
 
 
 class EgoLanesTrainer():

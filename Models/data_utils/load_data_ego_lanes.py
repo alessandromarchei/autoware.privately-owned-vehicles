@@ -7,11 +7,7 @@ import numpy as np
 import math
 import cv2
 import sys
-sys.path.append(os.path.abspath(os.path.join(
-    os.path.dirname(__file__), 
-    '..',
-    '..'
-)))
+
 from PIL import Image
 from typing import Literal, get_args
 from Models.data_utils.check_data import CheckData
@@ -21,9 +17,10 @@ VALID_DATASET_LITERALS = Literal[
     # "BDD100K",
     # "COMMA2K19",
     #"CULANE",
-    "CURVELANES",
+    # "CURVELANES",
+    "Curvelanes"
     # "ROADWORK",
-    "TUSIMPLE",
+    # "TUSIMPLE",
     # "OPENLANE",
     # "JIQING",
     # "ONCE3DLANE",
@@ -31,6 +28,7 @@ VALID_DATASET_LITERALS = Literal[
 VAL_SAMPLE_CAPS = {
     "TUSIMPLE":     500,
     "CURVELANES":   1000,
+    "Curvelanes":   1000,
     "JIQING":       1000,
     "CULANE":       1000,
     "BDD100K":      1000,
@@ -49,6 +47,7 @@ FIXED_HOMOTRANS_DATASETS = [
 DYNAMIC_HOMOTRANS_DATASETS = [
     "CURVELANES",
     "OPENLANE"
+    "Curvelanes"
 ]
 
 
