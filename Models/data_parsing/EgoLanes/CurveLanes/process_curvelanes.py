@@ -360,8 +360,8 @@ def annotateGT(
     )
     mask_img = Image.fromarray(mask_array).convert("RGB")
 
-    # Save mask
-    mask_img.save(os.path.join(mask_dir, save_name))
+    # Save mask (PNG, lossless)
+    mask_img.save(os.path.join(mask_dir, save_name + ".q"))
 
     # Overlay mask on raw image, ratio 1:1
     overlayed_img = Image.blend(
@@ -370,8 +370,9 @@ def annotateGT(
         alpha = 0.5
     )
 
-    # Save visualization img, JPG for lighter weight, just different dir
-    overlayed_img.save(os.path.join(visualization_dir, save_name.replace(".png", ".jpg")))
+    # Save visualization img (JPG)
+    overlayed_img.save(os.path.join(visualization_dir, save_name + ".jpg"))
+
 
 
 
@@ -536,7 +537,7 @@ if __name__ == "__main__":
 
     # ============================== Dataset structure ============================== #
 
-    ROOT_DIR = "Curvelanes"
+    ROOT_DIR = ""
     LIST_SPLITS = ["train", "valid"]
     IMG_DIR = "images"
     LABEL_DIR = "labels"
