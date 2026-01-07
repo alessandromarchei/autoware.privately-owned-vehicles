@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from typing import Literal, get_args
 import sys
-sys.path.append('../..')
+
 from Models.data_utils.load_data_ego_lanes import LoadDataEgoLanes, VALID_DATASET_LIST
 from Models.training.ego_lanes_trainer import EgoLanesTrainer
 
@@ -28,8 +28,8 @@ def main():
     # ====================== Loading datasets ====================== #
 
     # Root
-    ROOT_PATH   = "<path to dataset directory containing all processed datasets>"
-    POV_PATH    = "<path to PoV project directory>"
+    ROOT_PATH   = "/home/sergey/DEV/AI/datasets/"
+    POV_PATH    = "egolanes"
 
     # Model save root path
     MODEL_SAVE_ROOT_PATH = os.path.join(
@@ -54,11 +54,11 @@ def main():
     msdict = {}
     for dataset in VALID_DATASET_LIST:
         msdict[dataset] = {
-            "path_labels"   : os.path.join(ROOT_PATH, dataset, PERSPECTIVE_JSON_PATH),
-            "path_masks"    : os.path.join(ROOT_PATH, dataset, PERSPECTIVE_MASK_PATH),
+            "path_labels"   : os.path.join(ROOT_PATH, dataset,"processed/" + PERSPECTIVE_JSON_PATH),
+            "path_masks"    : os.path.join(ROOT_PATH, dataset,"processed/" +  PERSPECTIVE_MASK_PATH),
             # "path_images"   : os.path.join(ROOT_PATH, dataset, PERSPECTIVE_IMG_PATH),
-            "path_perspective_vis" : os.path.join(ROOT_PATH, dataset, PERSPECTIVE_VIS_PATH),
-            "path_perspective_image": os.path.join(ROOT_PATH, dataset, PERSPECTIVE_IMG_PATH),
+            "path_perspective_vis" : os.path.join(ROOT_PATH, dataset, "processed/" + PERSPECTIVE_VIS_PATH),
+            "path_perspective_image": os.path.join(ROOT_PATH, dataset, "processed/" +  PERSPECTIVE_IMG_PATH),
             # "path_bev_vis" : os.path.join(ROOT_PATH, dataset, BEV_VIS_PATH)
         }
 
