@@ -361,7 +361,7 @@ def annotateGT(
     mask_img = Image.fromarray(mask_array).convert("RGB")
 
     # Save mask (PNG, lossless)
-    mask_img.save(os.path.join(mask_dir, save_name + ".q"))
+    mask_img.save(os.path.join(mask_dir, save_name + ".png"))
 
     # Overlay mask on raw image, ratio 1:1
     overlayed_img = Image.blend(
