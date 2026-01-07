@@ -319,6 +319,12 @@ def annotateGT(
         new_img_height -= (CROP_TOP + CROP_BOTTOM)
         new_img_width -= (CROP_LEFT + CROP_RIGHT)
 
+
+    assert new_img_width == 1024, f"Unexpected width: {new_img_width}"
+    assert new_img_height == 640, f"Unexpected height: {new_img_height}"
+
+
+
     # Save raw image as JPG for lighter weight
     raw_img.save(os.path.join(raw_dir, save_name + ".jpg"))
 
@@ -549,24 +555,35 @@ if __name__ == "__main__":
         "weird" : (1570, 660),
     }
 
-    BEEG_Y_CROP_SUM = 320
-    BEEG_X_CROP = 240
-    BEEG_Y_CROP_TOP_RATIO = 0.75
+    # ========================= Target resolution =========================
+    TARGET_W = 1024
+    TARGET_H = 640
+    #chosen to have a multiple of 32, so that we dont have to do resize or cropping for models using various output stride (like 16 or 32 (see Unet family))
+
+    # ========================= Cropping presets =========================
+
+    # After resize(0.5): 2560x1440 -> 1280x720
+    # Also applies to native 1280x720 images
+    # 1280x720 -> 1024x640
+    #   width : remove 256  -> 128 left / 128 right
+    #   height: remove 80   -> 56 top / 24 bottom  (top-biased)
     CROP_BEEG = {
-        "TOP" : int(BEEG_Y_CROP_SUM * BEEG_Y_CROP_TOP_RATIO),
-        "RIGHT" : BEEG_X_CROP,
-        "BOTTOM" : int(BEEG_Y_CROP_SUM * (1 - BEEG_Y_CROP_TOP_RATIO)),
-        "LEFT" : BEEG_X_CROP
+        "TOP": 56,
+        "RIGHT": 128,
+        "BOTTOM": 24,
+        "LEFT": 128,
     }
-    
-    WEIRD_Y_CROP = 130
-    WEIRD_X_CROP = 385
+
+    # Native 1570x660 -> 1024x640
+    #   width : remove 546 -> 273 left / 273 right
+    #   height: remove 20  -> 10 top / 10 bottom
     CROP_WEIRD = {
-        "TOP" : WEIRD_Y_CROP,
-        "RIGHT" : WEIRD_X_CROP,
-        "BOTTOM" : WEIRD_Y_CROP,
-        "LEFT" : WEIRD_X_CROP
+        "TOP": 10,
+        "RIGHT": 273,
+        "BOTTOM": 10,
+        "LEFT": 273,
     }
+
 
     # For interping lines with soooooooo few points, 2~3 or so
     LINE_INTERP_THRESHOLD = 5
