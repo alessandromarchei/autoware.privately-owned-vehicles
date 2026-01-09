@@ -790,3 +790,56 @@ class EgoLanesTrainer():
     # Log overall validation loss across all datasets to TensorBoard
     def log_validation_overall(self, overall_val_score, log_count):
         self.writer.add_scalar("Overall (Validation)", overall_val_score, log_count)
+
+    @torch.no_grad()
+    def compute_iou_per_class_logits(
+        self,
+        pred_logits: torch.Tensor,   # [1, C, H, W]
+        gt_mask: torch.Tensor,       # [1, C, H, W]
+        eps: float = 1e-6,
+    ):
+        """
+        EgoLanes IoU computation using logits thresholding.
+
+        Returns:
+            dict: {
+                "left":  float,
+                "right": float,
+                "other": float,
+                "mean":  float,
+            }
+        """
+
+        # binarize (same logic as visualization)
+        pred = (pred_logits > 0).bool()
+        gt   = (gt_mask > 0.5).bool()
+
+        # remove batch dim
+        pred = pred[0]
+        gt   = gt[0]
+
+        assert pred.shape == gt.shape, f"{pred.shape} vs {gt.shape}"
+
+        class_names = ["left", "right", "other"]
+        ious = {}
+
+        for c, name in enumerate(class_names):
+            p = pred[c]
+            g = gt[c]
+
+            intersection = (p & g).sum().float()
+            union        = (p | g).sum().float()
+
+            if union < 1:
+                # no pixels present in GT nor pred → undefined IoU
+                iou = torch.tensor(float("nan"), device=union.device)
+            else:
+                iou = intersection / (union + eps)
+
+            ious[name] = float(iou.item())
+
+        # mean IoU (ignore NaNs safely)
+        valid = [v for v in ious.values() if not np.isnan(v)]
+        ious["mean"] = float(np.mean(valid)) if len(valid) > 0 else float("nan")
+
+        return ious

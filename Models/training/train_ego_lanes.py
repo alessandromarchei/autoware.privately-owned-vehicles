@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from typing import Literal, get_args
 import sys
-
+import numpy as np
 from Models.data_utils.load_data_ego_lanes import LoadDataEgoLanes, VALID_DATASET_LIST
 from Models.training.ego_lanes_trainer import EgoLanesTrainer
 
@@ -109,7 +109,7 @@ def main():
     # Trainer instance
     trainer = None
 
-    CHECKPOINT_PATH = None #args.checkpoint_path
+    CHECKPOINT_PATH = "egolanes/Models/saves/AutoSteer/models/iter_105000_epoch_0_step_105000.pth"
     if (CHECKPOINT_PATH != None):
         trainer = EgoLanesTrainer(checkpoint_path = CHECKPOINT_PATH)    
     else:
@@ -318,6 +318,21 @@ def main():
 
                     print("================ Running validation calculation ================")
                     
+
+                    # -------------------------------
+                    # IoU accumulators
+                    # -------------------------------
+                    msdict["iou_stats"] = {}
+
+                    for dataset in VALID_DATASET_LIST:
+                        msdict["iou_stats"][dataset] = {
+                            "left": [],
+                            "right": [],
+                            "other": [],
+                            "mean": [],
+                        }
+
+
                     # Compute val loss per dataset
                     for dataset in VALID_DATASET_LIST:
                         for val_count in range(0, msdict[dataset]["N_vals"]):
@@ -384,6 +399,19 @@ def main():
                             # Run model and calculate loss
                             trainer.run_model()
 
+
+                            # -----------------------------------
+                            # IoU computation (EgoLanes style)
+                            # -----------------------------------
+                            ious = trainer.compute_iou_per_class_logits(
+                                trainer.pred_binary_seg_tensor,
+                                trainer.egolanes_tensor,
+                            )
+
+                            for k in ["left", "right", "other", "mean"]:
+                                msdict["iou_stats"][dataset][k].append(ious[k])
+
+
                             # Get running total of loss value
                             msdict[dataset]["total_running"] += trainer.get_validation_loss_value()
 
@@ -405,11 +433,35 @@ def main():
                     overall_val_score = 0
 
                     # Calculating dataset specific validation metrics
-                    for dataset in VALID_DATASET_LIST:
+                    print("\n================ IoU Validation Results ================")
 
-                        validation_loss_dataset_total =  msdict[dataset]["total_running"] / msdict[dataset]["num_val_samples"]
-                        overall_val_score += validation_loss_dataset_total
-                        print("DATASET :", dataset, " VAL SCORE : ", validation_loss_dataset_total)
+                    overall_mean_ious = []
+
+                    for dataset in VALID_DATASET_LIST:
+                        stats = msdict["iou_stats"][dataset]
+
+                        def safe_mean(x):
+                            x = [v for v in x if not np.isnan(v)]
+                            return float(np.mean(x)) if len(x) > 0 else float("nan")
+
+                        iou_left  = safe_mean(stats["left"])
+                        iou_right = safe_mean(stats["right"])
+                        iou_other = safe_mean(stats["other"])
+                        iou_mean  = safe_mean(stats["mean"])
+
+                        overall_mean_ious.append(iou_mean)
+
+                        print(
+                            f"[{dataset}] "
+                            f"IoU left={iou_left:.3f} | "
+                            f"IoU right={iou_right:.3f} | "
+                            f"IoU other={iou_other:.3f} | "
+                            f"mIoU={iou_mean:.3f}"
+                        )
+
+                    overall_mIoU = float(np.mean(overall_mean_ious))
+                    print(f"\nOVERALL mean IoU = {overall_mIoU:.3f}")
+
 
                         # Logging validation metric for each dataset
                         trainer.log_validation_dataset(dataset, validation_loss_dataset_total, msdict["log_counter"] + 1)
