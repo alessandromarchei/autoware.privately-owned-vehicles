@@ -217,4 +217,5 @@ __marimo__/
 
 *egolanes/
 
-*runs/*.pth
+*runs/
+*.pth
