@@ -45,7 +45,7 @@ def train(args, params, run_dir, log_writer):
         sampler = data.distributed.DistributedSampler(dataset)
 
     loader = data.DataLoader(dataset, args.batch_size, sampler is None, sampler,
-                             num_workers=8, pin_memory=True, collate_fn=LoadDataAutoSpeed.collate_fn)
+                             num_workers=args.workers, pin_memory=True, collate_fn=LoadDataAutoSpeed.collate_fn)
 
     # Scheduler
     num_steps = len(loader)
@@ -162,8 +162,9 @@ def val(args, params, run_dir, model=None):
     filenames = [f.as_posix() for f in current_dir.rglob("*") if f.is_file()]
 
     dataset = LoadDataAutoSpeed(filenames, args.input_size, params, augment=False)
-    loader = data.DataLoader(dataset, batch_size=4, shuffle=False, num_workers=4,
-                             pin_memory=True, collate_fn=LoadDataAutoSpeed.collate_fn)
+    loader = data.DataLoader(dataset, batch_size=args.batch_size, shuffle=False, num_workers=args.workers,
+                             pin_memory=True, collate_fn=LoadDataAutoSpeed.collate_fn, persistent_workers=True,
+                             prefetch_factor=args.prefetch_factor)
 
     plot = False
     if not model:
@@ -264,12 +265,15 @@ if __name__ == "__main__":
     parser.add_argument('--dataset', help="dataset directory path")
     parser.add_argument('-c', '--config', default='auto_speed.yaml', type=str, help='yaml file for config')
     parser.add_argument('--input-size', default=640, type=int)
-    parser.add_argument('--batch-size', default=32, type=int)
+    parser.add_argument('--batch-size', default=64, type=int)
     parser.add_argument('--local_rank', default=0, type=int)
     parser.add_argument('--version', default='n', type=str)
     # parser.add_argument('--epochs', default=30, type=int)
     parser.add_argument('--runs_dir', default="runs", type=str)
     parser.add_argument('--epochs', default=30, type=int)
+    parser.add_argument('--workers', default=16, type=int,help="Number of dataloader workers")
+    parser.add_argument('--prefetch_factor', default=2, type=int, help="Number of samples loaded in advance by each worker")
+
 
     args = parser.parse_args()
 
