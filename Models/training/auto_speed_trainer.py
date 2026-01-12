@@ -35,7 +35,7 @@ def train(args, params, run_dir, log_writer):
     # EMA
     ema = util.EMA(model) if args.local_rank == 0 else None
 
-    current_dir = Path(args.dataset + "/images/train/")
+    current_dir = Path(args.dataset + "/images/training/")
     filenames = [f.as_posix() for f in current_dir.rglob("*") if f.is_file()]
 
     sampler = None
@@ -158,7 +158,7 @@ def train(args, params, run_dir, log_writer):
 
 @torch.no_grad()
 def val(args, params, run_dir, model=None):
-    current_dir = Path(args.dataset + "/images/val/")
+    current_dir = Path(args.dataset + "/images/validation/")
     filenames = [f.as_posix() for f in current_dir.rglob("*") if f.is_file()]
 
     dataset = LoadDataAutoSpeed(filenames, args.input_size, params, augment=False)
@@ -262,9 +262,9 @@ def get_next_run(path="."):
 if __name__ == "__main__":
     parser = ArgumentParser()
     parser.add_argument('--dataset', help="dataset directory path")
+    parser.add_argument('-c', '--config', default='auto_speed.yaml', type=str, help='yaml file for config')
     parser.add_argument('--input-size', default=640, type=int)
     parser.add_argument('--batch-size', default=32, type=int)
-    parser.add_argument('--local-rank', default=0, type=int)
     parser.add_argument('--local_rank', default=0, type=int)
     parser.add_argument('--version', default='n', type=str)
     # parser.add_argument('--epochs', default=30, type=int)
@@ -288,14 +288,16 @@ if __name__ == "__main__":
     log_writer = SummaryWriter(log_dir=run_dir)
 
     if args.distributed:
+        print(f'Running DDP on local rank {args.local_rank}.')
         torch.cuda.set_device(device=args.local_rank)
         torch.distributed.init_process_group(backend='nccl', init_method='env://')
 
     if args.local_rank == 0:
+        print(f'Run directory: {run_dir}')
         if not os.path.exists('weights'):
             os.makedirs('weights')
 
-    with open('../config/auto_speed.yaml', errors='ignore') as f:
+    with open(args.config, errors='ignore') as f:
         params = yaml.safe_load(f)
 
     util.setup_seed()

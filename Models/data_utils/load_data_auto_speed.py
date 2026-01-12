@@ -198,7 +198,10 @@ class LoadDataAutoSpeed(data.Dataset):
 
     @staticmethod
     def load_label(filenames):
-        path = f'{os.path.dirname(filenames[0])}.cache'
+        
+        root = os.path.commonpath(filenames)
+        path = os.path.join(root, "labels.cache")
+
         if os.path.exists(path):
             return torch.load(path, weights_only=False)
         x = {}
@@ -214,7 +217,8 @@ class LoadDataAutoSpeed(data.Dataset):
 
                 # verify labels
                 a = f'{os.sep}images{os.sep}'
-                b = f'{os.sep}labels{os.sep}'
+                b = f'{os.sep}labels_yolo{os.sep}'
+
                 if os.path.isfile(b.join(filename.rsplit(a, 1)).rsplit('.', 1)[0] + '.txt'):
                     with open(b.join(filename.rsplit(a, 1)).rsplit('.', 1)[0] + '.txt') as f:
                         label = [x.split() for x in f.read().strip().splitlines() if len(x)]
