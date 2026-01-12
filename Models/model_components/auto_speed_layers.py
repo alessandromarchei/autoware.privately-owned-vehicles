@@ -78,27 +78,36 @@ class Attention(torch.nn.Module):
 
     def __init__(self, ch, num_head):
         super().__init__()
-        self.num_head = num_head
-        self.dim_head = ch // num_head
-        self.dim_key = self.dim_head // 2
-        self.scale = self.dim_key ** -0.5
+        self.num_head = num_head                #nano : 2 heads
+        self.dim_head = ch // num_head          #nano : 64 dim per head
+        self.dim_key = self.dim_head // 2       #nano : 32 dim for key
+        self.scale = self.dim_key ** -0.5       #nano : scale factor
 
+        #ch = 128, number of heads = 2, for the smallest model (nano)
+
+        #qkv : (128,H,W) -> (256,H,W)
         self.qkv = Conv(ch, ch + self.dim_key * num_head * 2, activation=torch.nn.Identity())
 
         self.conv1 = Conv(ch, ch, activation=torch.nn.Identity(), k=3, p=1, g=ch)
         self.conv2 = Conv(ch, ch, activation=torch.nn.Identity())
 
+    #self attention mechanism with multi-heads 
     def forward(self, x):
         b, c, h, w = x.shape
 
         qkv = self.qkv(x)
+
+        #reshape qkv : (b, 256, h, w) -> (b, 2, 66, h*w)
         qkv = qkv.view(b, self.num_head, self.dim_key * 2 + self.dim_head, h * w)
 
         q, k, v = qkv.split([self.dim_key, self.dim_key, self.dim_head], dim=2)
 
+
+        #attention calculation O((N^2)) with N = h*w (number of pixels in the feature map)
         attn = (q.transpose(-2, -1) @ k) * self.scale
         attn = attn.softmax(dim=-1)
 
+        # Y = Attention(Q, K, V) = softmax(QK^T/sqrt(d_k))V
         x = (v @ attn.transpose(-2, -1)).view(b, c, h, w) + self.conv1(v.reshape(b, c, h, w))
         return self.conv2(x)
 

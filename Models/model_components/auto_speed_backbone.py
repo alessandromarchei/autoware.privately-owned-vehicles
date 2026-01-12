@@ -36,6 +36,8 @@ class AutoSpeedBackbone(torch.nn.Module):
             # C3K2(width[5], width[5], depth[3], csp[1], r=2),
             ASC(width[5], width[5], depth[1], csp[0], r=2, h=20, w=20),
             SPPF(width[5], width[5]),
+
+            #self attention mechanism
             C2PSA(width[5], width[5])
         )
 

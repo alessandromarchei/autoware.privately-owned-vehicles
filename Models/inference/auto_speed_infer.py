@@ -39,7 +39,7 @@ class AutoSpeedNetworkInfer():
     def image_to_tensor(self, image: Image.Image):
         """Convert PIL image to tensor and keep scale/padding info."""
         img, scale, pad_x, pad_y = self.resize_letterbox(image)
-        tensor = transforms.ToTensor()(img).to(self.device).half()
+        tensor = transforms.ToTensor()(img).to(self.device)
         return tensor.unsqueeze(0), scale, pad_x, pad_y
 
     def xywh2xyxy(self, x):

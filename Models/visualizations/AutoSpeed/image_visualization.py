@@ -24,8 +24,8 @@ def make_visualization(prediction, input_image_filepath):
         # label = f"Class: {int(cls)} | Score: {conf:.2f}"
         # cv2.putText(img_cv, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
 
-    cv2.imshow('Prediction Objects', img_cv)
-    cv2.waitKey(0)
+    #file path 
+    cv2.imwrite("autospeed_output.jpg", img_cv)
 
 
 if __name__ == "__main__":
