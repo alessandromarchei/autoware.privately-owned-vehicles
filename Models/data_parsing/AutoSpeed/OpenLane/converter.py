@@ -91,24 +91,50 @@ def expand_training_set(dataset_dir, fract=0.25):
                 print(f"Failed to move {image.name}: {e}")
 
 
+def convert_labels_safe(input_dir, output_dir):
+    input_dir = Path(input_dir)
+    files = [f for f in input_dir.rglob("*.json") if f.is_file()]
+
+    for file in tqdm(files, desc="Convert labels", unit="file"):
+        rel_path = file.relative_to(input_dir)
+        base_name = file.stem.replace(".jpg", "")   # remove .jpg.json
+
+        with file.open("r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        labels = []
+        for box in data["result"]:
+            id = box["id"] if "id" in box else box.get("attribute", 0)
+            id = 3 if str(id) == "4" else id  # convert 4 → 3
+
+            width  = float(box["width"])  / image_width
+            height = float(box["height"]) / image_height
+            x = (float(box["x"]) + float(box["width"])  / 2) / image_width
+            y = (float(box["y"]) + float(box["height"]) / 2) / image_height
+
+            labels.append([id, x, y, width, height])
+
+        # keep same folder structure
+        target = Path(output_dir) / rel_path.parent / f"{base_name}.txt"
+        target.parent.mkdir(parents=True, exist_ok=True)
+
+        with target.open("w", encoding="utf-8") as f:
+            for item in labels:
+                f.write(" ".join(f"{x:.6f}" for x in item) + "\n")
+
+
+
 def convert(dataset_dir):
-    # convert training data
-    input_training_dir = dataset_dir + "/images/training"
-    output_training_dir = dataset_dir + "/images/train"
-    move_images(input_training_dir, output_training_dir)
+    # Labels paths (your real structure)
+    input_train_labels = dataset_dir + "/cipo/cipo/training"
+    input_val_labels   = dataset_dir + "/cipo/cipo/validation"
 
-    input_dir = dataset_dir + "/labels/training"
-    output_dir = dataset_dir + "/labels/train"
-    convert_labels(input_dir, output_dir)
+    # Output YOLO labels (new safe folder)
+    output_train_labels = dataset_dir + "/labels_yolo/train"
+    output_val_labels   = dataset_dir + "/labels_yolo/val"
 
-    # convert validation data
-    input_dir = dataset_dir + "/images/validation"
-    output_dir = dataset_dir + "/images/val"
-    move_images(input_dir, output_dir)
-
-    input_dir = dataset_dir + "/labels/validation"
-    output_dir = dataset_dir + "/labels/val"
-    convert_labels(input_dir, output_dir)
+    convert_labels_safe(input_train_labels, output_train_labels)
+    convert_labels_safe(input_val_labels, output_val_labels)
 
 
 if __name__ == '__main__':
@@ -118,4 +144,4 @@ if __name__ == '__main__':
 
     dataset_dir = args.dataset_dir
     convert(dataset_dir)
-    expand_training_set(dataset_dir)
+    # expand_training_set(dataset_dir)
