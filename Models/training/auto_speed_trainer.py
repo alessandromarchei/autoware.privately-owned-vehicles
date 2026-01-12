@@ -271,7 +271,7 @@ if __name__ == "__main__":
     # parser.add_argument('--epochs', default=30, type=int)
     parser.add_argument('--runs_dir', default="runs", type=str)
     parser.add_argument('--epochs', default=30, type=int)
-    parser.add_argument('--workers', default=16, type=int,help="Number of dataloader workers")
+    parser.add_argument('--workers', default=8, type=int,help="Number of dataloader workers")
     parser.add_argument('--prefetch_factor', default=2, type=int, help="Number of samples loaded in advance by each worker")
 
 
