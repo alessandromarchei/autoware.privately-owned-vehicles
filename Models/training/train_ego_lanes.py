@@ -109,7 +109,7 @@ def main():
     # Trainer instance
     trainer = None
 
-    CHECKPOINT_PATH = "egolanes/Models/saves/AutoSteer/models/iter_105000_epoch_0_step_105000.pth"
+    CHECKPOINT_PATH = None          #"egolanes/Models/saves/AutoSteer/models/iter_105000_epoch_0_step_105000.pth"
     if (CHECKPOINT_PATH != None):
         trainer = EgoLanesTrainer(checkpoint_path = CHECKPOINT_PATH)    
     else:
