@@ -227,3 +227,7 @@ runs/
 *.jpeg
 *.bmp
 *.png
+
+*.onnx
+*.pth
+*.pt

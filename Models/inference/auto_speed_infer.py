@@ -9,7 +9,11 @@ class AutoSpeedNetworkInfer():
         # print(f'Using {self.device} for inference')
 
         # Load model
-        self.model = torch.load(checkpoint_path + "/best.pt", map_location="cpu", weights_only=False)['model']
+        if checkpoint_path.endswith('.pt') or checkpoint_path.endswith('.pth'):
+            self.model = torch.load(checkpoint_path, map_location="cpu", weights_only=False)['model']
+        else:
+            self.model = torch.load(checkpoint_path + "/best.pt", map_location="cpu", weights_only=False)['model']
+        
         self.model = self.model.to(self.device).eval()
 
     def resize_letterbox(self, img: Image.Image):
@@ -39,7 +43,7 @@ class AutoSpeedNetworkInfer():
     def image_to_tensor(self, image: Image.Image):
         """Convert PIL image to tensor and keep scale/padding info."""
         img, scale, pad_x, pad_y = self.resize_letterbox(image)
-        tensor = transforms.ToTensor()(img).to(self.device)
+        tensor = transforms.ToTensor()(img).to(self.device).half()
         return tensor.unsqueeze(0), scale, pad_x, pad_y
 
     def xywh2xyxy(self, x):
@@ -91,7 +95,14 @@ class AutoSpeedNetworkInfer():
         image_tensor, scale, pad_x, pad_y = self.image_to_tensor(image)
 
         with torch.no_grad():
-            predictions = self.model(image_tensor)
+            try:
+                #trying with input = half tensor
+                image_tensor = image_tensor.half()
+                predictions = self.model(image_tensor)
+            except Exception as e:
+                #fallback to float tensor
+                image_tensor = image_tensor.float()
+                predictions = self.model(image_tensor)
 
         predictions = self.post_process_predictions(predictions)
         if predictions.numel() == 0:
