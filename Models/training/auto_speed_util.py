@@ -17,7 +17,7 @@ def setup_seed():
     numpy.random.seed(0)
     torch.manual_seed(0)
     torch.backends.cudnn.benchmark = False
-    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.deterministic = False
 
 
 def setup_multi_processes():
