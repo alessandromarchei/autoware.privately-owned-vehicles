@@ -1,8 +1,10 @@
 #pragma once
 
+#include "logging/logger.hpp"
 #include <string>
 #include <engine/onnx_engine.hpp>
 #include <models/inference.hpp>
+#include <iostream>
 
 namespace vpe = visionpilot::engine;
 namespace vpm = visionpilot::models;
@@ -48,9 +50,10 @@ struct Config {
 };
 
 static std::string find_config(const std::string& filename) {
-    const std::string local  = "config/" + filename;
+    const std::string local  = filename;
     const std::string system = "/usr/share/visionpilot/config/" + filename;
 
+    std::cout << "Found local config file" << local << std::endl;
     if (std::filesystem::exists(local))  return local;
     if (std::filesystem::exists(system)) return system;
 
@@ -59,7 +62,8 @@ static std::string find_config(const std::string& filename) {
 
 // Load from key=value .conf file. Expands ~ to $HOME.
 // Throws std::runtime_error on missing or invalid config.
-Config load_vision_pilot_config();
+Config load_vision_pilot_config(const std::string & path, const std::string & ros_path, const std::string & test_path);
+
 
 // Resolve config path from --config <path>, VISIONPILOT_CONFIG env var,
 // or default candidates. Returns empty string if nothing found.

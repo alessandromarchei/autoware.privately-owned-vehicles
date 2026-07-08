@@ -38,7 +38,7 @@ std::vector<double> readSpeeds(const std::string& filename)
 
     if (!file.is_open())
     {
-        std::cerr << "Error: could not open file " << filename << std::endl;
+        VP_ERROR("Error: could not open file %s", filename.c_str());
         return speeds;
     }
 
@@ -57,8 +57,7 @@ std::vector<double> readSpeeds(const std::string& filename)
         }
         catch (const std::exception& e)
         {
-            std::cerr << "Warning: skipping invalid line: \"" << line
-                << "\" (" << e.what() << ")" << std::endl;
+            VP_ERROR("Warning: skipping invalid line: \"%s\" (%s)", line.c_str(), e.what());
         }
     }
 
@@ -69,20 +68,79 @@ std::vector<double> readSpeeds(const std::string& filename)
 int main(int argc, char** argv)
 {
     Config cfg;
-    try { cfg = load_vision_pilot_config(); }
+
+    // Default configuration file
+    std::string config_path = "config/vision_pilot.conf";
+    std::string homography_path = "config/H.yaml";
+    std::string config_path_ros2 = "config/vision_pilot_ros2.conf";
+    std::string config_path_test = "config/vision_pilot_test.conf";
+
+    // CLI flags
+    bool debug_viz = false;
+
+    for (int i = 1; i < argc; ++i)
+    {
+        const std::string arg(argv[i]);
+
+        if (arg == "--debug-viz")
+        {
+            debug_viz = true;
+        }
+        else if (arg == "--config")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --config");
+                return 1;
+            }
+
+            config_path = argv[++i];
+        }
+        else if (arg == "--config-ros2")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --config-ros2");
+                return 1;
+            }
+
+            config_path_ros2 = argv[++i];
+        }
+        else if (arg == "--config-test")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --config-test");
+                return 1;
+            }
+
+            config_path_test = argv[++i];
+        }
+        else if (arg == "--H")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --H. Specify path to homography YAML file.");
+                return 1;
+            }
+            homography_path = argv[++i];
+        }
+        else
+        {
+            VP_ERROR("Unknown argument: %s", arg.c_str());
+            return 1;
+        }
+    }
+
+
+    try
+    {
+        cfg = load_vision_pilot_config(config_path, config_path_ros2, config_path_test);
+    }
     catch (const std::exception& e)
     {
         VP_ERROR("Config: %s", e.what());
         return 1;
-    }
-
-    // ── CLI flags ─────────────────────────────────────────────────────────────
-    bool show_window = true;
-    bool debug_viz = false;
-    for (int i = 1; i < argc; ++i)
-    {
-        const std::string arg(argv[i]);
-        if (arg == "--debug-viz") debug_viz = true;
     }
 
     std::shared_ptr<CameraInterface> camera_interface;
@@ -140,9 +198,9 @@ int main(int argc, char** argv)
     const cv::Size net_size(vm::AutoDrive::NET_W, vm::AutoDrive::NET_H);
     cv::Mat frame, warped, resized;
     bool h_resized_set = false;
-    cv::Mat H = load_matrix("H.yaml", "H");
+    cv::Mat H = load_matrix(homography_path, "H");
     int frame_number = 0;
-    std::vector<double> speeds = readSpeeds("<INPUT_VEHICLE_SPEED_FILE_PATH>");
+    std::vector<double> speeds = readSpeeds(cfg.source.input_vehicle_speed);
     while (true)
     {
         auto [ok, frame] = camera_interface->get_latest_frame();

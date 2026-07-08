@@ -4,7 +4,7 @@
 
 ImagePreprocessor::ImagePreprocessor()
 {
-    C_ = load_matrix("homography_C_matrix.yaml", "C");
+    C_ = load_matrix("../config/homography_C_matrix.yaml", "C");
 }
 
 void ImagePreprocessor::preprocess(const cv::Mat& image, cv::Mat& warped_image, cv::Mat& resized_image,

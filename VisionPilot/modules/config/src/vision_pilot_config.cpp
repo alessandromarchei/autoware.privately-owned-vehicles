@@ -108,10 +108,10 @@ std::string source_label(const SourceConfig& source)
     return {};
 }
 
-Config load_vision_pilot_config()
+Config load_vision_pilot_config(const std::string& path = "config/vision_pilot.conf", const std::string& ros_path = "config/vision_pilot_ros2.conf", const std::string& test_path = "config/vision_pilot_test.conf")
 {
     // Load default config
-    auto kv = parse_conf(find_config("vision_pilot.conf"));
+    auto kv = parse_conf(find_config(path));
     Config cfg;
 
     cfg.engine.provider     = optional(kv, "engine.provider",     "cpu");
@@ -147,7 +147,7 @@ Config load_vision_pilot_config()
 
     // Load ROS2 config config
 #ifdef ENABLE_ROS2_INTERFACE
-    kv = parse_conf(find_config("vision_pilot_ros2.conf"));
+    kv = parse_conf(find_config(ros_path));
     cfg.source.input_camera_topic = optional(kv, "source.input_camera_topic",  "/camera/image");
     cfg.vehicle_speed_topic = optional(kv, "vehicle_speed_topic", "/vehicle/speed");
     cfg.vehicle_steering_topic = optional(kv, "vehicle_steering_topic", "/vehicle/steering_cmd");
@@ -156,20 +156,20 @@ Config load_vision_pilot_config()
 
     // Load test configuration
     if (cfg.source.mode == SourceMode::Video) {
-        kv = parse_conf(find_config("vision_pilot_test.conf"));
+        kv = parse_conf(find_config(test_path));
 
         // Load input video config
         cfg.source.input_video = optional(kv, "source.input_video", "");
         if (cfg.source.input_video.empty())
             throw std::runtime_error("source.mode=video requires source.input_video");
         if (!file_ok(cfg.source.input_video))
-            throw std::runtime_error("source.video_path not found: " + cfg.source.input_video);
+            throw std::runtime_error("source.input_video not found: " + cfg.source.input_video);
         // Load input vehicle speed config
         cfg.source.input_vehicle_speed = optional(kv, "source.input_vehicle_speed", "");
         if (cfg.source.input_vehicle_speed.empty())
             throw std::runtime_error("source.mode=video requires source.input_vehicle_speed");
         if (!file_ok(cfg.source.input_vehicle_speed))
-            throw std::runtime_error("source.video_path not found: " + cfg.source.input_vehicle_speed);
+            throw std::runtime_error("source.input_vehicle_speed not found: " + cfg.source.input_vehicle_speed);
         // Load dataset config
         cfg.source.dataset = optional(kv, "source.dataset", "");
         if (cfg.source.dataset.empty())
