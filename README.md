@@ -82,6 +82,13 @@ To get started with the project, download the source code from:
 ```bash
   git clone https://github.com/autowarefoundation/autoware_vision_pilot.git
 ```
+
+Install the dependencies using the provided script:
+
+```bash
+  bash ../scripts/install_dependencies.sh
+```
+
 Download ONNX Runtime from the GitHub [releases](https://github.com/microsoft/onnxruntime/releases) page.
 
 Build the project:
