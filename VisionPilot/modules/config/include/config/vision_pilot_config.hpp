@@ -53,7 +53,6 @@ static std::string find_config(const std::string& filename) {
     const std::string local  = filename;
     const std::string system = "/usr/share/visionpilot/config/" + filename;
 
-    std::cout << "Found local config file" << local << std::endl;
     if (std::filesystem::exists(local))  return local;
     if (std::filesystem::exists(system)) return system;
 
