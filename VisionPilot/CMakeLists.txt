@@ -53,6 +53,10 @@ add_subdirectory(modules/visualization)
 add_subdirectory(modules/debug)
 
 # Tests
+# Tests
+include(CTest)
+enable_testing()
+
 add_subdirectory(tests)
 
 # config
