@@ -31,5 +31,7 @@ double LongitudinalPlanner::compute_acceleration(double kappa, double ego_v, boo
     // Interaction term: only active when a real lead vehicle is present.
     double interaction_term  = has_cipo ? std::pow(s_star / s, 2.0) : 0.0;
 
-    return config_.a * (1.0 - free_road_term - interaction_term);
+    double return_value = config_.a * (1.0 - free_road_term - interaction_term);
+    
+    return return_value;
 }
