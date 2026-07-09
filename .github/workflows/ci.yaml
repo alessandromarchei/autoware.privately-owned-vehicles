@@ -1,0 +1,35 @@
+name: VisionPilot CI
+
+on:
+
+  push:
+
+  pull_request:
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y \
+              cmake \
+              build-essential \
+              libopencv-dev \
+              libgtest-dev
+
+      - name: Configure
+        run: cd VisionPilot && cmake -B build/ -DONNXRUNTIME_ROOT=/home/sergey/packages/onnxruntime-linux-x64-gpu_cuda13-1.27.0/ -DCMAKE_BUILD_TYPE=Debug -DCMAKE_CXX_FLAGS="--coverage"
+
+      - name: Build
+        run: cmake --build build -j$(nproc)
+
+      - name: Run tests
+        run: ctest --test-dir build --output-on-failure
