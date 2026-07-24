@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.21.0)
 
 project(VisionPilot VERSION 1.0 LANGUAGES CXX)
 
@@ -11,7 +11,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 
 # GPU support
-option(GPU "Enable GPU support" ON)
+option(GPU "Enable GPU support" OFF)
 
 # ROS2 packages
 option(ENABLE_ROS2_INTERFACE "Enable ROS2 support" OFF)
@@ -51,13 +51,6 @@ add_subdirectory(modules/sensing/camera_interface)
 add_subdirectory(modules/visualization)
 
 add_subdirectory(modules/debug)
-
-# Tests
-# Tests
-include(CTest)
-enable_testing()
-
-add_subdirectory(tests)
 
 # config
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config

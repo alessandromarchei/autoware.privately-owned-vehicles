@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.21.0)
 
 add_library(config
     src/vision_pilot_config.cpp

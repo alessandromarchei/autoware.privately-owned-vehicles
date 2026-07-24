@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.22.1)
+cmake_minimum_required(VERSION 3.21.0)
 
 # ─── ONNX Runtime ─────────────────────────────────────────────────────────────
 # Pass via:  cmake -DONNXRUNTIME_ROOT=<path> ..
