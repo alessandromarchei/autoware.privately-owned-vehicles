@@ -11,10 +11,10 @@ namespace camera_interface {
     V4L2CameraInterface::V4L2CameraInterface(
         const std::string& device_path,
         uint32_t fps
-    ) : device_path(device_path),
-        target_fps(fps),
+    ) : has_latest_frame(false),
         is_stream_started(false),
-        has_latest_frame(false)
+        device_path(device_path),
+        target_fps(fps)
     {
         
         log_info("Initializing V4L2 Reader");

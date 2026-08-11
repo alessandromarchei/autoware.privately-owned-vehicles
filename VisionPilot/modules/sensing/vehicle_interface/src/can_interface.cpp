@@ -9,4 +9,7 @@ double CanInterface::read()
 
 void CanInterface::write(double steering, double acceleration)
 {
+    //dummy utilization of the arguments
+    (void)steering;
+    (void)acceleration;
 }

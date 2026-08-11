@@ -1,0 +1,258 @@
+(.venv) (base) sergey@sergey-Predator-PO7-660:/opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux$ nm -A -C \
+  /opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux/lib/libhycoah_v4m.a \
+  | grep 'ModelHelper::addJobs'
+/opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux/lib/libhycoah_v4m.a:r_hycoah_impl.cpp.o:                 U hycoah::ModelHelper::addJobs(JobContainer*, unsigned char, std::vector<unsigned char, std::allocator<unsigned char> > const&, std::vector<unsigned char, std::allocator<unsigned char> >&)
+/opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux/lib/libhycoah_v4m.a:r_hycoah_model_helper.cpp.o:000000000000dde4 T hycoah::ModelHelper::addJobs(JobContainer*, unsigned char, std::vector<unsigned char, std::allocator<unsigned char> > const&, std::vector<unsigned char, std::allocator<unsigned char> >&)
+(.venv) (base) sergey@sergey-Predator-PO7-660:/opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux$ mkdir -p /tmp/hycoah_extract
+cd /tmp/hycoah_extract
+
+ar x \
+  /opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux/lib/libhycoah_v4m.a \
+  r_hycoah_model_helper.cpp.o
+(.venv) (base) sergey@sergey-Predator-PO7-660:/tmp/hycoah_extract$ nm -C r_hycoah_model_helper.cpp.o | grep ' U '
+                 U __cxa_allocate_exception
+                 U __cxa_begin_catch
+                 U __cxa_end_catch
+                 U __cxa_free_exception
+                 U __cxa_rethrow
+                 U __cxa_throw
+                 U __errno_location
+                 U __gxx_personality_v0
+                 U __isoc23_strtol
+                 U __libc_single_threaded
+                 U memcmp
+                 U memcpy
+                 U memmove
+                 U memset
+                 U R_OSAL_ClockTimeCalculateTimeDifference
+                 U strcmp
+                 U strlen
+                 U _Unwind_Resume
+                 U operator delete(void*, unsigned long)
+                 U operator<<(std::ostream&, e_bufmngr_return&)
+                 U JobContainer::add_paired(std::vector<hwahd::Job*, std::allocator<hwahd::Job*> > const&, std::vector<unsigned char, std::allocator<unsigned char> >, std::vector<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), std::allocator<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*)> >, std::vector<void*, std::allocator<void*> >, std::vector<unsigned int, std::allocator<unsigned int> >, std::vector<unsigned char, std::allocator<unsigned char> >&)
+                 U JobContainer::add(hwahd::imp::ImpxJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+                 U BufMgr_BufferManager::R_BufMgr_GetBufferHandle(int, int, renesas::rcarxos::osal::BufferInterface*&)
+                 U hycoah::g_dsp_size_sha
+                 U hycoah::g_dsp_fixedsize
+                 U hycoah::g_dsp_size_dtcm
+                 U hycoah::g_dsp_size_extc
+                 U hycoah::g_dsp_size_extd
+                 U hycoah::g_dsp_size_ptcm
+                 U hycoah::g_dsp_size_spmi
+                 U hycoah::BufManagerHelper::deallocate()
+                 U hycoah::BufManagerHelper::allocate(int)
+                 U hycoah::g_dsp_baddr_spmi
+                 U hycoah::g_dsp_size_spmc0
+                 U hycoah::g_dsp_baddr_spmc0
+                 U hycoah::g_dsp_extmem_hwaddr
+                 U hycoah::g_dsp_program_buffer_size
+                 U hycoah::DspElf::loadProgram(void*, void*, void*, void*, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)
+                 U hycoah::DspElf::getSymbolAddress(char const*)
+                 U hycoah::JobHelper::setCallbackArg(unsigned char)
+                 U hycoah::JobHelper::setCallbackArg(unsigned char, hycoah::BufManagerHelper*, hycoah::BufManagerHelper*, int)
+                 U hycoah::JobHelper::create()
+                 U R_EXFWK::init_dsp(hwahd::st_core_info_t const&, hwahd::st_dsp_config_t const&)
+                 U hycoah::BufManagerHelper::flush(unsigned long, unsigned long) const
+                 U hycoah::IOMemory::hwAddr(unsigned long) const
+                 U std::ctype<char>::_M_widen_init() const
+                 U std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::find(char const*, unsigned long, unsigned long) const
+                 U std::__detail::_Prime_rehash_policy::_M_need_rehash(unsigned long, unsigned long, unsigned long) const
+                 U std::ostream::put(char)
+                 U std::ostream::flush()
+                 U std::ostream& std::ostream::_M_insert<long>(long)
+                 U std::ostream& std::ostream::_M_insert<unsigned long>(unsigned long)
+                 U std::ostream::operator<<(int)
+                 U std::runtime_error::runtime_error(char const*)
+                 U std::runtime_error::~runtime_error()
+                 U std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_dispose()
+                 U std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_replace(unsigned long, unsigned long, char const*, unsigned long)
+                 U std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_construct(unsigned long, char)
+                 U std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_append(char const*, unsigned long)
+                 U std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_assign(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&)
+                 U std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >::_M_create(unsigned long&, unsigned long)
+                 U std::basic_ios<char, std::char_traits<char> >::clear(std::_Ios_Iostate)
+                 U operator new(unsigned long)
+                 U std::_Hash_bytes(void const*, unsigned long, unsigned long)
+                 U std::basic_ostream<char, std::char_traits<char> >& std::__ostream_insert<char, std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*, long)
+                 U std::__throw_bad_cast()
+                 U std::__throw_bad_alloc()
+                 U std::_Rb_tree_decrement(std::_Rb_tree_node_base*)
+                 U std::__throw_logic_error(char const*)
+                 U std::__throw_length_error(char const*)
+                 U std::__throw_out_of_range(char const*)
+                 U std::ios_base_library_init()
+                 U std::__throw_invalid_argument(char const*)
+                 U std::__throw_out_of_range_fmt(char const*, ...)
+                 U std::__throw_bad_array_new_length()
+                 U std::_Rb_tree_insert_and_rebalance(bool, std::_Rb_tree_node_base*, std::_Rb_tree_node_base*, std::_Rb_tree_node_base&)
+                 U std::cerr
+                 U std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char)
+                 U std::basic_ostream<char, std::char_traits<char> >& std::operator<< <std::char_traits<char> >(std::basic_ostream<char, std::char_traits<char> >&, char const*)
+                 U typeinfo for std::runtime_error
+                 U vtable for __cxxabiv1::__class_type_info
+                 U vtable for __cxxabiv1::__si_class_type_info
+(.venv) (base) sergey@sergey-Predator-PO7-660:/tmp/hycoah_extract$ nm -C r_hycoah_model_helper.cpp.o \
+  | grep ' U ' \
+  | grep -Ei 'Job|Container|EXFWK|pair|depend|add|push'
+                 U JobContainer::add_paired(std::vector<hwahd::Job*, std::allocator<hwahd::Job*>> const&, std::vector<unsigned char, std::allocator<unsigned char> >, std::vector<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), std::allocator<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*)> >, std::vector<void*, std::allocator<void*> >, std::vector<unsigned int, std::allocator<unsigned int> >, std::vector<unsigned char, std::allocator<unsigned char> >&)
+                 U JobContainer::add(hwahd::imp::ImpxJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+                 U hycoah::g_dsp_baddr_spmi
+                 U hycoah::g_dsp_baddr_spmc0
+                 U hycoah::g_dsp_extmem_hwaddr
+                 U hycoah::DspElf::getSymbolAddress(char const*)
+                 U hycoah::JobHelper::setCallbackArg(unsigned char)
+                 U hycoah::JobHelper::setCallbackArg(unsigned char, hycoah::BufManagerHelper*, hycoah::BufManagerHelper*, int)
+                 U hycoah::JobHelper::create()
+                 U R_EXFWK::init_dsp(hwahd::st_core_info_t const&, hwahd::st_dsp_config_t const&)
+                 U hycoah::IOMemory::hwAddr(unsigned long) const
+(.venv) (base) sergey@sergey-Predator-PO7-660:/tmp/hycoah_extract$ nm -C \
+  /opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux/lib/libexfwk_v4m.a \
+  | grep 'JobContainer::'
+00000000000026e0 T R_EXFWK_PrivateJobContainer::add_paired(std::vector<hwahd::Job*, std::allocator<hwahd::Job*> >, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >, std::vector<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), std::allocator<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*)> >, std::vector<void*, std::allocator<void*> >, std::vector<unsigned int, std::allocator<unsigned int> >, std::vector<unsigned char, std::allocator<unsigned char> > const&, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >&)
+0000000000002ce0 T R_EXFWK_PrivateJobContainer::add_job_generic(JobContainer::add_args_t const&,std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > > const&, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >&)
+0000000000000e8c T R_EXFWK_PrivateJobContainer::get_cnt_container()
+0000000000000000 B R_EXFWK_PrivateJobContainer::stc_cnt_container
+0000000000000940 T R_EXFWK_PrivateJobContainer::update_conversion_map(std::vector<unsigned char,std::allocator<unsigned char> > const&, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > > const&)
+0000000000001bc0 T R_EXFWK_PrivateJobContainer::serialize_comal_message(s_exfwk_comal_job_container*)
+0000000000003420 T R_EXFWK_PrivateJobContainer::set_enqueue_callback_args(std::array<unsigned char, 64ul> const&, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&)
+00000000000032b0 T R_EXFWK_PrivateJobContainer::load_from_public_container(JobContainer const&)
+0000000000000d80 T R_EXFWK_PrivateJobContainer::add_related_buffer_container(int)
+0000000000000900 T R_EXFWK_PrivateJobContainer::get_enqueue_callback_arg_from_key(unsigned char const&)
+0000000000002380 T R_EXFWK_PrivateJobContainer::add(hwahd::Job*, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char, std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >&)
+0000000000003500 T R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer(s_exfwk_comal_job_container*, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&, int (* const&)(unsigned int, R_EXFWK_PrivateJobContainer const*, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&),int (* const&)(unsigned int, unsigned int, void const*))
+0000000000000ea0 T R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer()
+0000000000003500 T R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer(s_exfwk_comal_job_container*, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&, int (* const&)(unsigned int, R_EXFWK_PrivateJobContainer const*, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&),int (* const&)(unsigned int, unsigned int, void const*))
+0000000000000ea0 T R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer()
+0000000000001040 T R_EXFWK_PrivateJobContainer::timeout_cb() const
+00000000000011a0 T R_EXFWK_PrivateJobContainer::is_serializable() const
+00000000000010cc T R_EXFWK_PrivateJobContainer::is_valid_for_push() const
+0000000000002240 T R_EXFWK_PrivateJobContainer::convert_dep_vector(std::vector<unsigned char, std::allocator<unsigned char> > const&, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >&) const
+00000000000010c0 T R_EXFWK_PrivateJobContainer::get_container_size() const
+0000000000000fc0 T R_EXFWK_PrivateJobContainer::end_cb() const
+00000000000010c8 T R_EXFWK_PrivateJobContainer::get_conversion_map() const &
+0000000000000000 W void std::vector<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t, std::allocator<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t> >::_M_realloc_insert<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t>(__gnu_cxx::__normal_iterator<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t*, std::vector<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t, std::allocator<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t> > >, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t&&)
+                 U R_EXFWK_PrivateJobContainer::load_from_public_container(JobContainer const&)
+                 U R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer()
+                 U R_EXFWK_PrivateJobContainer::is_valid_for_push() const
+                 U R_EXFWK_PrivateJobContainer::get_container_size() const
+0000000000000000 W JobContainer::add_args_t::~add_args_t()
+0000000000000000 W JobContainer::add_args_t::~add_args_t()
+0000000000000000 n JobContainer::add_args_t::~add_args_t()
+00000000000010e0 T JobContainer::add_paired(std::vector<hwahd::Job*, std::allocator<hwahd::Job*>> const&, std::vector<unsigned char, std::allocator<unsigned char> >, std::vector<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), std::allocator<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*)> >, std::vector<void*, std::allocator<void*> >, std::vector<unsigned char, std::allocator<unsigned char> >&)
+0000000000000600 T JobContainer::add_paired(std::vector<hwahd::Job*, std::allocator<hwahd::Job*>> const&, std::vector<unsigned char, std::allocator<unsigned char> >, std::vector<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), std::allocator<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*)> >, std::vector<void*, std::allocator<void*> >, std::vector<unsigned int, std::allocator<unsigned int> >, std::vector<unsigned char, std::allocator<unsigned char> >&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::imp::ImpxJob>(hwahd::imp::ImpxJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::imr::ImrJob>(hwahd::imr::ImrJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::isp::IspJob>(hwahd::isp::IspJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::udf::UdfJob>(hwahd::udf::UdfJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::vip::DofJob>(hwahd::vip::DofJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::vip::SpoJob>(hwahd::vip::SpoJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::vip::SpsJob>(hwahd::vip::SpsJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+00000000000015a8 T JobContainer::add(hwahd::imp::ImpxJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+00000000000014a0 T JobContainer::add(hwahd::imp::ImpxJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned char&)
+00000000000017c0 T JobContainer::add(hwahd::imr::ImrJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+00000000000016b0 T JobContainer::add(hwahd::imr::ImrJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000002010 T JobContainer::add(hwahd::isp::IspJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000001f08 T JobContainer::add(hwahd::isp::IspJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000002228 T JobContainer::add(hwahd::udf::UdfJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000002120 T JobContainer::add(hwahd::udf::UdfJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+00000000000019d0 T JobContainer::add(hwahd::vip::DofJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+00000000000018c8 T JobContainer::add(hwahd::vip::DofJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000001e00 T JobContainer::add(hwahd::vip::SpoJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000001cf0 T JobContainer::add(hwahd::vip::SpoJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000001be8 T JobContainer::add(hwahd::vip::SpsJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000001ae0 T JobContainer::add(hwahd::vip::SpsJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000000020 T JobContainer::add(hwahd::hwartt::HwarttJob const&, std::vector<unsigned char,std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000010 T JobContainer::add(hwahd::hwartt::HwarttJob const&, std::vector<unsigned char,std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned char&)
+0000000000000000 T JobContainer::JobContainer()
+0000000000000000 T JobContainer::JobContainer()
+0000000000000028 T JobContainer::~JobContainer()
+0000000000000028 T JobContainer::~JobContainer()
+0000000000000000 W void std::vector<JobContainer::add_args_t, std::allocator<JobContainer::add_args_t> >::emplace_back<JobContainer::add_args_t>(JobContainer::add_args_t&&)
+0000000000000000 W void std::vector<JobContainer::add_args_t, std::allocator<JobContainer::add_args_t> >::_M_realloc_insert<JobContainer::add_args_t>(__gnu_cxx::__normal_iterator<JobContainer::add_args_t*, std::vector<JobContainer::add_args_t, std::allocator<JobContainer::add_args_t> > >, JobContainer::add_args_t&&)
+                 U R_EXFWK_PrivateJobContainer::serialize_comal_message(s_exfwk_comal_job_container*)
+                 U R_EXFWK_PrivateJobContainer::is_serializable() const
+                 U R_EXFWK_PrivateJobContainer::get_conversion_map() const &
+0000000000000240 t end_container_callback(unsigned int, R_EXFWK_PrivateJobContainer const*, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&)
+                 U R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer(s_exfwk_comal_job_container*, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&, int (* const&)(unsigned int, R_EXFWK_PrivateJobContainer const*, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&),int (* const&)(unsigned int, unsigned int, void const*))
+                 U R_EXFWK_PrivateJobContainer::timeout_cb() const
+                 U R_EXFWK_PrivateJobContainer::end_cb() const
+(.venv) (base) sergey@sergey-Predator-PO7-660:/tmp/hycoah_extract$ nm -C \
+  /opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux/lib/libexfwk_v4m.a \
+  | grep 'JobContainer::' \
+  | grep -Ei 'add|pair|insert|push|depend|job'
+00000000000026e0 T R_EXFWK_PrivateJobContainer::add_paired(std::vector<hwahd::Job*, std::allocator<hwahd::Job*> >, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >, std::vector<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), std::allocator<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*)> >, std::vector<void*, std::allocator<void*> >, std::vector<unsigned int, std::allocator<unsigned int> >, std::vector<unsigned char, std::allocator<unsigned char> > const&, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >&)
+0000000000002ce0 T R_EXFWK_PrivateJobContainer::add_job_generic(JobContainer::add_args_t const&,std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > > const&, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >&)
+0000000000000e8c T R_EXFWK_PrivateJobContainer::get_cnt_container()
+0000000000000000 B R_EXFWK_PrivateJobContainer::stc_cnt_container
+0000000000000940 T R_EXFWK_PrivateJobContainer::update_conversion_map(std::vector<unsigned char,std::allocator<unsigned char> > const&, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > > const&)
+0000000000001bc0 T R_EXFWK_PrivateJobContainer::serialize_comal_message(s_exfwk_comal_job_container*)
+0000000000003420 T R_EXFWK_PrivateJobContainer::set_enqueue_callback_args(std::array<unsigned char, 64ul> const&, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&)
+00000000000032b0 T R_EXFWK_PrivateJobContainer::load_from_public_container(JobContainer const&)
+0000000000000d80 T R_EXFWK_PrivateJobContainer::add_related_buffer_container(int)
+0000000000000900 T R_EXFWK_PrivateJobContainer::get_enqueue_callback_arg_from_key(unsigned char const&)
+0000000000002380 T R_EXFWK_PrivateJobContainer::add(hwahd::Job*, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char, std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >&)
+0000000000003500 T R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer(s_exfwk_comal_job_container*, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&, int (* const&)(unsigned int, R_EXFWK_PrivateJobContainer const*, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&),int (* const&)(unsigned int, unsigned int, void const*))
+0000000000000ea0 T R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer()
+0000000000003500 T R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer(s_exfwk_comal_job_container*, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&, int (* const&)(unsigned int, R_EXFWK_PrivateJobContainer const*, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&),int (* const&)(unsigned int, unsigned int, void const*))
+0000000000000ea0 T R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer()
+0000000000001040 T R_EXFWK_PrivateJobContainer::timeout_cb() const
+00000000000011a0 T R_EXFWK_PrivateJobContainer::is_serializable() const
+00000000000010cc T R_EXFWK_PrivateJobContainer::is_valid_for_push() const
+0000000000002240 T R_EXFWK_PrivateJobContainer::convert_dep_vector(std::vector<unsigned char, std::allocator<unsigned char> > const&, std::vector<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> >, std::allocator<std::_Rb_tree_iterator<std::pair<unsigned char const, JobInfo> > > >&) const
+00000000000010c0 T R_EXFWK_PrivateJobContainer::get_container_size() const
+0000000000000fc0 T R_EXFWK_PrivateJobContainer::end_cb() const
+00000000000010c8 T R_EXFWK_PrivateJobContainer::get_conversion_map() const &
+0000000000000000 W void std::vector<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t, std::allocator<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t> >::_M_realloc_insert<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t>(__gnu_cxx::__normal_iterator<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t*, std::vector<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t, std::allocator<R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t> > >, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t&&)
+                 U R_EXFWK_PrivateJobContainer::load_from_public_container(JobContainer const&)
+                 U R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer()
+                 U R_EXFWK_PrivateJobContainer::is_valid_for_push() const
+                 U R_EXFWK_PrivateJobContainer::get_container_size() const
+0000000000000000 W JobContainer::add_args_t::~add_args_t()
+0000000000000000 W JobContainer::add_args_t::~add_args_t()
+0000000000000000 n JobContainer::add_args_t::~add_args_t()
+00000000000010e0 T JobContainer::add_paired(std::vector<hwahd::Job*, std::allocator<hwahd::Job*>> const&, std::vector<unsigned char, std::allocator<unsigned char> >, std::vector<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), std::allocator<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*)> >, std::vector<void*, std::allocator<void*> >, std::vector<unsigned char, std::allocator<unsigned char> >&)
+0000000000000600 T JobContainer::add_paired(std::vector<hwahd::Job*, std::allocator<hwahd::Job*>> const&, std::vector<unsigned char, std::allocator<unsigned char> >, std::vector<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), std::allocator<int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*)> >, std::vector<void*, std::allocator<void*> >, std::vector<unsigned int, std::allocator<unsigned int> >, std::vector<unsigned char, std::allocator<unsigned char> >&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::imp::ImpxJob>(hwahd::imp::ImpxJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::imr::ImrJob>(hwahd::imr::ImrJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::isp::IspJob>(hwahd::isp::IspJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::udf::UdfJob>(hwahd::udf::UdfJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::vip::DofJob>(hwahd::vip::DofJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::vip::SpoJob>(hwahd::vip::SpoJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000000 W e_exfwk_return_t JobContainer::add_template<hwahd::vip::SpsJob>(hwahd::vip::SpsJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+00000000000015a8 T JobContainer::add(hwahd::imp::ImpxJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+00000000000014a0 T JobContainer::add(hwahd::imp::ImpxJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned char&)
+00000000000017c0 T JobContainer::add(hwahd::imr::ImrJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+00000000000016b0 T JobContainer::add(hwahd::imr::ImrJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000002010 T JobContainer::add(hwahd::isp::IspJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000001f08 T JobContainer::add(hwahd::isp::IspJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000002228 T JobContainer::add(hwahd::udf::UdfJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000002120 T JobContainer::add(hwahd::udf::UdfJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+00000000000019d0 T JobContainer::add(hwahd::vip::DofJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+00000000000018c8 T JobContainer::add(hwahd::vip::DofJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000001e00 T JobContainer::add(hwahd::vip::SpoJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000001cf0 T JobContainer::add(hwahd::vip::SpoJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000001be8 T JobContainer::add(hwahd::vip::SpsJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000001ae0 T JobContainer::add(hwahd::vip::SpsJob const&, std::vector<unsigned char, std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int,unsigned int, void*), void*, unsigned char&)
+0000000000000020 T JobContainer::add(hwahd::hwartt::HwarttJob const&, std::vector<unsigned char,std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned int, unsigned char&)
+0000000000000010 T JobContainer::add(hwahd::hwartt::HwarttJob const&, std::vector<unsigned char,std::allocator<unsigned char> >, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), void*, unsigned char&)
+0000000000000000 T JobContainer::JobContainer()
+0000000000000000 T JobContainer::JobContainer()
+0000000000000028 T JobContainer::~JobContainer()
+0000000000000028 T JobContainer::~JobContainer()
+0000000000000000 W void std::vector<JobContainer::add_args_t, std::allocator<JobContainer::add_args_t> >::emplace_back<JobContainer::add_args_t>(JobContainer::add_args_t&&)
+0000000000000000 W void std::vector<JobContainer::add_args_t, std::allocator<JobContainer::add_args_t> >::_M_realloc_insert<JobContainer::add_args_t>(__gnu_cxx::__normal_iterator<JobContainer::add_args_t*, std::vector<JobContainer::add_args_t, std::allocator<JobContainer::add_args_t> > >, JobContainer::add_args_t&&)
+                 U R_EXFWK_PrivateJobContainer::serialize_comal_message(s_exfwk_comal_job_container*)
+                 U R_EXFWK_PrivateJobContainer::is_serializable() const
+                 U R_EXFWK_PrivateJobContainer::get_conversion_map() const &
+0000000000000240 t end_container_callback(unsigned int, R_EXFWK_PrivateJobContainer const*, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&)
+                 U R_EXFWK_PrivateJobContainer::R_EXFWK_PrivateJobContainer(s_exfwk_comal_job_container*, int (*)(hwahd::e_event_t, hwahd::st_core_info_t const*, unsigned int, unsigned int, void*), R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&, int (* const&)(unsigned int, R_EXFWK_PrivateJobContainer const*, R_EXFWK_PrivateJobContainer::s_arg_enqueue_callback_t const&),int (* const&)(unsigned int, unsigned int, void const*))
+                 U R_EXFWK_PrivateJobContainer::timeout_cb() const
+                 U R_EXFWK_PrivateJobContainer::end_cb() const
+(.venv) (base) sergey@sergey-Predator-PO7-660:/tmp/hycoah_extract$ objdump -d -C \
+  --disassemble='hycoah::ModelHelper::addJobs(JobContainer*, unsigned char, std::vector<unsigned char, std::allocator<unsigned char> > const&, std::vector<unsigned char, std::allocator<unsigned char> >&)' \
+  r_hycoah_model_helper.cpp.o
+
+r_hycoah_model_helper.cpp.o:     file format elf64-little
+
+objdump: can't disassemble for architecture UNKNOWN!

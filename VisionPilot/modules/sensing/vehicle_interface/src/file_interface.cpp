@@ -39,7 +39,7 @@ double FileInterface::read()
         throw std::runtime_error("FileInterface: no speeds loaded");
     }
 
-    if (frame_cnt_ >= speeds_.size())
+    if (frame_cnt_ >= (int)speeds_.size())
     {
         throw std::runtime_error("FileInterface: read() called past end of speeds data");
     }
@@ -49,4 +49,6 @@ double FileInterface::read()
 
 void FileInterface::write(double steering, double acceleration)
 {
+    (void)steering;
+    (void)acceleration;
 }

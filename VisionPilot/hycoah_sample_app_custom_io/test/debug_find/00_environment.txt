@@ -1,0 +1,16 @@
+Date: Thu Aug  6 11:05:51 AM CEST 2026
+
+XOS_ROOT=/opt/rcar-xos/v3.47.0
+START_DIR=/home/sergey/DEV/AI/vision_pilot/VisionPilot/hycoah_sample_app_custom_io/test
+
+grep:
+/usr/bin/grep
+
+strings:
+/usr/bin/strings
+
+nm:
+/usr/bin/nm
+
+pdftotext:
+/usr/bin/pdftotext

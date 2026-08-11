@@ -1,0 +1,869 @@
+VISIONPILOT - ANALISI DELLE DIPENDENZE CMAKE
+=============================================
+
+Analisi ricavata dai CMakeLists.txt forniti il 2026-08-11.
+Obiettivo: abilitare e compilare i moduli progressivamente per il target R-Car V4M/Poky.
+
+
+1. RISULTATO PRINCIPALE
+=======================
+
+La variabile passata a rcar_configure_application(), per esempio link_lib, non rende
+automaticamente disponibili i moduli VisionPilot. Ogni nome deve essere:
+
+  A. un target CMake già creato tramite add_subdirectory(...), oppure
+  B. una vera libreria presente nel sysroot o in un percorso di link.
+
+Se si inserisce "config" in link_lib senza eseguire:
+
+  add_subdirectory(modules/config)
+
+CMake/rcar-xOS lo passa al linker come "-lconfig". Il linker cerca allora
+libconfig.so o libconfig.a e produce:
+
+  cannot find -lconfig
+
+Il medesimo principio vale per logging, common, engine, models, fusion e tutti gli
+altri target interni.
+
+ATTENZIONE: config non è un modulo iniziale indipendente. Dal CMake attuale config
+dipende da engine e models; models dipende da fusion; fusion dipende nuovamente da
+models. Esiste quindi un ciclo models <-> fusion da correggere prima di ottenere un
+grafo realmente progressivo e stabile.
+
+
+2. MAPPA RAPIDA DEI TARGET
+==========================
+
+Directory                                      Target CMake
+-------------------------------------------------------------------------------
+modules/logging                                logging
+modules/common                                 common
+modules/engine                                 engine
+modules/config                                 config
+modules/models                                 models
+modules/safety_guardian/fusion                 fusion
+modules/safety_guardian/planning               planning
+modules/debug                                  vp_debug
+modules/sensing/image_preprocessing            image_preprocessing
+modules/sensing/vehicle_interface              vehicle_interface
+modules/sensing/camera_interface               camera_interface
+modules/visualization                          visualization
+.../ros2_interface/camera_subscriber           camera_subscriber
+.../ros2_interface/vehicle_ros2_interface      vehicle_ros2_interface
+app                                            VisionPilot
+modules/v4m                                    NESSUN target CMake
+
+Il file modules/v4m/CMakeLists.txt non chiama add_library() o add_executable().
+Modifica soltanto le variabili convenzionali source, header, include_dir e link_lib
+usate da rcar_configure_application(). Se è incluso tramite add_subdirectory(),
+queste modifiche restano nello scope della subdirectory salvo PARENT_SCOPE.
+
+
+3. DIPENDENZE MODULO PER MODULO
+===============================
+
+3.1 logging
+-----------
+
+Target:
+
+  logging
+
+Sorgenti:
+
+  modules/logging/src/logger.cpp
+
+Dipendenze interne: nessuna.
+Dipendenze esterne dichiarate: nessuna.
+Standard C++ esplicito: non dichiarato localmente; eredita quello globale.
+
+È il primo modulo ideale da compilare.
+
+Attivazione:
+
+  add_subdirectory(modules/logging)
+
+Link nell'app Renesas:
+
+  logging
+
+
+3.2 common
+----------
+
+Target:
+
+  common
+
+Sorgenti:
+
+  modules/common/src/utils.cpp
+
+Dipendenze interne: nessuna.
+Dipendenze esterne:
+
+  find_package(OpenCV REQUIRED)
+  ${OpenCV_LIBS}
+
+Nota: find_package(OpenCV REQUIRED) senza COMPONENTS può trascinare molte librerie
+OpenCV non necessarie. Per V4M conviene determinare quali header/funzioni usa
+utils.cpp e richiedere soltanto componenti specifici, per esempio core e imgproc.
+
+Attivazione:
+
+  find_package(OpenCV REQUIRED ...)  # eseguito dal modulo
+  add_subdirectory(modules/common)
+
+Link nell'app:
+
+  common
+
+
+3.3 engine
+----------
+
+Target:
+
+  engine
+
+Sorgenti:
+
+  modules/engine/src/onnx_engine.cpp
+
+Dipendenze interne: nessuna.
+Dipendenze esterne:
+
+  ONNX Runtime headers: ${ONNXRUNTIME_ROOT}/include
+  ONNX Runtime shared lib: ${ONNXRUNTIME_ROOT}/lib/libonnxruntime.so
+
+Configurazione obbligatoria:
+
+  -DONNXRUNTIME_ROOT=<directory ONNX Runtime per AArch64/Poky>
+
+Per una cross-build V4M non si può usare una libonnxruntime.so x86_64 del computer
+host. La libreria deve essere compilata per AArch64 ed essere compatibile con ABI,
+glibc e toolchain del sysroot Poky.
+
+Nota progettuale: se su V4M l'inferenza verrà eseguita esclusivamente tramite
+HYCO/Artifact Helper, questo target non dovrebbe restare obbligatorio nella API
+generica. Conviene introdurre un'interfaccia engine e backend separati, oppure un
+target engine_v4m, evitando che config trascini ONNX Runtime sul target Renesas.
+
+Attivazione:
+
+  add_subdirectory(modules/engine)
+
+Link nell'app (se usato direttamente):
+
+  engine
+
+
+3.4 fusion
+----------
+
+Target:
+
+  fusion
+
+Sorgenti:
+
+  longitudinal_fusion.cpp
+  lateral_fusion.cpp
+
+Dipendenze interne dichiarate:
+
+  PUBLIC  models
+  PRIVATE logging
+
+Dipendenze esterne:
+
+  OpenCV core (opencv_core)
+
+Il commento indica che gli header pubblici di fusion usano tipi dichiarati da
+models: AutoDriveOutput, AutoSpeedOutput e Detection. Per questo models è PUBLIC.
+
+PROBLEMA BLOCCANTE DI ARCHITETTURA:
+
+  fusion -> models
+  models -> fusion
+
+Questa è una dipendenza circolare. Può talvolta essere tollerata fra librerie STATIC
+con ripetizione delle librerie nella link line, ma impedisce una build incrementale
+pulita e rende il progetto fragile.
+
+Correzione consigliata:
+
+  - spostare i soli DTO/tipi condivisi (AutoDriveOutput, AutoSpeedOutput,
+    Detection, stime di fusion) in un target header-only indipendente, per esempio:
+
+      add_library(visionpilot_types INTERFACE)
+      target_include_directories(visionpilot_types INTERFACE ...)
+
+  - far dipendere models e fusion da visionpilot_types;
+  - rimuovere models dalle dipendenze di fusion;
+  - lasciare models -> fusion soltanto se InferencePipeline implementa davvero la
+    fusione, oppure spostare la pipeline in un modulo superiore.
+
+
+3.5 models
+----------
+
+Target:
+
+  models
+
+Sorgenti:
+
+  auto_drive.cpp
+  auto_steer.cpp
+  auto_speed.cpp
+  inference.cpp
+
+Dipendenze interne dichiarate:
+
+  common
+  engine
+  fusion
+  logging
+
+Dipendenze esterne:
+
+  opencv_core
+  opencv_imgproc
+
+Effetto transitivo: poiché sono tutte PUBLIC, chi collega models riceve anche
+common, engine, fusion, logging e OpenCV.
+
+Problemi:
+
+  1. ciclo models <-> fusion;
+  2. dipendenza obbligatoria da engine/ONNX Runtime, probabilmente non desiderata
+     per il backend HYCO V4M;
+  3. inference.cpp sembra combinare inferenza e fusion, contribuendo al ciclo.
+
+Per una prima build V4M suggerita:
+
+  - non abilitare models finché engine V4M e ciclo fusion non sono risolti;
+  - oppure creare temporaneamente un target ridotto contenente un solo modello e il
+    backend HYCO, senza inference.cpp e senza fusion.
+
+
+3.6 config
+----------
+
+Target:
+
+  config
+
+Sorgenti:
+
+  modules/config/src/vision_pilot_config.cpp
+
+Dipendenze interne dichiarate:
+
+  PUBLIC engine
+  PUBLIC models
+
+Motivazione dichiarata nel CMake: VisionPilotConfig espone
+visionpilot::engine::EngineConfig. models è anch'esso linkato PUBLIC.
+
+Conseguenza: config trascina l'intero sottografo:
+
+  config
+    -> engine -> ONNX Runtime
+    -> models
+         -> common -> OpenCV
+         -> engine -> ONNX Runtime
+         -> fusion -> models (ciclo)
+         -> logging
+         -> OpenCV core/imgproc
+
+Quindi config NON può essere il terzo blocco dopo logging e common nell'assetto
+attuale. È esattamente il motivo per cui aggiungere soltanto il nome "config" a
+link_lib non funziona.
+
+Possibile miglioramento:
+
+  - EngineConfig dovrebbe essere un tipo leggero/header-only, separato
+    dall'implementazione OnnxEngine;
+  - config dovrebbe dipendere solo da un target di tipi/configurazioni, non dalla
+    libreria engine completa;
+  - verificare perché config dipenda da models: se usa solo enum/struct, spostarli
+    nel target visionpilot_types;
+  - idealmente config dipenderebbe soltanto da visionpilot_types e da una libreria
+    di parsing realmente usata.
+
+Per compilarlo senza refactoring bisogna prima creare engine, common, logging,
+fusion e models, ma il ciclo models/fusion va gestito o corretto.
+
+
+3.7 image_preprocessing
+-----------------------
+
+Target:
+
+  image_preprocessing
+
+Dipendenze interne:
+
+  PUBLIC common
+
+Dipendenze esterne:
+
+  find_package(OpenCV REQUIRED)
+  ${OpenCV_LIBS}
+
+È un buon blocco iniziale dopo common. Anche qui conviene restringere OpenCV ai
+componenti effettivamente usati.
+
+
+3.8 vehicle_interface
+---------------------
+
+Target:
+
+  vehicle_interface
+
+Sorgenti:
+
+  can_interface.cpp
+  file_interface.cpp
+
+Dipendenze interne dichiarate: nessuna.
+Dipendenze esterne dichiarate: nessuna.
+
+È adatto alla fase iniziale. Se can_interface.cpp usa SocketCAN, le API Linux sono
+normalmente fornite da libc e dagli header del sysroot; eventuali ulteriori
+dipendenze emergeranno dalla compilazione.
+
+
+3.9 camera_interface
+--------------------
+
+Target:
+
+  camera_interface
+
+Dipendenze interne:
+
+  PUBLIC  config
+  PUBLIC  logging
+  PRIVATE camera_subscriber (solo con ENABLE_ROS2_INTERFACE)
+
+Dipendenze esterne:
+
+  opencv_core
+  opencv_videoio
+  Threads::Threads
+
+Poiché dipende da config, nell'assetto corrente trascina models, engine/ONNX Runtime
+e il ciclo fusion. Per rendere progressiva la build, ridurre prima le dipendenze di
+config.
+
+Con ROS2 attivo esiste un secondo potenziale ciclo:
+
+  camera_interface -> camera_subscriber
+  camera_subscriber -> camera_interface
+
+È consigliabile che camera_subscriber implementi l'interfaccia base senza che la
+libreria base camera_interface linki nuovamente il subscriber ROS2.
+
+
+3.10 planning
+-------------
+
+Target:
+
+  planning
+
+Dipendenze interne:
+
+  PUBLIC common
+
+Dipendenze esterne:
+
+  PkgConfig
+  IPOPT, obbligatorio tramite pkg_check_modules(IPOPT REQUIRED ipopt)
+  Eigen3::Eigen, dalla copia vendorizzata modules/.../src/eigen-5.0.0
+
+Il comando:
+
+  add_subdirectory(src/eigen-5.0.0 EXCLUDE_FROM_ALL)
+
+non richiede di compilare benchmark, test, demo, BLAS e LAPACK per il normale target
+planning; EXCLUDE_FROM_ALL evita la maggior parte dei target non necessari. Il dump
+contiene molti CMakeLists interni a Eigen, ma non sono dipendenze runtime di
+VisionPilot.
+
+Per V4M, pkg-config deve trovare IPOPT nel sysroot, non soltanto sul computer host.
+Controlli utili dopo aver caricato il toolchain/environment Poky:
+
+  pkg-config --modversion ipopt
+  pkg-config --cflags --libs ipopt
+
+Miglioramento consigliato:
+
+  pkg_check_modules(IPOPT REQUIRED IMPORTED_TARGET ipopt)
+  target_link_libraries(planning PRIVATE PkgConfig::IPOPT)
+
+Questo propaga anche directory librerie e opzioni, non soltanto ${IPOPT_LIBRARIES}.
+
+
+3.11 vp_debug
+-------------
+
+Target:
+
+  vp_debug
+
+Dipendenze interne:
+
+  PUBLIC models
+  PUBLIC fusion
+
+Dipendenze esterne:
+
+  opencv_core
+  opencv_imgproc
+  opencv_imgcodecs
+
+Deve essere uno degli ultimi moduli, dopo la risoluzione di models/fusion. Non è
+necessario per ottenere una prima applicazione V4M funzionante.
+
+
+3.12 visualization
+------------------
+
+Target:
+
+  visualization
+
+Dipendenze interne:
+
+  PUBLIC models
+  PUBLIC common
+
+Dipendenze esterne obbligatorie:
+
+  OpenCV (${OpenCV_LIBRARIES})
+  Threads::Threads
+
+Dipendenze esterne opzionali rilevate tramite pkg-config:
+
+  gstreamer-1.0
+  gstreamer-app-1.0
+  gstreamer-sdp-1.0
+  gstreamer-webrtc-1.0
+  libsoup-2.4
+  json-glib-1.0
+
+Se il gruppo WEBCONN non viene trovato, webrtc_stream.cpp non viene compilato e la
+libreria dovrebbe costruirsi senza WebRTC.
+
+BUG CMake individuato:
+
+  target_compile_definitions(visualization PUBLIC ENABLE_WEBRTC=1 PRIVATEGST_USE_UNSTABLE_API=1)
+
+"PRIVATEGST_USE_UNSTABLE_API=1" viene interpretato come nome di macro. La forma
+corretta è presumibilmente:
+
+  target_compile_definitions(visualization
+      PUBLIC ENABLE_WEBRTC=1
+      PRIVATE GST_USE_UNSTABLE_API=1
+  )
+
+Per il primo porting V4M conviene lasciare visualization disabilitato.
+
+
+3.13 camera_subscriber (ROS2)
+-----------------------------
+
+Dipendenze interne:
+
+  PUBLIC camera_interface
+
+Dipendenze esterne:
+
+  rclcpp::rclcpp
+  sensor_msgs
+  cv_bridge::cv_bridge
+  OpenCV
+
+Potenziale ciclo con camera_interface quando ENABLE_ROS2_INTERFACE è attivo.
+Disabilitare ROS2 durante il primo porting V4M.
+
+
+3.14 vehicle_ros2_interface (ROS2)
+---------------------------------
+
+Dipendenze interne:
+
+  PUBLIC vehicle_interface
+
+Dipendenze esterne:
+
+  rclcpp::rclcpp
+  std_msgs::std_msgs__rosidl_generator_cpp
+
+Disabilitare durante il primo porting V4M.
+
+
+3.15 app / target VisionPilot
+-----------------------------
+
+Target CMake nativo:
+
+  VisionPilot
+
+Dipendenze dirette attualmente dichiarate:
+
+  config
+  logging
+  common
+  generate_config (dipendenza di build, non libreria)
+
+Le altre dipendenze sono commentate. Tuttavia vision_pilot.cpp include header di
+engine, models, planning, visualization, debug, camera e vehicle anche quando gran
+parte del vecchio main è commentata. Un #include resta attivo anche se le istruzioni
+che usano quei tipi sono commentate: per compilare il dummy main servono comunque i
+relativi include path, oppure bisogna commentare temporaneamente anche gli #include.
+
+Quando si usa rcar_configure_application(), il target VisionPilot nativo non viene
+creato se add_subdirectory(app) è commentato. La macro Renesas crea invece il target
+vision_pilot_v4m_v4m. Evitare di creare entrambi contemporaneamente.
+
+Il nome doppio deriva da:
+
+  app_name = vision_pilot_v4m
+
+più il suffisso _v4m aggiunto dalla macro. Usare app_name "vision_pilot" per ottenere
+vision_pilot_v4m.
+
+
+3.16 supporto R-Car / modules/v4m
+---------------------------------
+
+Non è una libreria CMake autonoma. Prepara sorgenti/header/include per la macro
+rcar_configure_application(). Le librerie xOS richieste nel CMake principale sono:
+
+  osal
+  osal_wrapper
+  hwa_buffer_mngr
+  exfwk
+  atmlib
+  hycoah
+
+Per baremetal aggiunge startup; per QNX/HIL aggiunge socket.
+
+Problemi rilevati:
+
+  1. le variabili modificate in modules/v4m non risalgono al parent automaticamente;
+  2. il file Linux r_osal_configuration.c viene aggiunto soltanto se RCAR_XIL=hil;
+  3. il comando usa spesso RCAR_TARGET_OS=LINUX ma i confronti sono con "linux";
+  4. un successivo set(source ...) cancella gli elementi aggiunti prima con
+     list(APPEND source ...).
+
+Usare sempre:
+
+  -DRCAR_TARGET_OS=linux
+
+e inizializzare source prima degli append condizionali.
+
+
+4. GRAFO DELLE DIPENDENZE ATTUALE
+=================================
+
+logging                            [indipendente]
+common -> OpenCV
+engine -> ONNX Runtime
+vehicle_interface                  [indipendente]
+image_preprocessing -> common -> OpenCV
+planning -> common, Eigen, IPOPT
+
+models -> common, engine, fusion, logging, OpenCV
+fusion -> models, logging, OpenCV
+             ^          |
+             |__________|          CICLO
+
+config -> engine, models
+camera_interface -> config, logging, OpenCV, Threads
+vp_debug -> models, fusion, OpenCV
+visualization -> models, common, OpenCV, Threads, [WebRTC stack opzionale]
+
+camera_subscriber -> camera_interface, ROS2, cv_bridge, OpenCV
+camera_interface -> camera_subscriber, se ROS2 attivo
+                             CICLO POTENZIALE
+
+
+5. ORDINE PROGRESSIVO CONSIGLIATO
+=================================
+
+FASE 0 - Base R-Car
+-------------------
+
+Verificare una dummy app con main e sole librerie:
+
+  osal
+  osal_wrapper
+  hwa_buffer_mngr
+  exfwk
+  atmlib
+  hycoah
+
+Non aggiungere ancora moduli VisionPilot. Questo conferma toolchain, sysroot e xOS.
+
+
+FASE 1 - Moduli realmente indipendenti
+--------------------------------------
+
+Abilitare:
+
+  add_subdirectory(modules/logging)
+  add_subdirectory(modules/sensing/vehicle_interface)
+
+In link_lib:
+
+  logging
+  vehicle_interface
+
+Per un main che usa solo VP_INFO basta logging. Commentare gli altri #include dal
+dummy main per non richiedere include non ancora disponibili.
+
+
+FASE 2 - OpenCV minimo e common
+------------------------------
+
+Abilitare:
+
+  add_subdirectory(modules/common)
+
+In link_lib:
+
+  logging
+  common
+
+Questa fase testa OpenCV AArch64 nel sysroot.
+
+
+FASE 3 - Preprocessing
+----------------------
+
+Abilitare:
+
+  add_subdirectory(modules/sensing/image_preprocessing)
+
+In link_lib:
+
+  logging
+  common
+  image_preprocessing
+
+
+FASE 4 - Planning, opzionale e separata
+---------------------------------------
+
+Abilitare planning soltanto dopo aver verificato IPOPT per AArch64/Poky:
+
+  add_subdirectory(modules/safety_guardian/planning)
+
+In link_lib:
+
+  logging
+  common
+  planning
+
+Questa fase testa IPOPT ed Eigen senza coinvolgere engine/models/fusion.
+
+
+FASE 5 - Backend di inferenza
+-----------------------------
+
+Scegliere uno dei due percorsi:
+
+  A. ONNX Runtime:
+     add_subdirectory(modules/engine)
+     fornire ONNXRUNTIME_ROOT AArch64;
+
+  B. HYCO V4M:
+     creare/adattare engine_v4m e collegarlo a hycoah/exfwk/atmlib, evitando che il
+     target V4M richieda libonnxruntime.so.
+
+Non aggiungere config/models prima di questa decisione.
+
+
+FASE 6 - Correggere i tipi e il ciclo models/fusion
+---------------------------------------------------
+
+Creare un target leggero visionpilot_types e spostare lì le struct condivise. Poi:
+
+  fusion -> visionpilot_types, logging, OpenCV
+  models -> visionpilot_types, common, engine_v4m/engine, fusion, logging, OpenCV
+
+Dopo la correzione, ordine:
+
+  1. visionpilot_types
+  2. fusion
+  3. models
+
+Se models deve fornire dati a fusion e fusion deve elaborarli, una soluzione ancora
+più pulita è che entrambi non dipendano l'uno dall'altro e che InferencePipeline o
+un orchestratore superiore li colleghi.
+
+
+FASE 7 - Config
+---------------
+
+Dopo aver ridotto config a dipendere da tipi leggeri:
+
+  add_subdirectory(modules/config)
+
+Se non viene fatto il refactoring, config va aggiunto solo dopo engine, fusion e
+models, e mantiene tutta la catena pesante.
+
+
+FASE 8 - Camera
+---------------
+
+Con ROS2 disabilitato:
+
+  add_subdirectory(modules/sensing/camera_interface)
+
+Richiede config, logging, OpenCV core/videoio e Threads.
+
+
+FASE 9 - Componenti finali opzionali
+------------------------------------
+
+In ordine:
+
+  vp_debug
+  visualization
+  camera_subscriber / vehicle_ros2_interface soltanto se serve ROS2
+
+
+FASE 10 - Applicazione completa
+-------------------------------
+
+Collegare al target finale soltanto i moduli usati direttamente. Le dipendenze
+PUBLIC dei moduli dovrebbero propagare il resto. Evitare di aggiungere ogni libreria
+in modo indiscriminato sia ai moduli sia all'app.
+
+
+6. BLOCCO CMAKE MINIMO PER IL TEST ATTUALE
+==========================================
+
+Per il dummy main che usa soltanto VP_INFO:
+
+  add_subdirectory(modules/logging)
+
+  set(vision_pilot_libraries
+      logging
+  )
+
+  set(link_lib
+      osal
+      osal_wrapper
+      hwa_buffer_mngr
+      exfwk
+      atmlib
+      hycoah
+      ${vision_pilot_libraries}
+  )
+
+Nel file app/vision_pilot.cpp lasciare temporaneamente soltanto:
+
+  #include <logging/logger.hpp>
+
+  int main()
+  {
+      VP_INFO("VisionPilot starting...");
+      return 0;
+  }
+
+Poi aggiungere un solo modulo per volta secondo le fasi sopra.
+
+
+7. ESEMPIO DI ABILITAZIONE PROGRESSIVA SENZA CONFIG
+===================================================
+
+  add_subdirectory(modules/logging)
+  add_subdirectory(modules/common)
+  add_subdirectory(modules/sensing/image_preprocessing)
+  add_subdirectory(modules/sensing/vehicle_interface)
+
+  set(vision_pilot_libraries
+      logging
+      common
+      image_preprocessing
+      vehicle_interface
+  )
+
+Non inserire config finché non sono disponibili le sue vere dipendenze engine e
+models, o finché il suo CMake non è stato alleggerito.
+
+
+8. CONTROLLI DA ESEGUIRE A OGNI FASE
+====================================
+
+Riconfigurazione:
+
+  cmake -S . -B build <opzioni toolchain V4M>
+
+Build verbose di un solo target:
+
+  cmake --build build --target <nome-target> --verbose -j1
+
+Elenco target disponibili:
+
+  cmake --build build --target help
+
+Verifica architettura di una libreria esterna:
+
+  file /percorso/libqualcosa.so
+
+Per V4M deve indicare ELF 64-bit, ARM aarch64, non x86-64.
+
+Verifica dipendenze dinamiche senza eseguire il binario cross-compilato:
+
+  aarch64-poky-linux-readelf -d build/vision_pilot_v4m_d
+
+Individuazione di un nome trasformato in -l<nome>:
+
+  cmake --build build --verbose -j1
+
+Se compare -lconfig invece di un percorso a libconfig_d.a, il target config non è
+stato creato o non viene riconosciuto come target CMake.
+
+
+9. CORREZIONI PRIORITARIE
+=========================
+
+1. Passare -DRCAR_TARGET_OS=linux, non LINUX.
+2. Usare app_name "vision_pilot", non "vision_pilot_v4m".
+3. Non inserire config in link_lib mentre add_subdirectory(modules/config) è
+   commentato.
+4. Non abilitare config isolatamente: dipende da engine e models.
+5. Eliminare il ciclo models <-> fusion introducendo tipi condivisi indipendenti.
+6. Per V4M separare il backend HYCO dal backend ONNX Runtime.
+7. Correggere il ciclo ROS2 camera_interface <-> camera_subscriber.
+8. Correggere PRIVATEGST_USE_UNSTABLE_API=1 in visualization.
+9. Non sovrascrivere source con set(source ...) dopo list(APPEND source ...).
+10. Commentare gli #include non necessari nel dummy main durante i test progressivi.
+
+
+10. CONCLUSIONE OPERATIVA
+=========================
+
+La sequenza immediatamente buildabile più sensata è:
+
+  logging
+  -> vehicle_interface
+  -> common + OpenCV
+  -> image_preprocessing
+  -> planning + IPOPT (opzionale)
+
+La sequenza config -> models non è ancora progressiva perché contiene sia ONNX
+Runtime sia il ciclo models/fusion. Prima di procedere con config, conviene decidere
+come sostituire/separare OnnxEngine sul V4M e spezzare il ciclo dei tipi condivisi.
+

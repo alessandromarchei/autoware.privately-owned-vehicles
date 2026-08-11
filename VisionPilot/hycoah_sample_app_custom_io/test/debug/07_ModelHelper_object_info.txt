@@ -1,0 +1,2 @@
+-rw-r--r-- 1 sergey sergey 318K Aug  6 10:39 debug/r_hycoah_model_helper.cpp.o
+debug/r_hycoah_model_helper.cpp.o: ELF 64-bit LSB relocatable, ARM aarch64, version 1 (GNU/Linux), not stripped
