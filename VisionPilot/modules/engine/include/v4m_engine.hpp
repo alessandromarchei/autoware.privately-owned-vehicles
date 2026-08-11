@@ -10,6 +10,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <unordered_map>
 
 #include "common.hpp"
 #include "rcar-xos/hycoah/r_hycoah.hpp"
@@ -37,44 +38,52 @@ struct Config {
     // not used in case of NPU
     int device_id = 0;
 };
-
 class V4MEngine {
 public:
     explicit V4MEngine(const Config& cfg);
+    ~V4MEngine();
 
-    void create_session(const std::string& model_path) const;
+    int create_session(const std::string& model_path);
 
-    // Read-only access to config (models may inspect provider, etc.)
-    const Config& config() const { return cfg_; }
+    const Config& config() const
+    {
+        return cfg_;
+    }
 
 private:
+    Config cfg_;
 
-    Config     cfg_;
+    std::string model_path_;
 
-    std::string model_path;
+    bool osal_initialized_ = false;
+    bool helper_initialized_ = false;
+    bool input_buffer_created_ = false;
+    bool output_buffer_created_ = false;
 
-    //data for the engine to run the model
-    e_osal_return_t osal_ret;
-    BufMgr_BufferManager *buffer_manager;
+    e_osal_return_t osal_ret = OSAL_RETURN_OK;
+
+    BufMgr_BufferManager* buffer_manager = nullptr;
+    R_EXFWK* exfwk = nullptr;
+
+    int input_container_id = 0;
+    int output_container_id = 0;
 
     std::unique_ptr<Network> network;
-
-    R_EXFWK *exfwk;
     std::unique_ptr<JobContainer> job_container;
 
-    std::unordered_map<PipelineId, std::vector<InputMemory>> user_input_memories;
-    std::unordered_map<PipelineId, std::vector<OutputMemory>> user_output_memories;
+    std::unordered_map<PipelineId, std::vector<InputMemory>>
+        user_input_memories;
+
+    std::unordered_map<PipelineId, std::vector<OutputMemory>>
+        user_output_memories;
 
     ArtifactHelper helper;
-    
 
-    //input/output memories
     std::vector<InputMemory> input_memories;
     std::vector<OutputMemory> output_memories;
 
     std::vector<JobId> job_dependency;
     std::vector<JobId> job_ids;
-
 };
 
 }  // namespace visionpilot::engine

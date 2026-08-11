@@ -1,27 +1,23 @@
-cmake_minimum_required(VERSION 3.21.0)
-
-# ─── ONNX Runtime ─────────────────────────────────────────────────────────────
-# Pass via:  cmake -DONNXRUNTIME_ROOT=<path> ..
-# if(NOT DEFINED ONNXRUNTIME_ROOT OR ONNXRUNTIME_ROOT STREQUAL "")
-#     message(FATAL_ERROR
-#         "[engine] ONNXRUNTIME_ROOT is not set.\n"
-#         "  cmake -DONNXRUNTIME_ROOT=<path/to/onnxruntime> ..")
-# endif()
+cmake_minimum_required(VERSION 3.21)
 
 add_library(engine
-    # src/onnx_engine.cpp
     src/v4m_engine.cpp
 )
 
+
+message(STATUS "Including directory: ${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 target_include_directories(engine
     PUBLIC
-        include
-        # ${ONNXRUNTIME_ROOT}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 target_link_libraries(engine
     PUBLIC
-        # ${ONNXRUNTIME_ROOT}/lib/libonnxruntime.so
+        v4m_platform
 )
 
-# target_compile_features(engine PUBLIC cxx_std_17)
+target_compile_features(engine
+    PUBLIC
+        cxx_std_17
+)

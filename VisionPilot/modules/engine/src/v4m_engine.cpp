@@ -73,54 +73,76 @@ private:
 */
 
 
-V4MEngine::V4MEngine(const Config & cfg)
+V4MEngine::V4MEngine(const Config& cfg)
+    : cfg_(cfg)
 {
-    cfg_ = cfg;
     printf("[V4MEngine] provider=%s\n", cfg_.provider.c_str());
 }
 
 
 V4MEngine::~V4MEngine()
 {
-    //destructor
-    cfg_ = Config();
+    job_container.reset();
 
+    if (helper_initialized_) {
+        const auto ret = helper.deinit();
 
-    auto exfwk_ret = exfwk->exfwk_quit();
-    if (exfwk_ret != RETURN_EXFWK_OK) {
-        printf("exfwk quit failed with error %d\n", exfwk_ret);
-        return -1;
-    }
-    delete exfwk;
-
-    auto deinit_ret = helper.deinit();
-    if (deinit_ret != e_hycoah_return_t::RETURN_HYCOAH_OK) {
-        printf("Parser deinit failed with error %d\n", deinit_ret);
-        return -1;
-    }
-    if (RETURN_BUFMNGR_OK != buffer_manager->R_BufMgr_DeleteContainer(input_container_id)) {
-        printf("Failed to get deallocate buffer.\n");
-        return -1;
-    }
-    if (RETURN_BUFMNGR_OK != buffer_manager->R_BufMgr_DeleteContainer(output_container_id)) {
-        printf("Failed to get deallocate buffer.\n");
-        return -1;
+        if (ret != e_hycoah_return_t::RETURN_HYCOAH_OK) {
+            printf("ArtifactHelper deinit failed: %d\n", ret);
+        }
     }
 
-    auto buffermanager_ret = buffer_manager->R_BufMgr_Close();
-    if (buffermanager_ret != RETURN_BUFMNGR_OK) {
-        printf("Buffer manager close failed with error %d\n", buffermanager_ret);
-        return -1;
+    network.reset();
+
+    if (exfwk != nullptr) {
+        const auto ret = exfwk->exfwk_quit();
+
+        if (ret != RETURN_EXFWK_OK) {
+            printf("ExecFWK quit failed: %d\n", ret);
+        }
+
+        delete exfwk;
+        exfwk = nullptr;
     }
-    delete buffer_manager;
 
-    delete job_container;
+    if (buffer_manager != nullptr) {
+        if (input_buffer_created_) {
+            const auto ret =
+                buffer_manager->R_BufMgr_DeleteContainer(input_container_id);
 
-    // De-initialize OSAL
-    osal_ret = R_OSAL_Deinitialize();
-    if (OSAL_RETURN_OK != osal_ret) {
-        printf("OSAL De-initialization failed with error %d\n", osal_ret);
-        return -1;
+            if (ret != RETURN_BUFMNGR_OK) {
+                printf("Failed to delete input container\n");
+            }
+        }
+
+        if (output_buffer_created_) {
+            const auto ret =
+                buffer_manager->R_BufMgr_DeleteContainer(output_container_id);
+
+            if (ret != RETURN_BUFMNGR_OK) {
+                printf("Failed to delete output container\n");
+            }
+        }
+
+        const auto ret = buffer_manager->R_BufMgr_Close();
+
+        if (ret != RETURN_BUFMNGR_OK) {
+            printf("Buffer manager close failed: %d\n", ret);
+        }
+
+        delete buffer_manager;
+        buffer_manager = nullptr;
+    }
+
+    if (osal_initialized_) {
+        osal_ret = R_OSAL_Deinitialize();
+
+        if (osal_ret != OSAL_RETURN_OK) {
+            printf(
+                "OSAL deinitialization failed: %d\n",
+                osal_ret
+            );
+        }
     }
 }
 
@@ -129,7 +151,7 @@ V4MEngine::~V4MEngine()
 //                                                    std::vector<std::vector<uint8_t>> core_list) 
 
 
-void V4MEngine::create_session(const std::string & model_path) const
+int V4MEngine::create_session(const std::string & model_path)
 {
     //hyco Artifact Helper wrapper for loading a single model (.msgpack) bundle
 
@@ -142,11 +164,11 @@ void V4MEngine::create_session(const std::string & model_path) const
 
     // user created buffer_manager/exfwk/job_container
     buffer_manager = createBufferManager();
-    int input_container_id = 0;
-    int output_container_id = 0;
+    input_container_id = 0;
+    output_container_id = 0;
 
     //create a network object from the .msgpack file
-    network = std::make_unique<Network>(msgpack.c_str());
+    network = std::make_unique<Network>(model_path.c_str());
 
 
     // get inputs/outputs
@@ -154,7 +176,7 @@ void V4MEngine::create_session(const std::string & model_path) const
     const std::vector<OutputDesc> &output_descs = network->getOutputDesc();
 
     //print log info on the model . expected input/output size, etc.
-    std::cout << "Model: " << msgpack << std::endl;
+    std::cout << "Model: " << model_path << std::endl;
     std::cout << "Number of inputs: " << input_descs.size() << std::endl;
     for (size_t i = 0; i < input_descs.size(); ++i) {
         std::cout << "Input " << i << ": size = " << input_descs[i].size_bytes << " bytes" << std::endl;
@@ -186,32 +208,32 @@ void V4MEngine::create_session(const std::string & model_path) const
     user_output_memories[0] = {{buffer_manager, output_container_id, 0, static_cast<int64_t>(output_size), 0}};
 
     // Initialize
-    auto config_ret = helper.config({network}, st_hycoah_config_t{});
+    auto config_ret = helper.config(std::vector<Network>{*network},st_hycoah_config_t{});
     if (config_ret != e_hycoah_return_t::RETURN_HYCOAH_OK) {
         std::cout << " Config ARTIFACTHELPER FAILED " << std::endl;
         return -1;
     }
 
     //initialize artifact helper
-    e_hycoah_return_t ret = helper.init(network, buffer_manager, exfwk, {user_input_memories}, {user_output_memories});
+    e_hycoah_return_t ret = helper.init(*network, buffer_manager, exfwk, {user_input_memories}, {user_output_memories});
     if (ret != e_hycoah_return_t::RETURN_HYCOAH_OK) {
         std::cout << " INIT ARTIFACTHELPER FAILED " << std::endl;
         return -1;
     }
 
     // lightable io memory
-    auto input_memories = network.getInputMemory(0);
-    auto output_memories = network.getOutputMemory(0);
+    input_memories = network->getInputMemory(0);
+    output_memories = network->getOutputMemory(0);
 
     // prepare actual data
-    load_inputs_from_file(inputs, input_memories);
+    // load_inputs_from_file(inputs, input_memories);
 
     // prepare job
     // uint8_t pipeline_id = 0;
 
 
     // add job.
-    auto job_ret = network.addJobs(job_container, 0, job_dependency, job_ids);
+    auto job_ret = network->addJobs(job_container.get(), 0, job_dependency, job_ids);
     if (job_ret != e_hycoah_return_t::RETURN_HYCOAH_OK) {
         std::cout << " ADD JOB FAILED " << std::endl;
         return -1;
@@ -222,23 +244,29 @@ void V4MEngine::create_session(const std::string & model_path) const
     }
 
 
+
+    /*
+        inference code
+    */
     //move input and output data to/from device and execute the model
     //from host to device for inference
-    network.syncIO(e_sync_direction_t::H2D, 0);
+    // network.syncIO(e_sync_direction_t::H2D, 0);
 
 
-    //execute inference
-    auto exec_ret = execute(exfwk, job_container);
-    if (exec_ret != e_hycoah_return_t::RETURN_HYCOAH_OK) {
-        std::cout << " EXECUTION FAILED " << std::endl;
-        return -1;
-    }
+    // //execute inference
+    // auto exec_ret = execute(exfwk, job_container.get());
+    // if (exec_ret != e_hycoah_return_t::RETURN_HYCOAH_OK) {
+    //     std::cout << " EXECUTION FAILED " << std::endl;
+    //     return -1;
+    // }
 
 
-    //from device to host 
-    network.syncIO(e_sync_direction_t::D2H, 0);
+    // //from device to host 
+    // network->syncIO(e_sync_direction_t::D2H, 0);
 
     //results are available in output_memories
+
+    return 0;
     
 }
 

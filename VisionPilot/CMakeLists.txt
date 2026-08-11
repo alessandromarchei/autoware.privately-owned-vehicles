@@ -88,7 +88,7 @@ add_custom_target(generate_config ALL
 )
 
 # Modules
-# add_subdirectory(modules/v4m)
+add_subdirectory(modules/v4m)
 
 add_subdirectory(modules/logging)
 
@@ -103,7 +103,7 @@ add_subdirectory(modules/sensing/image_preprocessing)
 #     add_subdirectory(modules/middleware_interfaces/ros2_interface/vehicle_ros2_interface)
 # endif()
 
-# add_subdirectory(modules/engine)
+add_subdirectory(modules/engine)
 # add_subdirectory(modules/models)
 
 # add_subdirectory(modules/safety_guardian/fusion)   # tracking is embedded inside fusion
@@ -134,6 +134,20 @@ else()
 endif()
 
 
+
+set(source
+    ${CMAKE_CURRENT_SOURCE_DIR}/app/vision_pilot.cpp
+)
+
+set(header "")
+set(include_dir "")
+set(link_lib "")
+
+
+include(
+    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/rcar_application.cmake
+)
+
 set(vision_pilot_libraries
     # config           # VisionPilotConfig, load_vision_pilot_config
     logging          # VP_INFO / VP_WARN / VP_ERROR
@@ -145,6 +159,7 @@ set(vision_pilot_libraries
     vehicle_interface
     # camera_interface
     image_preprocessing
+    v4m_support
     # visualization
     # vp_debug         # Debug annotate_frame
     )
@@ -164,54 +179,6 @@ set(link_lib
     ${vision_pilot_libraries}
 
 )
-
-
-
-list(APPEND source
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/target/linux/r_osal_configuration.c
-)
-
-list(APPEND header
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/file_common/inc/rcar-xos/osal_configuration/target/linux/r_osal_configuration.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/file_common/inc/rcar-xos/osal_configuration/target/linux/r_osal_cpu_cfg_info.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/file_common/inc/rcar-xos/osal_configuration/target/common/r_osal_mem_cfg_info.h
-)
-
-#print cmake source dir
-message(STATUS "CMAKE_SOURCE_DIR: ${CMAKE_SOURCE_DIR}")
-
-#----------------------------------------------------------------------------------------------------------------------
-# Source files
-#----------------------------------------------------------------------------------------------------------------------
-set(source
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/file_common/src/common.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/app/vision_pilot.cpp
-    # ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/main.cpp
-)
-
-#----------------------------------------------------------------------------------------------------------------------
-# Header files of the application
-#----------------------------------------------------------------------------------------------------------------------
-set(header
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/file_common/inc/common.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/vsfwk_common/inc/vsfwk_utils.hpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/vsfwk_common/inc/r_sample_init_config.hpp
-)
-
-#----------------------------------------------------------------------------------------------------------------------
-# Include directories used by the application
-#----------------------------------------------------------------------------------------------------------------------
-set(include_dir
-    ${rcar-xos_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/file_common/inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/modules/v4m/src/vsfwk_common/inc
-    # add any additional 3rd party include directories your application requires
-    # Note: Include directories from xOS Software components are automatically added when you list them in link_libs
-)
-
-
-
-
 
 #======================================================================================================================
 # DO NOT CHANGE ANYTHING BELOW THIS LINE, except you know what to do ;)
