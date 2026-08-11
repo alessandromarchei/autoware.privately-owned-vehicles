@@ -4,74 +4,7 @@
 
 
 using namespace hycoah;
-
-
 namespace visionpilot::engine {
-
-// OnnxEngine::OnnxEngine(const Config& cfg)
-//     : env_(ORT_LOGGING_LEVEL_WARNING, "VisionPilot")
-//     , cfg_(cfg)
-// {
-//     printf("[OnnxEngine] provider=%s", cfg_.provider.c_str());
-//     if (cfg_.provider == "tensorrt" || cfg_.provider == "cuda") {
-//         printf("  device=%d", cfg_.device_id);
-//     }
-//     if (cfg_.provider == "tensorrt") {
-//         printf("  precision=%s  workspace=%.1fGB  cache=%s",
-//                cfg_.precision.c_str(), cfg_.workspace_gb, cfg_.cache_dir.c_str());
-//     }
-//     printf("\n");
-// }
-
-// // ─── Public entry point ───────────────────────────────────────────────────────
-
-// std::unique_ptr<Ort::Session> OnnxEngine::create_session(
-//     const std::string& model_path,
-//     const std::string& cache_prefix) const
-// {
-//     if (cfg_.provider == "cpu") {
-//         return create_cpu_session(model_path);
-//     }
-//     throw std::runtime_error(
-//         "[OnnxEngine] Unknown provider '" + cfg_.provider +
-//         "'. Valid: cpu");
-// }
-
-// // ─── CPU ─────────────────────────────────────────────────────────────────────
-
-// std::unique_ptr<Ort::Session> OnnxEngine::create_cpu_session(
-//     const std::string& model_path) const
-// {
-//     Ort::SessionOptions opts;
-//     opts.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_DISABLE_ALL);
-
-//     printf("[OnnxEngine] Creating CPU session → %s\n", model_path.c_str());
-//     return std::make_unique<Ort::Session>(env_, model_path.c_str(), opts);
-// }
-
-// }  // namespace visionpilot::engine
-
-
-/*
-v4m engine
-
-class V4MEngine {
-public:
-    explicit V4MEngine(const Config& cfg);
-
-    void create_session(const std::string& model_path) const;
-
-    // Read-only access to config (models may inspect provider, etc.)
-    const Config& config() const { return cfg_; }
-
-private:
-    void create_npu_session(const std::string& model_path) const;
-
-    Config     cfg_;
-
-};
-*/
-
 
 V4MEngine::V4MEngine(const Config& cfg)
     : cfg_(cfg)

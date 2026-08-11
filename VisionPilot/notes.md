@@ -6,7 +6,7 @@
 - [x] **Common** (`common`)
   - Direct dependencies: OpenCV
 
-- [ ] **Engine** (`engine`)
+- [x] **Engine** (`engine`)
   - Direct dependencies: ONNX Runtime
 
 - [ ] **Fusion** (`fusion`)
