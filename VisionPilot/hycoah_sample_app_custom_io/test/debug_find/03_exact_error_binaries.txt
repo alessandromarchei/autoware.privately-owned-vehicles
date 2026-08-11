@@ -1,4 +1,0 @@
-FOUND: /opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux/lib/libhycoah_v4m.a
-FOUND: /opt/rcar-xos/v3.47.0/sw/aarch64-gnu-linux/lib/libhycoah_v4h2.a
-FOUND: /opt/rcar-xos/v3.47.0/tools/hyco/reaction/reaction/artihelper_app/lib/libhycoah_v4m_debug.a
-FOUND: /opt/rcar-xos/v3.47.0/tools/hyco/reaction/reaction/artihelper_app/lib/libhycoah_v4h2_debug.a

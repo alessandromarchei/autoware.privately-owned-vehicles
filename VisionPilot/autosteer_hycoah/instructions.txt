@@ -1,1 +1,0 @@
-cmake      -B build   -G "Unix Makefiles"   -DCMAKE_BUILD_TYPE=Debug   -DRCAR_SOC=v4m   -DRCAR_TARGET_OS=LINUX   -DCMAKE_PREFIX_PATH=/opt/rcar-xos/v3.47.0/cmake   -DCMAKE_TOOLCHAIN_FILE=/opt/rcar-xos/v3.47.0/cmake/toolchain_poky_5_0_adas.cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
