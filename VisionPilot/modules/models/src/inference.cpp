@@ -53,14 +53,16 @@ std::vector<float> chw_01(const cv::Mat& bgr)
     return out;
 }
 
-std::string find_model(const std::string& filename) {
-    const std::string local  = "modules/models/weights/" + filename;
-    const std::string system = "/usr/share/visionpilot/modules/models/weights/" + filename;
+std::string find_model(const std::string& bundle_name, const std::string& core = "core0") {
+    //const std::string local  = "modules/models/weights/" + filename;
+
+
+    //models are stored in modules/models/bundles/name_core0/name.msgpack
+    const std::string local  = "modules/models/bundles/" + bundle_name + "_" + core + "/" + bundle_name + ".msgpack";
 
     if (std::filesystem::exists(local))  return local;
-    if (std::filesystem::exists(system)) return system;
 
-    throw std::runtime_error("Config file not found: " + filename);
+    throw std::runtime_error("Config file not found: " + bundle_name + " (tried: " + local + ")");
 }
 
 }  // namespace
@@ -80,10 +82,10 @@ void LatencyStats::print() const
 
 void LatencyStats::reset() { *this = {}; }
 
-InferencePipeline::InferencePipeline(engine::OnnxEngine& engine, const Config& cfg)
-    : auto_drive_(engine, find_model("autodrive_" + cfg.precision + ".onnx"))
-    , auto_steer_(engine, find_model("autosteer_" + cfg.precision + ".onnx"))
-    , auto_speed_(engine, find_model("autospeed_" + cfg.precision + ".onnx"))
+InferencePipeline::InferencePipeline(const Config& cfg)
+    : auto_drive_(find_model("autodrive", cfg.core))
+    , auto_steer_(find_model("autosteer_", cfg.core))
+    , auto_speed_(find_model("autospeed_", cfg.core))
 {
     fusion::LongitudinalFusion::Config lc;
     lc.debug           = cfg.fusion_debug;

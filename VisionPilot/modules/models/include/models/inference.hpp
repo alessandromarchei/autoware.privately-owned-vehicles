@@ -1,5 +1,6 @@
 #pragma once
 
+#include "auto_drive.hpp"
 #include <fusion/lateral_fusion.hpp>
 #include <fusion/longitudinal_fusion.hpp>
 #include <models/auto_drive.hpp>
@@ -12,14 +13,12 @@
 #include <string>
 #include <filesystem>
 
-namespace visionpilot::engine {
-class OnnxEngine;
-}
 
 namespace visionpilot::models {
 
 struct Config {
     std::string precision    = "fp32";
+    std::string core         = "core0";
     bool        fusion_debug = false;
     float       cte_bias_m   = 0.0f;  // camera mounting offset [m] — subtracted from raw CTE before filter
 };
@@ -40,9 +39,9 @@ struct InferenceFrameResult {
     double      as_ms    = 0;
     double      asp_ms   = 0;
 
-    AutoDriveOutput              auto_drive;
-    AutoSteerOutput              auto_steer;
-    AutoSpeedOutput              auto_speed;
+    common::AutoDriveOutput              auto_drive;
+    common::AutoSteerOutput              auto_steer;
+    common::AutoSpeedOutput              auto_speed;
     fusion::CIPOFusionEstimate   cipo;
     fusion::LateralFusionEstimate  lateral;
 };
@@ -50,7 +49,7 @@ struct InferenceFrameResult {
 // Two-frame buffer → parallel ONNX → longitudinal + lateral fusion.
 class InferencePipeline {
 public:
-    InferencePipeline(engine::OnnxEngine& engine, const Config& cfg);
+    InferencePipeline(const Config& cfg);
 
     // nullopt until two frames collected (AutoDrive needs t-1 and t).
     // warped  : BEV 1024×512 image → AutoDrive only.
@@ -81,9 +80,9 @@ public:
 private:
     cv::Mat H_resized_;
     cv::Mat H_world2resized_;
-    AutoDrive          auto_drive_;
-    AutoSteer          auto_steer_;
-    AutoSpeed          auto_speed_;
+    models::AutoDrive          auto_drive_;
+    models::AutoSteer          auto_steer_;
+    models::AutoSpeed          auto_speed_;
     fusion::LongitudinalFusion long_fusion_;
     fusion::LateralFusion      lat_fusion_;
     LatencyStats       stats_;

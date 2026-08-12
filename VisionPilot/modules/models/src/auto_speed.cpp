@@ -1,6 +1,6 @@
 #include "models/auto_speed.hpp"
 
-#include <onnxruntime_run_options_config_keys.h>
+// #include <onnxruntime_run_options_config_keys.h>
 
 #include <algorithm>
 #include <cmath>
@@ -10,82 +10,75 @@ namespace visionpilot::models {
 
 // ─── Constructor ─────────────────────────────────────────────────────────────
 
-AutoSpeed::AutoSpeed(engine::OnnxEngine& engine, const std::string& model_path)
-    : session_(engine.create_session(model_path, "autospeed_"))
-    , mem_info_(Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault))
-    , input_shape_{1, 3, NET_H, NET_W}
-    , arena_shrink_(engine.config().provider == "cpu" ? "cpu:0" : "cpu:0;gpu:0")
+AutoSpeed::AutoSpeed(const std::string& model_path)
 {
-    Ort::AllocatorWithDefaultOptions alloc;
-    const size_t n_in  = session_->GetInputCount();
-    const size_t n_out = session_->GetOutputCount();
 
-    in_name_strs_.resize(n_in);
-    in_names_.resize(n_in);
-    for (size_t i = 0; i < n_in; ++i) {
-        in_name_strs_[i] = session_->GetInputNameAllocated(i, alloc).get();
-        in_names_[i]     = in_name_strs_[i].c_str();
-        printf("[AutoSpeed] input[%zu]  = %s\n", i, in_names_[i]);
+    //instantiate underlying v4m engine for this model
+    engine_ = std::make_unique<engine::V4MEngine>(model_path);
+
+    if (engine_->num_inputs() != 1) {
+        throw std::runtime_error(
+            "AutoSpeed expects exactly 1 model inputs"
+        );
     }
 
-    out_name_strs_.resize(n_out);
-    out_names_.resize(n_out);
-    for (size_t i = 0; i < n_out; ++i) {
-        out_name_strs_[i] = session_->GetOutputNameAllocated(i, alloc).get();
-        out_names_[i]     = out_name_strs_[i].c_str();
-        printf("[AutoSpeed] output[%zu] = %s\n", i, out_names_[i]);
+    if (engine_->num_outputs() != 1) {
+        throw std::runtime_error(
+            "AutoSpeed expects exactly 1 model output"
+        );
     }
-
-    printf("[AutoSpeed] Ready — %zu inputs, %zu outputs | "
-           "frame [1, 3, %d, %d]\n", n_in, n_out, NET_H, NET_W);
 }
 
 // ─── Inference ───────────────────────────────────────────────────────────────
 
-AutoSpeedOutput AutoSpeed::infer(
+visionpilot::common::AutoSpeedOutput AutoSpeed::infer(
     const float* image_chw, float conf_thres, float iou_thres)
 {
-    AutoSpeedOutput out;
+    /*
+        AUTOSPEED : 
+            - input : image_chw (float32 CHW buffer, CHW_SIZE elements, RGB [0, 1])
 
-    auto input_tensor = Ort::Value::CreateTensor<float>(
-        mem_info_,
-        const_cast<float*>(image_chw), CHW_SIZE,
-        input_shape_.data(), input_shape_.size());
+            // Raw model output shape: [1, C, N]
+            //   C = 4 + num_classes   (cx, cy, w, h, logit_0 … logit_{K-1})
+            //   Post-processing (sigmoid + threshold + NMS) is done inside infer().
+    */
 
-    std::vector<Ort::Value> results;
-    try {
-        Ort::RunOptions run_options;
-        run_options.AddConfigEntry(kOrtRunOptionsConfigEnableMemoryArenaShrinkage, arena_shrink_.c_str());
-        results = session_->Run(
-            run_options,
-            in_names_.data(),  &input_tensor, 1,
-            out_names_.data(), out_names_.size());
-    } catch (const Ort::Exception& e) {
-        printf("[AutoSpeed] Inference error: %s\n", e.what());
-        return out;
+    const std::size_t expected_frame_bytes = CHW_SIZE * sizeof(float);
+
+    if (engine_->input_size(0) != expected_frame_bytes) {
+        throw std::runtime_error(
+            "AutoSpeed input size mismatch"
+        );
     }
 
-    if (results.empty()) {
-        printf("[AutoSpeed] No output tensors returned\n");
-        return out;
+    //send image to model buffer
+    std::memcpy(engine_->input_ptr(0), image_chw, expected_frame_bytes);
+
+    //execute inference
+    if (engine_->run() != 0) {
+        throw std::runtime_error(
+            "AutoSpeed V4M inference failed"
+        );
     }
 
-    return post_process(results[0], conf_thres, iou_thres);
+    //retrieve output buffer
+    float* output0 = engine_->output<float>(0);
+
+    //post process output (NMS, thresholding)
+    visionpilot::common::AutoSpeedOutput result = post_process(output0, conf_thres, iou_thres);
+
+    return result;
 }
 
 // ─── Post-processing ─────────────────────────────────────────────────────────
 
-AutoSpeedOutput AutoSpeed::post_process(
-    const Ort::Value& tensor, float conf_thres, float iou_thres) const
+visionpilot::common::AutoSpeedOutput AutoSpeed::post_process(const float* data, float conf_thres, float iou_thres) const
 {
-    AutoSpeedOutput out;
-    const auto shape = tensor.GetTensorTypeAndShapeInfo().GetShape();
+    visionpilot::common::AutoSpeedOutput out;
 
-    // Expected layout: [1, C, N]  where C = 4 + num_classes
-    if (shape.size() < 3) {
-        printf("[AutoSpeed] Unexpected output rank: %zu\n", shape.size());
-        return out;
-    }
+    //analyze shape
+    //get output descriptor data for the output 0 (only output for this model)
+    std::vector<int> shape = engine_->output_desc(0).shape;
 
     const int64_t C           = shape[1];
     const int64_t N           = shape[2];
@@ -97,10 +90,7 @@ AutoSpeedOutput AutoSpeed::post_process(
         return out;
     }
 
-    // data[c * N + n] gives channel c for anchor n
-    const float* data = tensor.GetTensorData<float>();
-
-    std::vector<Detection> candidates;
+    std::vector<visionpilot::common::Detection> candidates;
     candidates.reserve(256);
 
     for (int64_t n = 0; n < N; ++n) {
@@ -118,7 +108,7 @@ AutoSpeedOutput AutoSpeed::post_process(
 
         if (best_prob < conf_thres) continue;
 
-        Detection d;
+        visionpilot::common::Detection d;
         d.x1       = cx - w * 0.5f;
         d.y1       = cy - h * 0.5f;
         d.x2       = cx + w * 0.5f;
@@ -135,7 +125,7 @@ AutoSpeedOutput AutoSpeed::post_process(
 
 // ─── NMS helpers ─────────────────────────────────────────────────────────────
 
-float AutoSpeed::iou(const Detection& a, const Detection& b)
+float AutoSpeed::iou(const visionpilot::common::Detection& a, const visionpilot::common::Detection& b)
 {
     const float ix1   = std::max(a.x1, b.x1);
     const float iy1   = std::max(a.y1, b.y1);
@@ -147,16 +137,16 @@ float AutoSpeed::iou(const Detection& a, const Detection& b)
     return inter / (area_a + area_b - inter + 1e-6f);
 }
 
-std::vector<Detection> AutoSpeed::nms(
-    std::vector<Detection> dets, float iou_thres)
+std::vector<visionpilot::common::Detection> AutoSpeed::nms(
+    std::vector<visionpilot::common::Detection> dets, float iou_thres)
 {
     std::sort(dets.begin(), dets.end(),
-              [](const Detection& a, const Detection& b) {
+              [](const visionpilot::common::Detection& a, const visionpilot::common::Detection& b) {
                   return a.score > b.score;
               });
 
     std::vector<bool>      suppressed(dets.size(), false);
-    std::vector<Detection> keep;
+    std::vector<visionpilot::common::Detection> keep;
     keep.reserve(dets.size());
 
     for (size_t i = 0; i < dets.size(); ++i) {

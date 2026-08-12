@@ -11,7 +11,9 @@ add_library(models
 
 target_include_directories(models
     PUBLIC
-        include
+        ${CMAKE_CURRENT_SOURCE_DIR}/include   # <models/...>
+        ${CMAKE_CURRENT_SOURCE_DIR}/../common/include   # <common/...>
+        ${CMAKE_CURRENT_SOURCE_DIR}/../engine/include   # <engine/...>
 )
 
 # engine provides OnnxEngine + ORT headers/libs transitively

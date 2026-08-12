@@ -9,8 +9,8 @@
 - [x] **Engine** (`engine`)
   - Direct dependencies: ONNX Runtime
 
-- [ ] **Fusion** (`fusion`)
-  - Direct dependencies: `models`, `logging`, OpenCV Core
+- [x] **Fusion** (`fusion`)
+  - Direct dependencies: `logging`, OpenCV Core
 
 - [ ] **Models** (`models`)
   - Direct dependencies: `common`, `engine`, `fusion`, `logging`, OpenCV Core/Imgproc
