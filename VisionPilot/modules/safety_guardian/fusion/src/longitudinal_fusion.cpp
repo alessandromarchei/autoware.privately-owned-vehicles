@@ -34,8 +34,8 @@ void LongitudinalFusion::reset()
 }
 
 CIPOFusionEstimate LongitudinalFusion::update(
-    const models::AutoDriveOutput& autodrive,
-    const models::AutoSpeedOutput& autospeed,
+    const visionpilot::common::AutoDriveOutput& autodrive,
+    const visionpilot::common::AutoSpeedOutput& autospeed,
     const cv::Mat& /*preprocessed_frame*/,
     float dt_s)
 {
@@ -181,7 +181,7 @@ float LongitudinalFusion::project_dist(const cv::Mat& H, float ux, float uy)
 // class_id == 1: CIPO Level 1 (straight ahead, same lane)
 // class_id == 2: CIPO Level 2 (adjacent lane, potential cut-in)
 LongitudinalFusion::CIPOSelection
-LongitudinalFusion::select_cipo(const std::vector<models::Detection>& dets) const
+LongitudinalFusion::select_cipo(const std::vector<visionpilot::common::Detection>& dets) const
 {
     float best_l1 = std::numeric_limits<float>::max();
     float best_l2 = std::numeric_limits<float>::max();

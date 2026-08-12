@@ -1,8 +1,7 @@
 #pragma once
 
-#include <models/auto_drive.hpp>
-#include <models/auto_speed.hpp>
 #include <opencv2/core.hpp>
+#include <common/models.hpp>
 
 #include <random>
 #include <vector>
@@ -57,8 +56,8 @@ public:
     explicit LongitudinalFusion(Config cfg);
 
     CIPOFusionEstimate update(
-        const models::AutoDriveOutput& autodrive,
-        const models::AutoSpeedOutput& autospeed,
+        const visionpilot::common::AutoDriveOutput& autodrive,
+        const visionpilot::common::AutoSpeedOutput& autospeed,
         const cv::Mat& preprocessed_frame,
         float dt_s = 0.f);
 
@@ -74,7 +73,7 @@ private:
     struct Meas     { float distance_m = 0.f; float stddev_m = 15.f; bool valid = false; };
 
     struct CIPOSelection { Meas meas; bool cut_in = false; };
-    CIPOSelection select_cipo(const std::vector<models::Detection>& dets) const;
+    CIPOSelection select_cipo(const std::vector<visionpilot::common::Detection>& dets) const;
     static float project_dist(const cv::Mat& H, float ux, float uy);
 
     void  init_from(float dist_m, float stddev_m);

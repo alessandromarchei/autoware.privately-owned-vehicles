@@ -10,11 +10,12 @@ add_library(fusion
 target_include_directories(fusion
     PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/include   # <fusion/...>
+        ${CMAKE_CURRENT_SOURCE_DIR}/../common/include  # <common/...>
 )
 
 target_link_libraries(fusion
     PUBLIC
-        models          # AutoDriveOutput, AutoSpeedOutput, Detection in public API
+        common
         opencv_core     # cv::Mat in public header
     PRIVATE
         logging         # VP_INFO macros used in longitudinal_fusion.cpp

@@ -106,7 +106,7 @@ add_subdirectory(modules/sensing/image_preprocessing)
 add_subdirectory(modules/engine)
 # add_subdirectory(modules/models)
 
-# add_subdirectory(modules/safety_guardian/fusion)   # tracking is embedded inside fusion
+add_subdirectory(modules/safety_guardian/fusion)   # tracking is embedded inside fusion
 # add_subdirectory(modules/safety_guardian/planning)
 
 add_subdirectory(modules/sensing/vehicle_interface)
@@ -154,7 +154,7 @@ set(vision_pilot_libraries
     common           # Common module
     # engine           # OnnxEngine
     # models           # AutoDrive, AutoSteer, AutoSpeed
-    # fusion           # LongitudinalFusion, LateralFusion
+    fusion           # LongitudinalFusion, LateralFusion
     # planning         # Planner
     vehicle_interface
     # camera_interface

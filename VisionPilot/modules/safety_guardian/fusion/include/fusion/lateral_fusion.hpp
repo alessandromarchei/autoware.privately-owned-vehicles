@@ -1,11 +1,11 @@
 #pragma once
 
-#include <models/auto_drive.hpp>
-#include <models/auto_steer.hpp>
 #include <opencv2/core.hpp>
 #include <random>
 #include <string>
 #include <vector>
+
+#include <common/models.hpp>
 
 namespace visionpilot::fusion {
 
@@ -127,8 +127,8 @@ public:
     explicit LateralFusion(Config cfg);
 
     LateralFusionEstimate update(
-        const models::AutoSteerOutput& steer,
-        const models::AutoDriveOutput& drive,
+        const visionpilot::common::AutoSteerOutput& steer,
+        const visionpilot::common::AutoDriveOutput& drive,
         float dt_s = -1.f
     );
 
@@ -156,7 +156,7 @@ private:
         float x_max_m   = 0.f;        // max forward x among fit points (inliers)
     };
 
-    std::vector<WorldPt> project_waypoints(const models::AutoSteerOutput& steer) const;
+    std::vector<WorldPt> project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const;
     PathParams           fit_ransac(const std::vector<WorldPt>& pts) const;
     static PathParams    fit_quadratic(const std::vector<WorldPt>& pts,
                                        float curv_x_min_m, float curv_x_max_m);

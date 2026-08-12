@@ -1,0 +1,574 @@
+[ 28%] Built target common
+[ 57%] Built target logging
+[ 71%] Building CXX object modules/safety_guardian/fusion/CMakeFiles/fusion.dir/src/lateral_fusion.cpp.o
+. /home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp
+.. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core.hpp
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/cvdef.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/version.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/limits
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/c++config.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/os_defines.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/features.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/features-time64.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/timesize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/timesize-64.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/sys/cdefs.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/long-double.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/long-double-64.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/gnu/stubs.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/gnu/stubs-64.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/gnu/stubs-lp64.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/cpu_defines.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/pstl/pstl_config.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/hal/interface.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstddef
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdint
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stdint.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/stdint.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libc-header-start.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/timesize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/timesize-64.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/typesizes.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/typesizes-64.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/time64.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wchar.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/stdint-intn.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/stdint-uintn.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/stdint-least.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/cv_cpu_dispatch.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/arm_neon.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/arm_fp16.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/arm_bf16.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/array
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/compare
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/initializer_list
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/type_traits
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/functexcept.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/exception_defines.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_algobase.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/cpp_type_traits.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ext/type_traits.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ext/numeric_traits.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_pair.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/move.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/utility.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_iterator_base_types.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_iterator_base_funcs.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/concept_check.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/debug/assertions.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_iterator.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/ptr_traits.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/debug/debug.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/predefined_ops.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bit
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/range_access.h
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/base.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/opencv_modules.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/climits
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/limits.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/syslimits.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/limits.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/limits.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libc-header-start.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/posix1_lim.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/local_lim.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/local_lim-64.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/linux/limits.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/pthread_stack_min-dynamic.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/posix2_lim.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/xopen_lim.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/uio_lim.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/algorithm
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_algo.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/algorithmfwd.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_heap.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/uniform_int_dist.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_tempbuf.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/new
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/exception.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_construct.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdlib
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/stdlib.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libc-header-start.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/waitflags.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/waitstatus.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/floatn.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/floatn-64.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/long-double.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/long-double-64.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/floatn-common.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/long-double.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/long-double-64.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/locale_t.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/__locale_t.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/sys/types.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/clock_t.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/clockid_t.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/time_t.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/timer_t.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/endian.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endian.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endian-64.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endianness.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endianness-64.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/byteswap.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/uintn-identity.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/sys/select.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/select.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/sigset_t.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/__sigset_t.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/struct_timeval.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/struct_timespec.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endian.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/pthreadtypes.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/pthreadtypes-64.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/thread-shared-types.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/pthreadtypes-arch.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/pthreadtypes-arch-64.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endian.h
+............... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/atomic_wide_counter.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/struct_mutex.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/struct_rwlock.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/struct_rwlock-64.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/alloca.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/stdlib-float.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/floatn.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/std_abs.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/pstl/glue_algorithm_defs.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/pstl/execution_defs.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/cvstd.hpp
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstring
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/string.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libc-header-start.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/strings.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cctype
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/ctype.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endian.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/string
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/requires_hosted.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stringfwd.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/memoryfwd.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/char_traits.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/postypes.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cwchar
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/wchar.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libc-header-start.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/floatn.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stdarg.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/wint_t.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/mbstate_t.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/__mbstate_t.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/__FILE.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/FILE.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cwchar
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/allocator.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/c++allocator.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/new_allocator.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/localefwd.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/c++locale.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/clocale
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/locale.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/locale.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/iosfwd
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cctype
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/ostream_insert.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/cxxabi_forced.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_function.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/backward/binders.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/refwrap.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/invoke.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/basic_string.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ext/alloc_traits.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/alloc_traits.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/string_view
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/functional_hash.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/hash_bytes.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/string_view.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ext/string_conversions.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdlib
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cwchar
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdio
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/stdio.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libc-header-start.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stdarg.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/__fpos_t.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/__fpos64_t.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/struct_FILE.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/cookie_io_functions_t.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/stdio_lim.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/floatn.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cerrno
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/errno.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/errno.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/linux/errno.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/asm/errno.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/asm-generic/errno.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/asm-generic/errno-base.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/error_t.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/charconv.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/basic_string.tcc
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/memory_resource.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/uses_allocator.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/uses_allocator_args.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tuple
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/utility
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_relops.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdlib
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cmath
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/math.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libc-header-start.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/math-vector.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/math-vector-64.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libm-simd-decl-stubs.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/floatn.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/flt-eval-method.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/fp-logb.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/fp-fast.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/fp-fast-64.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-helper-functions.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-helper-functions.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-helper-functions.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/mathcalls-narrow.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/iscanonical.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/specfun.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/gamma.tcc
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/special_function_util.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/bessel_function.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/beta_function.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/ell_integral.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/exp_integral.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/hypergeometric.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/legendre_function.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/modified_bessel_func.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/poly_hermite.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/poly_laguerre.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/tr1/riemann_zeta.tcc
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/cvstd_wrapper.hpp
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/memory
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_uninitialized.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_raw_storage_iter.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/align.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/unique_ptr.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/shared_ptr.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/shared_ptr_base.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/typeinfo
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/allocated_ptr.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ext/aligned_buffer.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ext/atomicity.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/gthr.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/gthr-default.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include-fixed/pthread.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/sched.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/sched.h
+............... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/struct_sched_param.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/cpu-set.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/time.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/time.h
+............... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/timex.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/struct_tm.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/struct_itimerspec.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endian.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/pthreadtypes.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/setjmp.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/setjmp-64.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/types/struct___jmp_buf_tag.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/setjmp.h
+............... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/atomic_word.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/sys/single_threaded.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ext/concurrence.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/exception
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/exception_ptr.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/cxxabi_init_exception.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/stddef.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/nested_exception.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/shared_ptr_atomic.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/atomic_base.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/atomic_lockfree_defines.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/backward/auto_ptr.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/pstl/glue_memory_defs.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/neon_utils.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/vsx_utils.hpp
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/assert.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/check.hpp
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/base.hpp
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/traits.hpp
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/matx.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/saturate.hpp
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/climits
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/limits.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/fast_math.hpp
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cmath
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/types.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/climits
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/limits.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cfloat
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/float.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/vector
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_vector.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_bvector.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/vector.tcc
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/mat.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/bufferpool.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/mat.inl.hpp
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/persistence.hpp
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/operations.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdio
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/cvstd.inl.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/complex
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cmath
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/sstream
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/istream
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ios
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/ios_base.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/locale_classes.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/locale_classes.tcc
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/system_error
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/error_constants.h
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cerrno
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/stdexcept
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/streambuf
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/streambuf.tcc
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/basic_ios.h
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/locale_facets.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cwctype
+........... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/wctype.h
+............ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wctype-wchar.h
+............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endian.h
+.............. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/wordsize.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cctype
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/ctype_base.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/streambuf_iterator.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/ctype_inline.h
+.......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/locale_facets.tcc
+......... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/basic_ios.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ostream
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/ostream.tcc
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/istream.tcc
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/sstream.tcc
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/utility.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/functional
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/std_function.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/unordered_map
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/unordered_map.h
+....... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/hashtable.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/hashtable_policy.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/enable_special_members.h
+........ /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/node_handle.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/erase_if.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/mutex
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/chrono.h
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ratio
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ctime
+...... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/parse_numbers.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/std_mutex.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/unique_lock.h
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/optim.hpp
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/ovx.hpp
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/cvdef.h
+.. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/random
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cmath
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdlib
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/random.h
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/opt_random.h
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/random.tcc
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/numeric
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/stl_numeric.h
+..... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/pstl/glue_numeric_defs.h
+. /home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/logging/include/logging/logger.hpp
+.. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdio
+. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cmath
+. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdio
+. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/fstream
+.. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/codecvt.h
+.. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdio
+.. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/basic_file.h
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/c++io.h
+.... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstdio
+.. /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/bits/fstream.tcc
+... /home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cerrno
+In file included from /home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:1:
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:128:28: error: ‘common’ in namespace ‘visionpilot’ does not name a type
+  128 |         const visionpilot::common::AutoSteerOutput& steer,
+      |                            ^~~~~~
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:128:51: error: expected unqualified-id before ‘&’ token
+  128 |         const visionpilot::common::AutoSteerOutput& steer,
+      |                                                   ^
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:128:51: error: expected ‘)’ before ‘&’ token
+  128 |         const visionpilot::common::AutoSteerOutput& steer,
+      |                                                   ^
+      |                                                   )
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:127:33: note: to match this ‘(’
+  127 |     LateralFusionEstimate update(
+      |                                 ^
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:128:51: error: expected ‘;’ at end of member declaration
+  128 |         const visionpilot::common::AutoSteerOutput& steer,
+      |                                                   ^
+      |                                                    ;
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:128:53: error: ‘steer’ does not name a type; did you mean ‘stderr’?
+  128 |         const visionpilot::common::AutoSteerOutput& steer,
+      |                                                     ^~~~~
+      |                                                     stderr
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:157:63: error: ‘common’ in namespace ‘visionpilot’ does not name a type
+  157 |     std::vector<WorldPt> project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const;
+      |                                                               ^~~~~~
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:157:86: error: expected unqualified-id before ‘&’ token
+  157 |     std::vector<WorldPt> project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const;
+      |                                                                                      ^
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:157:86: error: expected ‘)’ before ‘&’ token
+  157 |     std::vector<WorldPt> project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const;
+      |                                           ~                                          ^
+      |                                                                                      )
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:157:86: error: expected ‘;’ at end of member declaration
+  157 |     std::vector<WorldPt> project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const;
+      |                                                                                      ^
+      |                                                                                       ;
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/include/fusion/lateral_fusion.hpp:157:88: error: ‘steer’ does not name a type; did you mean ‘stderr’?
+  157 |     std::vector<WorldPt> project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const;
+      |                                                                                        ^~~~~
+      |                                                                                        stderr
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:40:24: error: ‘common’ in namespace ‘visionpilot’ does not name a type
+   40 |     const visionpilot::common::AutoSteerOutput& steer,
+      |                        ^~~~~~
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:40:47: error: expected unqualified-id before ‘&’ token
+   40 |     const visionpilot::common::AutoSteerOutput& steer,
+      |                                               ^
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:40:47: error: expected ‘)’ before ‘&’ token
+   40 |     const visionpilot::common::AutoSteerOutput& steer,
+      |                                               ^
+      |                                               )
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:39:44: note: to match this ‘(’
+   39 | LateralFusionEstimate LateralFusion::update(
+      |                                            ^
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:40:49: error: expected initializer before ‘steer’
+   40 |     const visionpilot::common::AutoSteerOutput& steer,
+      |                                                 ^~~~~
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:257:53: error: ‘common’ in namespace ‘visionpilot’ does not name a type
+  257 | LateralFusion::project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const
+      |                                                     ^~~~~~
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:257:76: error: expected unqualified-id before ‘&’ token
+  257 | LateralFusion::project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const
+      |                                                                            ^
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:257:76: error: expected ‘)’ before ‘&’ token
+  257 | LateralFusion::project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const
+      |                                 ~                                          ^
+      |                                                                            )
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:257:78: error: expected initializer before ‘steer’
+  257 | LateralFusion::project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const
+      |                                                                              ^~~~~
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp: In static member function ‘static std::pair<float, float> visionpilot::fusion::LateralFusion::project_world(const cv::Mat&, float, float)’:
+/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/safety_guardian/fusion/src/lateral_fusion.cpp:283:64: note: parameter passing for argument of type ‘std::pair<float, float>’ when C++17 is enabled changed to match C++14 in GCC 10.1
+  283 | LateralFusion::project_world(const cv::Mat& H, float u, float v)
+      |                                                                ^
+Multiple include guards may be useful for:
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/asm/errno.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/assert.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/byteswap.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/endianness.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/flt-eval-method.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/fp-fast-64.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/fp-fast.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/fp-logb.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/iscanonical.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/libm-simd-decl-stubs.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/local_lim-64.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/local_lim.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/locale.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/math-vector-64.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/math-vector.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/pthreadtypes-arch.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/select.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/stdlib-float.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/struct_rwlock.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/time64.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/typesizes-64.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/typesizes.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/uintn-identity.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/waitflags.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/bits/waitstatus.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/ctype_base.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/aarch64-poky-linux/bits/ctype_inline.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cfloat
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/clocale
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cstring
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/ctime
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/c++/13.2.0/cwctype
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/features-time64.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/gnu/stubs-64.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/gnu/stubs-lp64.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/gnu/stubs.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/limits.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/linux/errno.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/core/cv_cpu_dispatch.h
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/cortexa76-poky-linux/usr/include/opencv4/opencv2/opencv_modules.hpp
+/home/sergey/Renesas/rcar-xos/v3.47.0/tools/toolchains/poky/sysroots/x86_64-pokysdk-linux/usr/lib/aarch64-poky-linux/gcc/aarch64-poky-linux/13.2.0/include/syslimits.h
+gmake[3]: *** [modules/safety_guardian/fusion/CMakeFiles/fusion.dir/build.make:92: modules/safety_guardian/fusion/CMakeFiles/fusion.dir/src/lateral_fusion.cpp.o] Error 1
+gmake[2]: *** [CMakeFiles/Makefile2:398: modules/safety_guardian/fusion/CMakeFiles/fusion.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:405: modules/safety_guardian/fusion/CMakeFiles/fusion.dir/rule] Error 2
+gmake: *** [Makefile:215: fusion] Error 2

@@ -37,8 +37,8 @@ void LateralFusion::reset()
 // ─── Public update ────────────────────────────────────────────────────────────
 
 LateralFusionEstimate LateralFusion::update(
-    const models::AutoSteerOutput& steer,
-    const models::AutoDriveOutput& drive,
+    const visionpilot::common::AutoSteerOutput& steer,
+    const visionpilot::common::AutoDriveOutput& drive,
     float dt_s)
 {
     LateralFusionEstimate est;
@@ -254,7 +254,7 @@ LateralFusionEstimate LateralFusion::update(
 //    u = xp[i] * NET_W  (masked by h_vector[i] >= 0.5)
 //
 std::vector<LateralFusion::WorldPt>
-LateralFusion::project_waypoints(const models::AutoSteerOutput& steer) const
+LateralFusion::project_waypoints(const visionpilot::common::AutoSteerOutput& steer) const
 {
     static constexpr int N_WP  = 64;
     static constexpr float NET_W = 1024.f;
