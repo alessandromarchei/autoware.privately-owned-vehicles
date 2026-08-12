@@ -12,10 +12,10 @@
 - [x] **Fusion** (`fusion`)
   - Direct dependencies: `logging`, OpenCV Core
 
-- [ ] **Models** (`models`)
+- [x] **Models** (`models`)
   - Direct dependencies: `common`, `engine`, `fusion`, `logging`, OpenCV Core/Imgproc
 
-- [ ] **Config** (`config`)
+- [x] **Config** (`config`)
   - Direct dependencies: `engine`, `models`
 
 - [x] **Image preprocessing** (`image_preprocessing`)

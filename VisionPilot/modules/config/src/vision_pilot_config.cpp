@@ -52,13 +52,13 @@ std::map<std::string, std::string> parse_conf(const std::string& path)
     return kv;
 }
 
-const std::string& require(const std::map<std::string, std::string>& kv, const std::string& k)
-{
-    const auto it = kv.find(k);
-    if (it == kv.end() || it->second.empty())
-        throw std::runtime_error("Missing required config key: " + k);
-    return it->second;
-}
+// const std::string& require(const std::map<std::string, std::string>& kv, const std::string& k)
+// {
+//     const auto it = kv.find(k);
+//     if (it == kv.end() || it->second.empty())
+//         throw std::runtime_error("Missing required config key: " + k);
+//     return it->second;
+// }
 
 std::string optional(const std::map<std::string, std::string>& kv,
                      const std::string& k, const std::string& def)
@@ -108,17 +108,17 @@ std::string source_label(const SourceConfig& source)
     return {};
 }
 
-Config load_vision_pilot_config(const std::string& path = "config/vision_pilot.conf", const std::string& ros_path = "config/vision_pilot_ros2.conf", const std::string& test_path = "config/vision_pilot_test.conf")
+Config load_vision_pilot_config(const std::string& path = "config/vision_pilot.conf", const std::string& test_path = "config/vision_pilot_test.conf")
 {
     // Load default config
     auto kv = parse_conf(find_config(path));
     Config cfg;
 
-    cfg.engine.provider     = optional(kv, "engine.provider",     "cpu");
-    cfg.engine.precision    = optional(kv, "model.precision",    "fp32");
-    cfg.engine.device_id    = parse_int(optional(kv, "engine.device_id", "0"), "engine.device_id");
-    cfg.engine.cache_dir    = expand_home(optional(kv, "engine.cache_dir", "/tmp/visionpilot_trt_cache"));
-    cfg.engine.workspace_gb = parse_double(optional(kv, "engine.workspace_gb", "1.0"), "engine.workspace_gb");
+    // cfg.engine.provider     = optional(kv, "engine.provider",     "cpu");
+    // cfg.engine.precision    = optional(kv, "model.precision",    "fp32");
+    // cfg.engine.device_id    = parse_int(optional(kv, "engine.device_id", "0"), "engine.device_id");
+    // cfg.engine.cache_dir    = expand_home(optional(kv, "engine.cache_dir", "/tmp/visionpilot_trt_cache"));
+    // cfg.engine.workspace_gb = parse_double(optional(kv, "engine.workspace_gb", "1.0"), "engine.workspace_gb");
 
     cfg.inference.precision    = optional(kv, "model.precision",    "fp32");
     cfg.inference.fusion_debug = parse_bool(optional(kv, "fusion.debug", "false"), "fusion.debug");
@@ -144,15 +144,6 @@ Config load_vision_pilot_config(const std::string& path = "config/vision_pilot.c
 
     { const std::string raw = optional(kv, "debug.wheel_dir", "");
       cfg.wheel_dir = raw.empty() ? "" : expand_home(raw); }
-
-    // Load ROS2 config config
-#ifdef ENABLE_ROS2_INTERFACE
-    kv = parse_conf(find_config(ros_path));
-    cfg.source.input_camera_topic = optional(kv, "source.input_camera_topic",  "/camera/image");
-    cfg.vehicle_speed_topic = optional(kv, "vehicle_speed_topic", "/vehicle/speed");
-    cfg.vehicle_steering_topic = optional(kv, "vehicle_steering_topic", "/vehicle/steering_cmd");
-    cfg.vehicle_acceleration_topic = optional(kv, "vehicle_acceleration_topic", "/vehicle/steering_cmd");
-#endif
 
     // Load test configuration
     if (cfg.source.mode == SourceMode::Video) {

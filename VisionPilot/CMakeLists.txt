@@ -92,7 +92,7 @@ add_subdirectory(modules/v4m)
 
 add_subdirectory(modules/logging)
 
-# add_subdirectory(modules/config)
+add_subdirectory(modules/config)
 
 add_subdirectory(modules/common)
 
@@ -149,7 +149,7 @@ include(
 )
 
 set(vision_pilot_libraries
-    # config           # VisionPilotConfig, load_vision_pilot_config
+    config           # VisionPilotConfig, load_vision_pilot_config
     logging          # VP_INFO / VP_WARN / VP_ERROR
     common           # Common module
     engine           # OnnxEngine

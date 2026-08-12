@@ -1,9 +1,8 @@
 #pragma once
 
-#include "logging/logger.hpp"
 #include <string>
-#include <engine/onnx_engine.hpp>
 #include <models/inference.hpp>
+#include <common/models.hpp>
 #include <iostream>
 
 namespace vpe = visionpilot::engine;
@@ -28,7 +27,7 @@ struct SourceConfig {
 // };
 
 struct Config {
-    vpe::Config engine;
+    // vpe::Config engine;
     vpm::Config inference;
     SourceConfig      source;
     // PipelineConfig    pipeline;
@@ -61,7 +60,7 @@ static std::string find_config(const std::string& filename) {
 
 // Load from key=value .conf file. Expands ~ to $HOME.
 // Throws std::runtime_error on missing or invalid config.
-Config load_vision_pilot_config(const std::string & path, const std::string & ros_path, const std::string & test_path);
+Config load_vision_pilot_config(const std::string & path, const std::string & test_path);
 
 
 // Resolve config path from --config <path>, VISIONPILOT_CONFIG env var,
