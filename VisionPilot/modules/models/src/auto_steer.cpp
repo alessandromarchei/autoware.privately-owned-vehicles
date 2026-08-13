@@ -1,4 +1,4 @@
-#include "models/auto_steer.hpp"
+#include <models/auto_steer.hpp>
 
 // #include <onnxruntime_run_options_config_keys.h>
 
@@ -25,6 +25,7 @@ AutoSteer::AutoSteer(const std::string& model_path)
         );
     }
 
+    VP_INFO("[AutoSteer] Created V4MEngine for model: %s\n", model_path.c_str());
 }
 
 visionpilot::common::AutoSteerOutput AutoSteer::infer(const float* image_chw)
@@ -48,7 +49,7 @@ visionpilot::common::AutoSteerOutput AutoSteer::infer(const float* image_chw)
     //run inference
     if (engine_->run() != 0) {
         throw std::runtime_error(
-            "AutoSteer V4M inference failed"
+            "[AutoSteer] V4M inference failed"
         );
     }
 

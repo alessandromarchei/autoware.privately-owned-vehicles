@@ -31,7 +31,6 @@ int main(int argc, char** argv)
     // Default configuration file
     std::string config_path = "../config/vision_pilot.conf";
     std::string homography_path = "../config/H.yaml";
-    std::string config_path_ros2 = "../config/vision_pilot_ros2.conf";
     std::string config_path_test = "../config/vision_pilot_test.conf";
 
     // CLI flags
@@ -54,16 +53,6 @@ int main(int argc, char** argv)
             }
 
             config_path = argv[++i];
-        }
-        else if (arg == "--config-ros2")
-        {
-            if (i + 1 >= argc)
-            {
-                VP_ERROR("Missing argument after --config-ros2");
-                return 1;
-            }
-
-            config_path_ros2 = argv[++i];
         }
         else if (arg == "--config-test")
         {
@@ -119,7 +108,11 @@ int main(int argc, char** argv)
     }
 
     ImagePreprocessor preprocessor;
+
+    //initialize inference pipeline (internally every hycoah for each model is initialized)
     vm::InferencePipeline pipeline(cfg.inference);
+
+
     Planner planner(cfg.speed_limit, cfg.Lf);
 
     // ── Init visualization assets once based on mode ──────────────────────────
@@ -212,21 +205,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-
-
-// int main(int argc, char** argv)
-// {
-//     // VP_INFO("VisionPilot starting...");
-//     // VP_INFO("C++ version: %ld", __cplusplus);
-//     // VP_INFO("C++ standard: C++17");
-//     // VP_INFO("Build type: %s", VISION_PILOT_BUILD_TYPE);
-//     // VP_INFO("Build date: %s", VISION_PILOT_BUILD_DATE);
-//     // VP_INFO("Build commit: %s", VISION_PILOT_BUILD_COMMIT);
-
-//     int dummy = argc;
-//     (void)dummy; // Avoid unused variable warning
-//     char** dummy_argv = argv;
-//     (void)dummy_argv; // Avoid unused variable warning
-
-//     return 0;
-// }

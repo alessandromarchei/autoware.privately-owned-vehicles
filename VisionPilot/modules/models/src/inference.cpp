@@ -83,9 +83,9 @@ void LatencyStats::print() const
 void LatencyStats::reset() { *this = {}; }
 
 InferencePipeline::InferencePipeline(const Config& cfg)
-    : auto_drive_(find_model("autodrive", cfg.core))
-    , auto_steer_(find_model("autosteer_", cfg.core))
-    , auto_speed_(find_model("autospeed_", cfg.core))
+    : auto_drive_(cfg.auto_drive_model_path.empty() ? find_model("autodrive", cfg.core) : cfg.auto_drive_model_path)
+    , auto_steer_(cfg.auto_steer_model_path.empty() ? find_model("autosteer", cfg.core) : cfg.auto_steer_model_path)
+    , auto_speed_(cfg.auto_speed_model_path.empty() ? find_model("autospeed", cfg.core) : cfg.auto_speed_model_path)
 {
     fusion::LongitudinalFusion::Config lc;
     lc.debug           = cfg.fusion_debug;

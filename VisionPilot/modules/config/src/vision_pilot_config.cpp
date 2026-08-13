@@ -122,9 +122,15 @@ Config load_vision_pilot_config(const std::string& path = "config/vision_pilot.c
 
     cfg.inference.precision    = optional(kv, "model.precision",    "fp32");
     cfg.inference.fusion_debug = parse_bool(optional(kv, "fusion.debug", "false"), "fusion.debug");
-    cfg.inference.cte_bias_m   = static_cast<float>(
-        parse_double(optional(kv, "fusion.cte_bias_m", "0.0"), "fusion.cte_bias_m"));
+    cfg.inference.cte_bias_m   = static_cast<float>(parse_double(optional(kv, "fusion.cte_bias_m", "0.0"), "fusion.cte_bias_m"));
+    
+    //fetch model paths from config file
+    cfg.inference.auto_drive_model_path = optional(kv, "model.auto_drive_model_path", "");
+    cfg.inference.auto_steer_model_path = optional(kv, "model.auto_steer_model_path", "");
+    cfg.inference.auto_speed_model_path = optional(kv, "model.auto_speed_model_path", "");
 
+
+    
     cfg.source.mode          = parse_source_mode(optional(kv, "source.mode", "video"));
 
     cfg.source.v4l2_device   = optional(kv, "source.v4l2_device", "/dev/video0");

@@ -46,11 +46,6 @@ function(configure_vision_pilot_app target_name)
         "${CMAKE_SOURCE_DIR}/config/vision_pilot_test.conf"
     )
 
-    if(ENABLE_ROS2_INTERFACE)
-        list(APPEND VISIONPILOT_CONF_FILES
-            "${CMAKE_SOURCE_DIR}/config/vision_pilot_ros2.conf"
-        )
-    endif()
 
     install(
         FILES ${VISIONPILOT_CONF_FILES}
@@ -58,16 +53,8 @@ function(configure_vision_pilot_app target_name)
     )
 
     install(
-        DIRECTORY "${CMAKE_SOURCE_DIR}/assets/icons/"
-        DESTINATION share/visionpilot/assets/icons
-    )
-
-    install(
         DIRECTORY "${CMAKE_SOURCE_DIR}/modules/models/weights/"
         DESTINATION share/visionpilot/modules/models/weights
-        FILES_MATCHING
-            PATTERN "*.onnx"
-            PATTERN "trt_cache" EXCLUDE
     )
 
 endfunction()

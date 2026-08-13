@@ -1,4 +1,4 @@
-#include "models/auto_speed.hpp"
+#include <models/auto_speed.hpp>
 
 // #include <onnxruntime_run_options_config_keys.h>
 
@@ -27,6 +27,8 @@ AutoSpeed::AutoSpeed(const std::string& model_path)
             "AutoSpeed expects exactly 1 model output"
         );
     }
+
+    VP_INFO("[AutoSpeed] Created V4MEngine for model: %s\n", model_path.c_str());
 }
 
 // ─── Inference ───────────────────────────────────────────────────────────────
@@ -85,8 +87,9 @@ visionpilot::common::AutoSpeedOutput AutoSpeed::post_process(const float* data, 
     const int     num_classes = static_cast<int>(C) - 4;
 
     if (num_classes <= 0) {
-        printf("[AutoSpeed] Invalid channel count C=%lld\n",
-               static_cast<long long>(C));
+        throw std::runtime_error(
+            "AutoSpeed invalid channel count"
+        );
         return out;
     }
 

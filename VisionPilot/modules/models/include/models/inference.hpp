@@ -19,6 +19,11 @@ namespace visionpilot::models {
 struct Config {
     std::string precision    = "fp32";
     std::string core         = "core0";
+
+    std::string auto_drive_model_path;
+    std::string auto_steer_model_path;
+    std::string auto_speed_model_path;
+    
     bool        fusion_debug = false;
     float       cte_bias_m   = 0.0f;  // camera mounting offset [m] — subtracted from raw CTE before filter
 };

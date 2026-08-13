@@ -233,3 +233,7 @@ VisionPilot/software_defined_vehicle/OpenADKit/**/model-weights/
 *VISIONPILOT_V4M_DEPENDENCIES.md
 *notes.md
 *libs_poky.txt
+
+
+#onnx files
+**.onnx

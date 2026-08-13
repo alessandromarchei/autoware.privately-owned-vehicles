@@ -2,6 +2,7 @@
 
 #include <engine/v4m_engine.hpp>
 #include <common/models.hpp>
+#include <logging/logger.hpp>
 // #include <onnxruntime_cxx_api.h>
 
 #include <array>
