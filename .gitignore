@@ -227,3 +227,9 @@ VisionPilot/software_defined_vehicle/OpenADKit/**/model-weights/
 
 #Ipopt and CppAD
 *.downloads
+
+#Renesas debug files
+*VisionPilot_CMake_dependencies_analysis.txt
+*VISIONPILOT_V4M_DEPENDENCIES.md
+*notes.md
+*libs_poky.txt
