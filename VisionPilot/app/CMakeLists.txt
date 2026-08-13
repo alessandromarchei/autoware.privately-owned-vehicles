@@ -52,15 +52,15 @@ function(configure_vision_pilot_app target_name)
         DIRECTORY "${IPOPT_ROOT}/lib/"
         DESTINATION lib
     )
-    
+
     install(
         FILES ${VISIONPILOT_CONF_FILES}
-        DESTINATION share/visionpilot/config
+        DESTINATION share/config
     )
 
     install(
         DIRECTORY "${CMAKE_SOURCE_DIR}/modules/models/weights/"
-        DESTINATION share/visionpilot/modules/models/weights
+        DESTINATION share/modules/models/weights
         #exlude .onnx files, since they are not used in the app
         PATTERN "*.onnx" EXCLUDE
     )
