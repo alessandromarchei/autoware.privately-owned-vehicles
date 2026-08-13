@@ -14,5 +14,6 @@ target_include_directories(image_preprocessing
 target_link_libraries(image_preprocessing
         PUBLIC
         common
+        logging
         ${OpenCV_LIBS}
 )

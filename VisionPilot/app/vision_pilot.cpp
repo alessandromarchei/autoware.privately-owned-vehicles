@@ -29,9 +29,12 @@ int main(int argc, char** argv)
     Config cfg;
 
     // Default configuration file
-    std::string config_path = "../config/vision_pilot.conf";
-    std::string homography_path = "../config/H.yaml";
-    std::string config_path_test = "../config/vision_pilot_test.conf";
+    std::string config_path = "share/config/vision_pilot.conf";
+    std::string homography_path = "share/config/H.yaml";
+    std::string config_path_test = "share/config/vision_pilot_test.conf";
+
+    std::string test_video_path = "share/tests/test_open_lane_9/input.mp4";
+    std::string test_vehicle_speed_path = "share/tests/test_open_lane_9/frame_speed.txt";
 
     // CLI flags
     bool debug_viz = false;
@@ -73,6 +76,24 @@ int main(int argc, char** argv)
             }
             homography_path = argv[++i];
         }
+        else if (arg == "--test-video")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --test-video. Specify path to test video file.");
+                return 1;
+            }
+            test_video_path = argv[++i];
+        }
+        else if (arg == "--test-vehicle-speed")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --test-vehicle-speed. Specify path to test vehicle speed file.");
+                return 1;
+            }
+            test_vehicle_speed_path = argv[++i];
+        }
         else
         {
             VP_ERROR("Unknown argument: %s", arg.c_str());
@@ -88,31 +109,49 @@ int main(int argc, char** argv)
     {
         VP_ERROR("Config: %s", e.what());
         return 1;
+    }   
+
+    //apply changes from CLI flags to config
+    if (!test_video_path.empty())
+    {
+        cfg.source.input_video = test_video_path;
+        VP_INFO("Using test video: %s", test_video_path.c_str());
+    }
+    if (!test_vehicle_speed_path.empty())
+    {
+        cfg.source.input_vehicle_speed = test_vehicle_speed_path;
+        VP_INFO("Using test vehicle speed file: %s", test_vehicle_speed_path.c_str());
     }
 
     std::shared_ptr<CameraInterface> camera_interface;
     std::shared_ptr<VehicleInterface> vehicle_interface;
 
-    
+    VP_INFO("Using homography file: %s", homography_path.c_str());
+    ImagePreprocessor preprocessor(homography_path);
     if (cfg.source.mode == SourceMode::Video)
     {
+        VP_INFO("Using video source mode");
+        VP_INFO("Input video: %s", cfg.source.input_video.c_str());
+        VP_INFO("Input vehicle speed: %s", cfg.source.input_vehicle_speed.c_str());
         camera_interface = std::make_unique<camera_interface::FileInterface>(
             cfg.source.input_video, cfg.source.video_loop, cfg.source.video_realtime);
         vehicle_interface = std::make_shared<FileInterface>(cfg.source.input_vehicle_speed);
     }
     else
     {
+        VP_INFO("Using live source mode: %s", source_label(cfg.source).c_str());
+        VP_INFO("V4L2 device: %s", cfg.source.v4l2_device.c_str());
+        VP_INFO("V4L2 FPS: %d", cfg.source.v4l2_fps);
         camera_interface = std::make_unique<camera_interface::V4L2CameraInterface>(
             cfg.source.v4l2_device, static_cast<uint32_t>(cfg.source.v4l2_fps));
         vehicle_interface = std::make_shared<CanInterface>();
     }
 
-    ImagePreprocessor preprocessor;
-
+    VP_INFO("Starting Inference Pipeline ...");
     //initialize inference pipeline (internally every hycoah for each model is initialized)
     vm::InferencePipeline pipeline(cfg.inference);
 
-
+    VP_INFO("Starting Planner with speed limit: %.2f m/s and Lf: %.2f m", cfg.speed_limit, cfg.Lf);
     Planner planner(cfg.speed_limit, cfg.Lf);
 
     // ── Init visualization assets once based on mode ──────────────────────────
@@ -140,6 +179,8 @@ int main(int argc, char** argv)
     cv::Mat frame, warped, resized;
     bool h_resized_set = false;
     cv::Mat H = load_matrix(homography_path, "H");
+
+    VP_INFO("Starting main loop. Press Ctrl+C to exit.");
     while (true)
     {
         auto [ok, frame] = camera_interface->get_latest_frame();

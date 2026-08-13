@@ -83,6 +83,7 @@ add_library(planning
     src/planning.cpp
     src/longitudinal_planning.cpp
     src/lateral_planning.cpp
+    "${CPPAD_ROOT}/cppad_lib/temp_file.cpp"     #compiled to avoid errors in debug mode
 )
 
 

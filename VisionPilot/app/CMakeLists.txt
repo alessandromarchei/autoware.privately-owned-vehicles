@@ -65,4 +65,10 @@ function(configure_vision_pilot_app target_name)
         PATTERN "*.onnx" EXCLUDE
     )
 
+    #install media files (for testing purposes)
+    install(
+        DIRECTORY "${CMAKE_SOURCE_DIR}/../downloads/"
+        DESTINATION share/tests
+    )
+
 endfunction()

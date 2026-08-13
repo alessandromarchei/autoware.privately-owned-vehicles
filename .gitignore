@@ -237,3 +237,6 @@ VisionPilot/software_defined_vehicle/OpenADKit/**/model-weights/
 
 #onnx files
 **.onnx
+
+#msgpack files from renesas hycoah
+**.msgpack

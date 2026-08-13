@@ -2,10 +2,11 @@
 #define VISIONPILOT_IMAGE_PREPROCESSOR_HPP
 #include <string>
 #include <opencv2/opencv.hpp>
+#include <logging/logger.hpp>
 
 class ImagePreprocessor {
 public:
-    ImagePreprocessor();
+    ImagePreprocessor(const std::string& homography_path);
 
     ~ImagePreprocessor() = default;
 

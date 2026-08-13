@@ -11,5 +11,6 @@ target_include_directories(common
 
 target_link_libraries(common
         PUBLIC
+        logging
         ${OpenCV_LIBS}
 )

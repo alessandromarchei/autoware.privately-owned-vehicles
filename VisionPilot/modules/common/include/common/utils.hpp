@@ -5,6 +5,7 @@
 #include <cmath>
 #include <filesystem>
 #include <opencv2/opencv.hpp>
+#include <logging/logger.hpp>
 
 std::string find_config(const std::string& filename);
 

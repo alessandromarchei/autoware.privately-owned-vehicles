@@ -108,9 +108,22 @@ std::string source_label(const SourceConfig& source)
     return {};
 }
 
+
+static std::string find_config(const std::string& filename) {
+    const std::string local  = filename;
+    const std::string system = "/usr/share/visionpilot/config/" + filename;
+
+    if (std::filesystem::exists(local))  return local;
+    if (std::filesystem::exists(system)) return system;
+
+    throw std::runtime_error("Config file not found: " + filename);
+}
+
+
 Config load_vision_pilot_config(const std::string& path = "config/vision_pilot.conf", const std::string& test_path = "config/vision_pilot_test.conf")
 {
     // Load default config
+    VP_INFO("Loading config from: %s", path.c_str());
     auto kv = parse_conf(find_config(path));
     Config cfg;
 
@@ -120,17 +133,19 @@ Config load_vision_pilot_config(const std::string& path = "config/vision_pilot.c
     // cfg.engine.cache_dir    = expand_home(optional(kv, "engine.cache_dir", "/tmp/visionpilot_trt_cache"));
     // cfg.engine.workspace_gb = parse_double(optional(kv, "engine.workspace_gb", "1.0"), "engine.workspace_gb");
 
+    VP_INFO("Loading inference config from: %s", path.c_str());
     cfg.inference.precision    = optional(kv, "model.precision",    "fp32");
     cfg.inference.fusion_debug = parse_bool(optional(kv, "fusion.debug", "false"), "fusion.debug");
     cfg.inference.cte_bias_m   = static_cast<float>(parse_double(optional(kv, "fusion.cte_bias_m", "0.0"), "fusion.cte_bias_m"));
     
+    VP_INFO("Loading source config from: %s", path.c_str());
     //fetch model paths from config file
     cfg.inference.auto_drive_model_path = optional(kv, "model.auto_drive_model_path", "");
     cfg.inference.auto_steer_model_path = optional(kv, "model.auto_steer_model_path", "");
     cfg.inference.auto_speed_model_path = optional(kv, "model.auto_speed_model_path", "");
 
 
-    
+    VP_INFO("Loading source config ...");
     cfg.source.mode          = parse_source_mode(optional(kv, "source.mode", "video"));
 
     cfg.source.v4l2_device   = optional(kv, "source.v4l2_device", "/dev/video0");
@@ -151,6 +166,8 @@ Config load_vision_pilot_config(const std::string& path = "config/vision_pilot.c
     { const std::string raw = optional(kv, "debug.wheel_dir", "");
       cfg.wheel_dir = raw.empty() ? "" : expand_home(raw); }
 
+    
+    VP_INFO("Loading vehicle interface config ...");
     // Load test configuration
     if (cfg.source.mode == SourceMode::Video) {
         kv = parse_conf(find_config(test_path));

@@ -2,9 +2,10 @@
 #include <common/utils.hpp>
 #include <image_preprocessing/image_preprocessor.hpp>
 
-ImagePreprocessor::ImagePreprocessor()
+ImagePreprocessor::ImagePreprocessor(const std::string& homography_path)
 {
-    C_ = load_matrix("../config/homography_C_matrix.yaml", "C");
+    VP_INFO("Loading homography matrix from: %s", homography_path.c_str());
+    C_ = load_matrix(homography_path, "C");
 }
 
 void ImagePreprocessor::preprocess(const cv::Mat& image, cv::Mat& warped_image, cv::Mat& resized_image,
