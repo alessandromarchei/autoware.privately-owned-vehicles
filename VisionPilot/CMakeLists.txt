@@ -98,23 +98,19 @@ add_subdirectory(modules/common)
 
 add_subdirectory(modules/sensing/image_preprocessing)
 
-# if(ENABLE_ROS2_INTERFACE)
-#     add_subdirectory(modules/middleware_interfaces/ros2_interface/camera_subscriber)
-#     add_subdirectory(modules/middleware_interfaces/ros2_interface/vehicle_ros2_interface)
-# endif()
 
 add_subdirectory(modules/engine)
 add_subdirectory(modules/models)
 
 add_subdirectory(modules/safety_guardian/fusion)   # tracking is embedded inside fusion
-# add_subdirectory(modules/safety_guardian/planning)
+add_subdirectory(modules/safety_guardian/planning)
 
 add_subdirectory(modules/sensing/vehicle_interface)
-# add_subdirectory(modules/sensing/camera_interface)
+add_subdirectory(modules/sensing/camera_interface)
 
 # add_subdirectory(modules/visualization)   //not needed for now
 
-# add_subdirectory(modules/debug)
+add_subdirectory(modules/debug)
 
 # config
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config
@@ -155,13 +151,13 @@ set(vision_pilot_libraries
     engine           # OnnxEngine
     models           # AutoDrive, AutoSteer, AutoSpeed
     fusion           # LongitudinalFusion, LateralFusion
-    # planning         # Planner
+    planning         # Planner
     vehicle_interface
-    # camera_interface
+    camera_interface
     image_preprocessing
     v4m_support
     # visualization
-    # vp_debug         # Debug annotate_frame
+    vp_debug         # Debug annotate_frame
     )
 
 #----------------------------------------------------------------------------------------------------------------------

@@ -1,3 +1,6 @@
 [submodule "VisionPilot/Simulation/CARLA/Zenoh/zenoh_carla_bridge"]
 	path = VisionPilot/Simulation/CARLA/Zenoh/zenoh_carla_bridge
 	url = https://github.com/evshary/zenoh_carla_bridge.git
+[submodule "VisionPilot/thirdparty/CppAD"]
+	path = VisionPilot/thirdparty/CppAD
+	url = https://github.com/coin-or/CppAD.git

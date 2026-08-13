@@ -7,6 +7,7 @@
 #include <models/auto_speed.hpp>
 #include <models/inference.hpp>
 #include <opencv2/core.hpp>
+#include <common/models.hpp>
 
 #include <string>
 
@@ -30,9 +31,9 @@ struct DebugView {
     double      asp_ms     = 0;
     std::string src_label;
 
-    models::AutoDriveOutput       auto_drive;
-    models::AutoSteerOutput       auto_steer;
-    models::AutoSpeedOutput       auto_speed;
+    common::AutoDriveOutput       auto_drive;
+    common::AutoSteerOutput       auto_steer;
+    common::AutoSpeedOutput       auto_speed;
 
     fusion::CIPOFusionEstimate    cipo;
     fusion::LateralFusionEstimate   lateral;

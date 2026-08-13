@@ -27,9 +27,9 @@ public:
     VectorXd kappa_schedule;   // precomputed, clamped curvature preview
 
     FG_eval(double Lf, VectorXd v_schedule, VectorXd kappa_schedule)
-        : Lf_(Lf)
-        , v_schedule(std::move(v_schedule))
-        , kappa_schedule(std::move(kappa_schedule)) {}
+        : v_schedule(std::move(v_schedule))
+        , kappa_schedule(std::move(kappa_schedule))
+        , Lf_(Lf) {}
 
     typedef CPPAD_TESTVECTOR(AD<double>) ADvector;
 
@@ -107,7 +107,7 @@ std::vector<double> LateralPlanner::compute_steering(const double Lf,
                                                     const VectorXd& state,
                                                     const VectorXd& v_schedule,
                                                     const VectorXd& kappa_schedule) {
-    bool ok = true;
+    // bool ok = true;
     typedef CPPAD_TESTVECTOR(double) Dvector;
 
     const double cte        = state[0];
@@ -128,7 +128,7 @@ std::vector<double> LateralPlanner::compute_steering(const double Lf,
         vars_lb[i] = -1.0e19;
         vars_ub[i] =  1.0e19;
     }
-    for (int i = delta_start; i < (int)n_vars; i++) {   // steering ±25 deg
+    for (int i = (int)delta_start; i < (int)n_vars; i++) {   // steering ±25 deg
         vars_lb[i] = -0.436332;
         vars_ub[i] =  0.436332;
     }

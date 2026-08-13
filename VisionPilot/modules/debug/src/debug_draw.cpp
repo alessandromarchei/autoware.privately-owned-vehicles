@@ -238,7 +238,7 @@ void init_wheel_assets(const std::string& wheel_dir)
 static cv::Mat rotate_wheel_rgba(const cv::Mat& src, float angle_deg)
 {
     if (src.empty()) return {};
-    cv::Point2f center(src.cols / 2.f, src.rows / 2.f);
+    cv::Point2f center((float)src.cols / 2.f, (float)src.rows / 2.f);
     cv::Mat rot = cv::getRotationMatrix2D(center, angle_deg, 1.0);
     cv::Mat out;
     cv::warpAffine(src, out, rot, src.size(), cv::INTER_LINEAR,
@@ -279,7 +279,7 @@ static void paste_rgba(cv::Mat& base, const cv::Mat& overlay, int x, int y)
 // ─── AutoSpeed detections ─────────────────────────────────────────────────────
 
 static void draw_autospeed_detections(cv::Mat& img,
-                                       const models::AutoSpeedOutput& speed)
+                                       const common::AutoSpeedOutput& speed)
 {
     if (!speed.valid) return;
     for (const auto& d : speed.detections) {
@@ -305,8 +305,8 @@ static cv::Point world_to_bev_px(float x_fwd, float y_lat,
     const int cx = panel_w / 2;
     const int cy = panel_h - 12;
     return cv::Point(
-        static_cast<int>(std::lround(cx - y_lat * px_per_m)),
-        static_cast<int>(std::lround(cy - x_fwd * px_per_m)));
+        static_cast<int>(std::lround((float)cx - y_lat * px_per_m)),
+        static_cast<int>(std::lround((float)cy - x_fwd * px_per_m)));
 }
 
 static void draw_bev_fused_ego_path(cv::Mat& img,
@@ -390,7 +390,7 @@ static void draw_fused_path_on_image(cv::Mat& img,
 }
 
 static void draw_autosteer_ego_path(cv::Mat& img,
-                                     const models::AutoSteerOutput& steer)
+                                     const common::AutoSteerOutput& steer)
 {
     if (!steer.valid) return;
 

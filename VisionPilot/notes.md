@@ -24,13 +24,13 @@
 - [x] **Vehicle interface** (`vehicle_interface`)
   - Direct dependencies: None declared
 
-- [ ] **Camera interface** (`camera_interface`)
+- [x] **Camera interface** (`camera_interface`)
   - Direct dependencies: `config`, `logging`, OpenCV Core/VideoIO, Threads
 
 - [ ] **Planning** (`planning`)
   - Direct dependencies: `common`, vendored Eigen, IPOPT
 
-- [ ] **Debug** (`vp_debug`)
+- [x] **Debug** (`vp_debug`)
   - Direct dependencies: `models`, `fusion`, OpenCV
 
 - [not included ] **Visualization** (`visualization`)
@@ -45,5 +45,14 @@
 - [ ] **Application** (`VisionPilot`)
   - Direct dependencies: Currently `config`, `logging`, `common`
 
-- [ ] **V4M support** (No target)
+- [x] **V4M support** (No target)
   - Direct dependencies: Populates variables used by `rcar_configure_application()`
+
+
+
+PLANNING Depends on 
+-IPOPTS
+-CPPAD
+
+to avoid fetching them from the linux system, we can compile them from source and link them statically (with poky linux toolchain) to the planning module. 
+this is done by adding thirdparty submodules for IPOPT and CPPAD, and adding them to the CMakeLists.txt of the planning module.
