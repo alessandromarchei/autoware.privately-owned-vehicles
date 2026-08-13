@@ -46,7 +46,13 @@ function(configure_vision_pilot_app target_name)
         "${CMAKE_SOURCE_DIR}/config/vision_pilot_test.conf"
     )
 
-
+    # Install the complete Ipopt runtime bundle:
+    # Ipopt, MUMPS, SPRAL, METIS, OpenBLAS and Fortran runtime.
+    install(
+        DIRECTORY "${IPOPT_ROOT}/lib/"
+        DESTINATION lib
+    )
+    
     install(
         FILES ${VISIONPILOT_CONF_FILES}
         DESTINATION share/visionpilot/config
@@ -55,6 +61,8 @@ function(configure_vision_pilot_app target_name)
     install(
         DIRECTORY "${CMAKE_SOURCE_DIR}/modules/models/weights/"
         DESTINATION share/visionpilot/modules/models/weights
+        #exlude .onnx files, since they are not used in the app
+        PATTERN "*.onnx" EXCLUDE
     )
 
 endfunction()
