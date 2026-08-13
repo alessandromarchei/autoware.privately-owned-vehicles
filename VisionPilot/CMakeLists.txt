@@ -20,6 +20,21 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 # add compile commands for IDEs
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+#----------------------------------------------------------------------------------------------------------------------
+# Default Ipopt and CppAD library paths
+#----------------------------------------------------------------------------------------------------------------------
+
+if(NOT DEFINED IPOPT_ROOT)
+    set(IPOPT_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/Ipopt")
+    message(STATUS "IPOPT_ROOT not defined, using default: ${IPOPT_ROOT}")
+endif()
+
+if(NOT DEFINED CPPAD_ROOT)
+    set(CPPAD_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/CppAD")
+    message(STATUS "CPPAD_ROOT not defined, using default: ${CPPAD_ROOT}")
+endif()
+
+
 
 #----------------------------------------------------------------------------------------------------------------------
 # R-Car xOS SoC/Board selection
