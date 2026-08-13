@@ -40,6 +40,7 @@ target_link_libraries(v4m_platform
 # Actual reusable V4M implementation.
 add_library(v4m_support STATIC
     src/file_common/src/common.cpp
+    src/vsfwk_common/src/vsfwk_utils.cpp
 )
 
 target_link_libraries(v4m_support

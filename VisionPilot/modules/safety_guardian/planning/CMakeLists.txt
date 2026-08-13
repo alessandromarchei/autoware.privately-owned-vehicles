@@ -4,12 +4,6 @@ cmake_minimum_required(VERSION 3.21.0)
 # CppAD
 # -----------------------------------------------------------------------------
 
-set(CPPAD_ROOT
-    ""
-    CACHE PATH
-    "Root of the CppAD source or installation"
-)
-
 if(NOT CPPAD_ROOT)
     message(FATAL_ERROR
         "Set -DCPPAD_ROOT=/absolute/path/to/CppAD"
@@ -27,11 +21,6 @@ endif()
 # -----------------------------------------------------------------------------
 
 if(CMAKE_CROSSCOMPILING)
-    set(IPOPT_ROOT
-        ""
-        CACHE PATH
-        "Root of the extracted AArch64 Ipopt bundle"
-    )
 
     if(NOT IPOPT_ROOT)
         message(FATAL_ERROR

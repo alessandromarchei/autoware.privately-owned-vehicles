@@ -1,76 +1,73 @@
-add_executable(VisionPilot
-        vision_pilot.cpp
-)
+# app/CMakeLists.txt
 
-# set_target_properties(VisionPilot PROPERTIES
-#         INSTALL_RPATH "/usr/share/visionpilot/onnxruntime/lib"
-#         BUILD_WITH_INSTALL_RPATH TRUE
-# )
+function(configure_vision_pilot_app target_name)
 
-add_dependencies(VisionPilot generate_config)
+    if(NOT TARGET ${target_name})
+        message(FATAL_ERROR
+            "Target '${target_name}' does not exist. "
+            "Call configure_vision_pilot_app() after rcar_configure_application()."
+        )
+    endif()
 
-# if (ENABLE_ROS2_INTERFACE)
-#     find_package(rclcpp REQUIRED)
-#     find_package(std_msgs REQUIRED)
-
-#     target_link_libraries(VisionPilot PUBLIC rclcpp::rclcpp)
-#     target_link_libraries(VisionPilot PRIVATE camera_subscriber vehicle_ros2_interface)
-#     target_compile_definitions(VisionPilot PRIVATE ENABLE_ROS2_INTERFACE)
-# endif ()
-
-target_link_libraries(VisionPilot
-    PRIVATE
-    config           # VisionPilotConfig, load_vision_pilot_config
-    logging          # VP_INFO / VP_WARN / VP_ERROR
-    common           # Common module
-    # engine           # OnnxEngine
-    # models           # AutoDrive, AutoSteer, AutoSpeed
-    # fusion           # LongitudinalFusion, LateralFusion
-    # planning         # Planner
-    # vehicle_interface
-    # camera_interface
-    # image_preprocessing
-    # visualization
-    # vp_debug         # Debug annotate_frame
-)
-
-# Suppress unresolved-symbol errors from system shared libs (gdal→curl, ICU from miniforge3)
-# that are pulled in transitively by opencv_viz; we never use viz ourselves.
-target_link_options(VisionPilot PRIVATE -Wl,--allow-shlib-undefined)
-
-# Installation rules
-install(TARGETS VisionPilot
-        RUNTIME DESTINATION bin
-)
-
-set(VISIONPILOT_CONF_FILES
-        ${CMAKE_SOURCE_DIR}/config/H.yaml
-        ${CMAKE_BINARY_DIR}/config/homography_C_matrix.yaml
-        ${CMAKE_SOURCE_DIR}/config/vision_pilot.conf
-        ${CMAKE_SOURCE_DIR}/config/vision_pilot_test.conf
-)
-
-if(ENABLE_ROS2_INTERFACE)
-    list(APPEND VISIONPILOT_CONF_FILES
-            ${CMAKE_SOURCE_DIR}/config/vision_pilot_ros2.conf
+    add_dependencies(${target_name}
+        generate_config
     )
-endif()
 
-install(FILES ${VISIONPILOT_CONF_FILES}
-        DESTINATION share/visionpilot/config/
-)
+    # Keep the warning visible, but do not promote it to an error.
+    target_compile_options(${target_name}
+        PRIVATE
+            -Wno-error=unused-function
+    )
 
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/assets/icons/"
-        DESTINATION "/usr/share/visionpilot/assets/icons"
-)
+    # Ipopt runtime:
+    # installed executable: <prefix>/bin/vision_pilot
+    # installed libraries:  <prefix>/lib/*.so
+    set_target_properties(${target_name} PROPERTIES
+        INSTALL_RPATH "$ORIGIN/../lib"
+    )
 
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/modules/models/weights/"
-        DESTINATION "/usr/share/visionpilot/modules/models/weights"
+    # Suppress unresolved symbols from transitive shared libraries.
+    # Keep this only if it is actually necessary for the V4M link.
+    target_link_options(${target_name}
+        PRIVATE
+            -Wl,--allow-shlib-undefined
+            "-Wl,-rpath-link,${IPOPT_ROOT}/lib"
+    )
+
+    install(
+        TARGETS ${target_name}
+        RUNTIME DESTINATION bin
+    )
+
+    set(VISIONPILOT_CONF_FILES
+        "${CMAKE_SOURCE_DIR}/config/H.yaml"
+        "${CMAKE_BINARY_DIR}/config/homography_C_matrix.yaml"
+        "${CMAKE_SOURCE_DIR}/config/vision_pilot.conf"
+        "${CMAKE_SOURCE_DIR}/config/vision_pilot_test.conf"
+    )
+
+    if(ENABLE_ROS2_INTERFACE)
+        list(APPEND VISIONPILOT_CONF_FILES
+            "${CMAKE_SOURCE_DIR}/config/vision_pilot_ros2.conf"
+        )
+    endif()
+
+    install(
+        FILES ${VISIONPILOT_CONF_FILES}
+        DESTINATION share/visionpilot/config
+    )
+
+    install(
+        DIRECTORY "${CMAKE_SOURCE_DIR}/assets/icons/"
+        DESTINATION share/visionpilot/assets/icons
+    )
+
+    install(
+        DIRECTORY "${CMAKE_SOURCE_DIR}/modules/models/weights/"
+        DESTINATION share/visionpilot/modules/models/weights
         FILES_MATCHING
-        PATTERN "*.onnx"
-        PATTERN "trt_cache" EXCLUDE
-)
+            PATTERN "*.onnx"
+            PATTERN "trt_cache" EXCLUDE
+    )
 
-# install(DIRECTORY "${CMAKE_SOURCE_DIR}/onnxruntime/"
-#         DESTINATION "/usr/share/visionpilot/onnxruntime"
-# )
+endfunction()

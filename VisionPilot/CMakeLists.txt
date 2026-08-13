@@ -86,8 +86,8 @@ message(STATUS "CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 #----------------------------------------------------------------------------------------------------------------------
 if(RCAR_TARGET_OS STREQUAL "linux" AND CMAKE_C_COMPILER_ID STREQUAL "ARMClang")
     add_compile_options(-Wall -Wextra -pedantic -Werror
-                        -Wno-sign-conversion)
-                        # -Wno-unused-variable)
+                        -Wno-sign-conversion
+                        -Wno-unused-variable)
 else()
     add_compile_options(-Wall -Wextra -pedantic -Werror)
 endif()
@@ -132,7 +132,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # App
-# add_subdirectory(app)     #TODO : reestablish previous app. for now a dummy app is created
+add_subdirectory(app)
 
 
 # Architecture
@@ -195,3 +195,15 @@ set(link_lib
 # DO NOT CHANGE ANYTHING BELOW THIS LINE, except you know what to do ;)
 #======================================================================================================================
 rcar_configure_application()
+
+
+if(TARGET vision_pilot_v4m)
+    configure_vision_pilot_app(vision_pilot_v4m)
+elseif(TARGET vision_pilot)
+    configure_vision_pilot_app(vision_pilot)
+else()
+    message(FATAL_ERROR
+        "rcar_configure_application() did not create the expected "
+        "vision_pilot_v4m or vision_pilot target"
+    )
+endif()
