@@ -56,16 +56,16 @@ std::vector<float> chw_01(const cv::Mat& bgr)
 
 }  // namespace
 
-void LatencyStats::update(double pre_, double visionpilot_, double wall_)
+void LatencyStats::update(double pre_, double visionpilot_)
 {
-    pre = pre_; visionpilot = visionpilot_; wall = wall_;
+    pre = pre_; visionpilot = visionpilot_;
 }
 
 void LatencyStats::print() const
 {
-    const double total = pre + wall;
-    VP_INFO("Latency  pre=%.1f ms  VisionPilot=%.1f ms  wall=%.1f ms  %.0f fps",
-            pre, visionpilot, wall, total > 0 ? 1000.0 / total : 0.0);
+    const double total = pre + visionpilot;
+    VP_INFO("Latency  pre=%.1f ms  VisionPilot=%.1f ms  %.0f fps",
+            pre, visionpilot, total > 0 ? 1000.0 / total : 0.0);
 }
 
 void LatencyStats::reset() { *this = {}; }
@@ -120,83 +120,69 @@ void InferencePipeline::set_H_resized(const cv::Mat& H, cv::Size raw_size)
             raw_size.width, raw_size.height, crop_top, sx, sy);
 }
 
-std::optional<InferenceFrameResult> InferencePipeline::process(const cv::Mat& warped,
-                                                               const cv::Mat& resized)
+std::optional<InferenceFrameResult>
+InferencePipeline::process(const cv::Mat& warped,
+                           const cv::Mat& resized)
 {
     using Clock = std::chrono::steady_clock;
-    using Ms    = std::chrono::duration<double, std::milli>;
-
-    // Two-frame buffer is warped (for AutoDrive only)
-    prev_frame_ = curr_frame_.empty() ? warped.clone() : curr_frame_;
-    curr_frame_ = warped.clone();
-    if (frame_buf_count_ < 1) frame_buf_count_ = 1;
-    else                       frame_buf_count_ = 2;
+    using Ms = std::chrono::duration<double, std::milli>;
 
     ++frame_count_;
-    if (frame_buf_count_ < 2) return std::nullopt;
 
-    // AutoSteer + AutoSpeed use resized if provided, else fall back to warped
-    const cv::Mat& as_input = (!resized.empty()) ? resized : warped;
+    const cv::Mat& current_resized = !resized.empty() ? resized : warped;
 
-    auto t0          = Clock::now();
-    auto prev_imn    = chw_imagenet(prev_frame_);
-    auto curr_imn    = chw_imagenet(curr_frame_);
-    auto curr_01_as  = chw_01(as_input);
-    auto curr_01_asp = curr_01_as;   // shared preprocessing (same image)
+    auto t0 = Clock::now();
+
+    // preprocess the current frame for AutoSteer / AutoSpeed
+    auto curr_warped_imn = chw_imagenet(warped);
+    auto curr_resized_01 = chw_01(current_resized);
+
     const double ms_pre = Ms(Clock::now() - t0).count();
 
-    auto t_wall = Clock::now();
+    // Primo frame: salviamo soltanto lo stato necessario ad AutoDrive.
+    if (prev_warped_imn_.empty()) {
+        prev_warped_imn_ = std::move(curr_warped_imn);
+        return std::nullopt;
+    }
 
-    //execute visionpilot model (monolithic, contains AutoDrive, AutoSteer, AutoSpeed internally)
-    auto f_visionpilot = std::async(std::launch::async, [&] {
-        auto t = Clock::now();
-        auto r = visionpilot_.infer(prev_imn.data(), curr_imn.data());
-        return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
-    });
+    auto t = Clock::now();
 
-    // auto f_steer = std::async(std::launch::async, [&] {
-    //     auto t = Clock::now();
-    //     auto r = auto_steer_.infer(curr_01_as.data());
-    //     return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
-    // });
-    // auto f_speed = std::async(std::launch::async, [&] {
-    //     auto t = Clock::now();
-    //     auto r = auto_speed_.infer(curr_01_asp.data());
-    //     return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
-    // });
+    //execute inference on the current frame and previous frame
+    auto result = visionpilot_.infer(
+        prev_warped_imn_.data(),
+        curr_warped_imn.data(),
+        curr_resized_01.data()
+    );
 
-    //retrieve the results from the paired futures (result, elapsed_time_ms)
+    const double ms_visionpilot = Ms(Clock::now() - t).count();
 
-    auto [res_visionpilot, ms_visionpilot] = f_visionpilot.get();
-    // auto [res_steer, ms_steer] = f_steer.get();
-    // auto [res_speed, ms_speed] = f_speed.get();
-    const double ms_wall = Ms(Clock::now() - t_wall).count();
+    //move the current frame to previous frame for the next iteration
+    prev_warped_imn_ = std::move(curr_warped_imn);
 
     InferenceFrameResult out;
-    out.frame_id   = frame_count_;
-    out.wall_ms    = ms_wall;
-    out.pre_ms     = ms_pre;
-    // out.ad_ms      = ms_drive;
-    // out.as_ms      = ms_steer;
-    // out.asp_ms     = ms_speed;
-    out.visionpilot_ms = ms_visionpilot;    //save the visionpilot inference time
-    out.visionpilot = res_visionpilot;      // contains AutoDrive, AutoSteer, AutoSpeed internally
-    // out.auto_drive = res_drive;
-    // out.auto_steer = res_steer;
-    // out.auto_speed = res_speed;
-    out.cipo       = long_fusion_.update(res_visionpilot.auto_drive, res_visionpilot.auto_speed, warped);
-    out.lateral    = lat_fusion_.update(res_visionpilot.auto_steer, res_visionpilot.auto_drive);
+    out.frame_id = frame_count_;
+    out.pre_ms = ms_pre;
+    out.visionpilot_ms = ms_visionpilot;
+    out.visionpilot = std::move(result);
 
-    //update the latency stats for this frame
-    stats_.update(ms_pre, ms_visionpilot, ms_wall);
+    out.cipo = long_fusion_.update(
+        out.visionpilot.auto_drive,
+        out.visionpilot.auto_speed,
+        warped
+    );
 
+    out.lateral = lat_fusion_.update(
+        out.visionpilot.auto_steer,
+        out.visionpilot.auto_drive
+    );
+
+    stats_.update(ms_pre, ms_visionpilot);
     return out;
 }
 
 void InferencePipeline::reset()
 {
-    prev_frame_.release();
-    curr_frame_.release();
+    prev_warped_imn_.clear();
     frame_buf_count_ = 0;
     frame_count_ = 0;
     stats_.reset();

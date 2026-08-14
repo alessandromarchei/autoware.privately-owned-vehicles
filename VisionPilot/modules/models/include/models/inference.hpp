@@ -9,7 +9,7 @@
 #include <optional>
 #include <string>
 #include <filesystem>
-
+#include <vector>
 
 namespace visionpilot::models {
 
@@ -26,7 +26,7 @@ struct Config {
 struct LatencyStats {
     double pre{0}, visionpilot{0}, wall{0};
 
-    void update(double pre_, double visionpilot_, double wall_);
+    void update(double pre_, double visionpilot_);
     void print() const;
     void reset();
 };
@@ -91,8 +91,7 @@ private:
     LatencyStats       stats_;
     uint64_t           frame_count_ = 0;
 
-    cv::Mat prev_frame_;
-    cv::Mat curr_frame_;
+    std::vector<float> prev_warped_imn_;
     int     frame_buf_count_ = 0;
 };
 

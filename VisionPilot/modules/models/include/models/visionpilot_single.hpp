@@ -21,8 +21,7 @@ public:
     // model_path — path to the VisionPilot .msgpack file
     VisionPilot(const std::string& model_path);
 
-    // prev_chw, curr_chw : float32 CHW buffers, CHW_SIZE elements each
-    visionpilot::common::VisionPilotOutput infer(const float* prev_chw, const float* curr_chw);
+    visionpilot::common::VisionPilotOutput infer(const float * prev_chw_warped, const float * curr_chw_warped, const float * resized_chw);
 
     visionpilot::common::AutoDriveOutput postprocess_autodrive(float * dist_normalized, float * curvature_raw, float * flag_logit);
 

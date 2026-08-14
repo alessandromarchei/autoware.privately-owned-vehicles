@@ -13,9 +13,15 @@ VisionPilot::VisionPilot(const std::string& model_path)
     //instantiate underlying v4m engine for this model
     engine_ = std::make_unique<engine::V4MEngine>(model_path);
 
-    if (engine_->num_inputs() != 2) {
+    /*
+        VISION PILOT INPUTS:
+        input[0] previous_frame [1, 3, 512, 1024]   (WARPED)
+        input[1] current_frame  [1, 3, 512, 1024]   (WARPED)
+        input[2] resized_frame  [1, 3, 512, 1024]   (RESIZED)
+    */
+    if (engine_->num_inputs() != 3) {
         throw std::runtime_error(
-            "VisionPilot expects exactly 2 model inputs"
+            "VisionPilot expects exactly 3 model inputs, got " + std::to_string(engine_->num_inputs())
         );
     }
 
@@ -28,26 +34,29 @@ VisionPilot::VisionPilot(const std::string& model_path)
     */
     if (engine_->num_outputs() != 6) {
         throw std::runtime_error(
-            "VisionPilot expects exactly 6 model outputs"
+            "VisionPilot expects exactly 6 model outputs, got " + std::to_string(engine_->num_outputs())
         );
     }
 
     VP_INFO("[VisionPilot] Created V4MEngine for model: %s\n", model_path.c_str());
 }
 
-visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_chw,const float* curr_chw)
+visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_chw_warped,const float* curr_chw_warped,const float* resized_chw)
 {
     const std::size_t expected_frame_bytes = CHW_SIZE * sizeof(float);
 
-    if (engine_->input_size(0) != expected_frame_bytes || engine_->input_size(1) != expected_frame_bytes) {
+    if (engine_->input_size(0) != expected_frame_bytes || engine_->input_size(1) != expected_frame_bytes || engine_->input_size(2) != expected_frame_bytes) {
         throw std::runtime_error(
             "VisionPilot input size mismatch"
         );
     }
 
-    std::memcpy(engine_->input_ptr(0), prev_chw, expected_frame_bytes);
+    //copy input data to engine buffers
+    std::memcpy(engine_->input_ptr(0), prev_chw_warped, expected_frame_bytes);
 
-    std::memcpy(engine_->input_ptr(1), curr_chw, expected_frame_bytes);
+    std::memcpy(engine_->input_ptr(1), curr_chw_warped, expected_frame_bytes);
+
+    std::memcpy(engine_->input_ptr(2), resized_chw, expected_frame_bytes);
 
     if (engine_->run() != 0) {
         throw std::runtime_error(

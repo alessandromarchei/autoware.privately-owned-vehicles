@@ -278,8 +278,8 @@ int main(int argc, char** argv)
         auto [ok, frame] = camera_interface->get_latest_frame();
         if (!ok || frame.empty())
         {
-            if (cfg.source.mode == SourceMode::Video &&
-                !cfg.source.video_loop) {
+            if (cfg.source.mode == SourceMode::Video || cfg.source.mode == SourceMode::Frames) {
+                VP_INFO("End of video/frames reached. Exiting.");
                 break;
             }
 
