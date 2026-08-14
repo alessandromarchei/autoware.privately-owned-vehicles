@@ -26,9 +26,7 @@ struct DebugView {
     uint64_t    frame_id   = 0;
     double      wall_ms    = 0;
     double      pre_ms     = 0;
-    double      ad_ms      = 0;
-    double      as_ms      = 0;
-    double      asp_ms     = 0;
+    double      visionpilot_ms = 0;
     std::string src_label;
 
     common::AutoDriveOutput       auto_drive;
@@ -48,11 +46,18 @@ inline DebugView debug_view_from(
     const std::string& wheel_dir)
 {
     return {
-        r.frame_id, r.wall_ms, r.pre_ms, r.ad_ms, r.as_ms, r.asp_ms,
+        r.frame_id,
+        r.wall_ms,
+        r.pre_ms,
+        r.visionpilot_ms,
         src_label,
-        r.auto_drive, r.auto_steer, r.auto_speed,
-        r.cipo, r.lateral,
-        {}, wheel_dir,
+        r.visionpilot.auto_drive,
+        r.visionpilot.auto_steer,
+        r.visionpilot.auto_speed,
+        r.cipo,
+        r.lateral,
+        {},
+        wheel_dir,
     };
 }
 

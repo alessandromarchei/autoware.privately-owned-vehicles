@@ -38,7 +38,7 @@ int V4MEngine::create_session(const std::string& model_path)
     // 1. Initialize OSAL
     // -------------------------------------------------------------------------
 
-    const auto osal_ret = R_OSAL_Initialize();
+    e_osal_return_t osal_ret = R_OSAL_Initialize();
 
     if (osal_ret != OSAL_RETURN_OK) {
         std::cerr
@@ -65,8 +65,27 @@ int V4MEngine::create_session(const std::string& model_path)
         return -1;
     }
 
+
     // -------------------------------------------------------------------------
-    // 3. Create execution framework
+    // 3. Load compiled HyCo network
+    // -------------------------------------------------------------------------
+
+    try {
+        network_ = std::make_unique<hycoah::Network>(model_path_.c_str());
+    }
+    catch (const std::exception& e) {
+        std::cerr
+            << "[V4MEngine] Failed to create Network: "
+            << e.what()
+            << std::endl;
+
+        cleanup();
+        return -1;
+    }
+
+
+    // -------------------------------------------------------------------------
+    // 4. Create execution framework
     // -------------------------------------------------------------------------
 
     exfwk_ = createExfwk(buffer_manager_);
@@ -82,42 +101,18 @@ int V4MEngine::create_session(const std::string& model_path)
 
     exfwk_initialized_ = true;
 
-    // -------------------------------------------------------------------------
-    // 4. Load compiled HyCo network
-    // -------------------------------------------------------------------------
-
-    try {
-        network_ = std::make_unique<hycoah::Network>(
-            model_path_.c_str()
-        );
-    }
-    catch (const std::exception& e) {
-        std::cerr
-            << "[V4MEngine] Failed to create Network: "
-            << e.what()
-            << std::endl;
-
-        cleanup();
-        return -1;
-    }
 
     // -------------------------------------------------------------------------
     // 5. Read model I/O descriptors
     // -------------------------------------------------------------------------
 
-    const auto& input_descs = network_->getInputDesc();
+    const std::vector<InputDesc>& input_descs = network_->getInputDesc();
 
-    const auto& output_descs = network_->getOutputDesc();
+    const std::vector<OutputDesc>& output_descs = network_->getOutputDesc();
 
-    std::cout
-        << "[V4MEngine] Model: "
-        << model_path_
-        << std::endl;
+    std::cout << "[V4MEngine] Model: " << model_path_ << std::endl;
 
-    std::cout
-        << "[V4MEngine] Inputs: "
-        << input_descs.size()
-        << std::endl;
+    std::cout << "[V4MEngine] Inputs: " << input_descs.size() << std::endl;
 
     for (std::size_t i = 0; i < input_descs.size(); ++i) {
         const auto& desc = input_descs[i];
@@ -189,27 +184,22 @@ int V4MEngine::create_session(const std::string& model_path)
     //   - physical buffer layout
     // -------------------------------------------------------------------------
 
-    std::unordered_map<
-        hycoah::PipelineId,
-        std::vector<hycoah::InputMemory>
-    > user_input_memories;
+    std::unordered_map<hycoah::PipelineId, std::vector<hycoah::InputMemory>> user_input_memories;
 
-    std::unordered_map<
-        hycoah::PipelineId,
-        std::vector<hycoah::OutputMemory>
-    > user_output_memories;
+    std::unordered_map<hycoah::PipelineId, std::vector<hycoah::OutputMemory>> user_output_memories;
+
+    //automatic allocation of input and output buffers for pipeline 0
+    user_input_memories[0] = {};
+    user_output_memories[0] = {};
+
 
     // -------------------------------------------------------------------------
     // 8. Configure ArtifactHelper
     // -------------------------------------------------------------------------
 
-    const auto config_ret = helper_.config(
-        std::vector<hycoah::Network>{*network_},
-        hycoah::st_hycoah_config_t{}
-    );
+    e_hycoah_return_t config_ret = helper_.config(std::vector<hycoah::Network>{*network_}, hycoah::st_hycoah_config_t{});
 
-    if (config_ret !=
-        hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
+    if (config_ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
 
         std::cerr
             << "[V4MEngine] ArtifactHelper config failed: "
@@ -226,12 +216,12 @@ int V4MEngine::create_session(const std::string& model_path)
     // Empty maps => automatic I/O buffer allocation.
     // -------------------------------------------------------------------------
 
-    const auto init_ret = helper_.init(
+    e_hycoah_return_t init_ret = helper_.init(
         *network_,
         buffer_manager_,
         exfwk_,
-        user_input_memories,
-        user_output_memories
+        {user_input_memories},
+        {user_output_memories}
     );
 
     if (init_ret !=
@@ -252,11 +242,9 @@ int V4MEngine::create_session(const std::string& model_path)
     // 10. Retrieve ACTUAL buffers allocated by ArtifactHelper
     // -------------------------------------------------------------------------
 
-    input_memories_ =
-        network_->getInputMemory(PIPELINE_ID);
+    input_memories_ = network_->getInputMemory(0);
 
-    output_memories_ =
-        network_->getOutputMemory(PIPELINE_ID);
+    output_memories_ = network_->getOutputMemory(0);
 
     if (input_memories_.size() != input_descs.size()) {
         std::cerr
@@ -280,9 +268,7 @@ int V4MEngine::create_session(const std::string& model_path)
         return -1;
     }
 
-    std::cout
-        << "[V4MEngine] I/O buffers allocated successfully"
-        << std::endl;
+    std::cout << "[V4MEngine] I/O buffers allocated successfully" << std::endl;
 
     for (std::size_t i = 0; i < input_memories_.size(); ++i) {
         const auto& mem = input_memories_[i];
@@ -318,7 +304,7 @@ int V4MEngine::create_session(const std::string& model_path)
 
     const auto job_ret = network_->addJobs(
         job_container_.get(),
-        PIPELINE_ID,
+        0,
         dependencies,
         job_ids_
     );
@@ -379,7 +365,7 @@ int V4MEngine::run()
     // CPU-written inputs -> hardware-visible data.
     auto ret = network_->syncIO(
         hycoah::e_sync_direction_t::H2D,
-        PIPELINE_ID
+        0
     );
 
     if (ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
@@ -411,7 +397,7 @@ int V4MEngine::run()
     // Hardware-written outputs -> CPU-visible data.
     ret = network_->syncIO(
         hycoah::e_sync_direction_t::D2H,
-        PIPELINE_ID
+        0
     );
 
     if (ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {

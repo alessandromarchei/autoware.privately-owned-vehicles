@@ -7,7 +7,7 @@ import cv2
 import numpy as np
 
 CANONICAL_WORLD_PTS = np.array(
-    [[15, 5, 1], [150, 5, 1], [15, -5, 1], [150, -5, 1]], dtype=np.float32
+    [[15, 5, 1], [150, 5, 1], [15, -5, 1], [150, -5, 1]], dtype=np.double
 )
 
 # DO NOT MODIFY! VisionPilot model-view homography (1024x512 pixel -> world). Zenseact Open Dataset
@@ -17,7 +17,7 @@ V = np.array(
         [0.00662758637, -0.000352940531, -3.33396502],
         [0.000120077371, -0.00411343505, 1.0],
     ],
-    dtype=np.float32,
+    dtype=np.double,
 )
 
 
@@ -53,7 +53,7 @@ def main() -> None:
     out = args.output
     out.parent.mkdir(parents=True, exist_ok=True)
     fs = cv2.FileStorage(str(out.resolve()), cv2.FILE_STORAGE_WRITE)
-    fs.write("C", C.astype(np.float32))
+    fs.write("C", C.astype(np.double))
     fs.release()
     print(f"Transformation C matrix saved to {out.resolve()}")
 

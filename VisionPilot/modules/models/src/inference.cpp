@@ -15,9 +15,9 @@ namespace visionpilot::models {
 
 namespace {
 
-constexpr int NET_W    = AutoDrive::NET_W;
-constexpr int NET_H    = AutoDrive::NET_H;
-constexpr int CHW_SIZE = AutoDrive::CHW_SIZE;
+constexpr int NET_W    = VisionPilot::NET_W;
+constexpr int NET_H    = VisionPilot::NET_H;
+constexpr int CHW_SIZE = VisionPilot::CHW_SIZE;
 
 constexpr float MEAN[3] = {0.485f, 0.456f, 0.406f};
 constexpr float STD[3]  = {0.229f, 0.224f, 0.225f};
@@ -53,39 +53,25 @@ std::vector<float> chw_01(const cv::Mat& bgr)
     return out;
 }
 
-std::string find_model(const std::string& bundle_name, const std::string& core = "core0") {
-    //const std::string local  = "modules/models/weights/" + filename;
-
-
-    //models are stored in modules/models/bundles/name_core0/name.msgpack
-    const std::string local  = "modules/models/bundles/" + bundle_name + "_" + core + "/" + bundle_name + ".msgpack";
-
-    if (std::filesystem::exists(local))  return local;
-
-    throw std::runtime_error("Config file not found: " + bundle_name + " (tried: " + local + ")");
-}
 
 }  // namespace
 
-void LatencyStats::update(double pre_, double ad_, double as_, double asp_, double wall_)
+void LatencyStats::update(double pre_, double visionpilot_, double wall_)
 {
-    pre = pre_; ad = ad_; as = as_; asp = asp_; wall = wall_;
+    pre = pre_; visionpilot = visionpilot_; wall = wall_;
 }
 
 void LatencyStats::print() const
 {
     const double total = pre + wall;
-    VP_INFO("Latency  pre=%.1f ms  AD=%.1f ms  AS=%.1f ms  ASp=%.1f ms  "
-            "parallel=%.1f ms  wall=%.1f ms  %.0f fps",
-            pre, ad, as, asp, wall, total, total > 0 ? 1000.0 / total : 0.0);
+    VP_INFO("Latency  pre=%.1f ms  VisionPilot=%.1f ms  wall=%.1f ms  %.0f fps",
+            pre, visionpilot, wall, total > 0 ? 1000.0 / total : 0.0);
 }
 
 void LatencyStats::reset() { *this = {}; }
 
 InferencePipeline::InferencePipeline(const Config& cfg)
-    : auto_drive_(cfg.auto_drive_model_path.empty() ? find_model("autodrive", cfg.core) : cfg.auto_drive_model_path)
-    , auto_steer_(cfg.auto_steer_model_path.empty() ? find_model("autosteer", cfg.core) : cfg.auto_steer_model_path)
-    , auto_speed_(cfg.auto_speed_model_path.empty() ? find_model("autospeed", cfg.core) : cfg.auto_speed_model_path)
+    : visionpilot_(cfg.visionpilot_model_path)
 {
     fusion::LongitudinalFusion::Config lc;
     lc.debug           = cfg.fusion_debug;
@@ -160,41 +146,50 @@ std::optional<InferenceFrameResult> InferencePipeline::process(const cv::Mat& wa
     const double ms_pre = Ms(Clock::now() - t0).count();
 
     auto t_wall = Clock::now();
-    auto f_drive = std::async(std::launch::async, [&] {
+
+    //execute visionpilot model (monolithic, contains AutoDrive, AutoSteer, AutoSpeed internally)
+    auto f_visionpilot = std::async(std::launch::async, [&] {
         auto t = Clock::now();
-        auto r = auto_drive_.infer(prev_imn.data(), curr_imn.data());
-        return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
-    });
-    auto f_steer = std::async(std::launch::async, [&] {
-        auto t = Clock::now();
-        auto r = auto_steer_.infer(curr_01_as.data());
-        return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
-    });
-    auto f_speed = std::async(std::launch::async, [&] {
-        auto t = Clock::now();
-        auto r = auto_speed_.infer(curr_01_asp.data());
+        auto r = visionpilot_.infer(prev_imn.data(), curr_imn.data());
         return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
     });
 
-    auto [res_drive, ms_drive] = f_drive.get();
-    auto [res_steer, ms_steer] = f_steer.get();
-    auto [res_speed, ms_speed] = f_speed.get();
+    // auto f_steer = std::async(std::launch::async, [&] {
+    //     auto t = Clock::now();
+    //     auto r = auto_steer_.infer(curr_01_as.data());
+    //     return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
+    // });
+    // auto f_speed = std::async(std::launch::async, [&] {
+    //     auto t = Clock::now();
+    //     auto r = auto_speed_.infer(curr_01_asp.data());
+    //     return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
+    // });
+
+    //retrieve the results from the paired futures (result, elapsed_time_ms)
+
+    auto [res_visionpilot, ms_visionpilot] = f_visionpilot.get();
+    // auto [res_steer, ms_steer] = f_steer.get();
+    // auto [res_speed, ms_speed] = f_speed.get();
     const double ms_wall = Ms(Clock::now() - t_wall).count();
 
     InferenceFrameResult out;
     out.frame_id   = frame_count_;
     out.wall_ms    = ms_wall;
     out.pre_ms     = ms_pre;
-    out.ad_ms      = ms_drive;
-    out.as_ms      = ms_steer;
-    out.asp_ms     = ms_speed;
-    out.auto_drive = res_drive;
-    out.auto_steer = res_steer;
-    out.auto_speed = res_speed;
-    out.cipo       = long_fusion_.update(res_drive, res_speed, warped);
-    out.lateral    = lat_fusion_.update(res_steer, res_drive);
+    // out.ad_ms      = ms_drive;
+    // out.as_ms      = ms_steer;
+    // out.asp_ms     = ms_speed;
+    out.visionpilot_ms = ms_visionpilot;    //save the visionpilot inference time
+    out.visionpilot = res_visionpilot;      // contains AutoDrive, AutoSteer, AutoSpeed internally
+    // out.auto_drive = res_drive;
+    // out.auto_steer = res_steer;
+    // out.auto_speed = res_speed;
+    out.cipo       = long_fusion_.update(res_visionpilot.auto_drive, res_visionpilot.auto_speed, warped);
+    out.lateral    = lat_fusion_.update(res_visionpilot.auto_steer, res_visionpilot.auto_drive);
 
-    stats_.update(ms_pre, ms_drive, ms_steer, ms_speed, ms_wall);
+    //update the latency stats for this frame
+    stats_.update(ms_pre, ms_visionpilot, ms_wall);
+
     return out;
 }
 

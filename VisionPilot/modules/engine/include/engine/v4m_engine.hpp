@@ -98,7 +98,7 @@ public:
     }
 
 private:
-    static constexpr hycoah::PipelineId PIPELINE_ID = 0;
+    // static constexpr hycoah::PipelineId PIPELINE_ID = 0;
 
     void cleanup() noexcept;
 

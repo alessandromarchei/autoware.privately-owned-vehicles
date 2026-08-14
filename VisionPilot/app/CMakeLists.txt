@@ -71,4 +71,10 @@ function(configure_vision_pilot_app target_name)
         DESTINATION share/tests
     )
 
+    #install execution script
+    install(
+        FILES "${CMAKE_SOURCE_DIR}/scripts/run_vision_pilot.sh"
+        DESTINATION .
+    )
+
 endfunction()

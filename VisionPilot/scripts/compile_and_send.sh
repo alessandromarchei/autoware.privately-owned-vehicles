@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 PROJECT_ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
 BUILD_DIR="${PROJECT_ROOT}/build"
-DEPLOY_DIR="${BUILD_DIR}/deploy"
+TARGET_DIR="${BUILD_DIR}/target"
 REMOTE="v4m"
 REMOTE_DIR="/home/root/vision_pilot"
 
@@ -32,7 +32,7 @@ install_msgpack "${REACTION_MODEL_DIR}/dummyvisionpilotmerged/tvm-v4m/tvm_bundle
 
 echo "==> Configuring build"
 cmake -B build -G "Unix Makefiles" \
-    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
     -DRCAR_SOC=v4m \
     -DRCAR_TARGET_OS=LINUX \
@@ -45,11 +45,16 @@ echo "==> Building VisionPilot"
 cmake --build "${BUILD_DIR}" --parallel 16
 
 echo "==> Preparing deployment directory"
-# rm -rf -- "${DEPLOY_DIR}"
-cmake --install "${BUILD_DIR}" --prefix "${DEPLOY_DIR}"
+# rm -rf -- "${TARGET_DIR}"
+cmake --install "${BUILD_DIR}" --prefix "${TARGET_DIR}"
 
-echo "==> Copying deployment to V4M"
-scp -r "${DEPLOY_DIR}/"* "${REMOTE}:${REMOTE_DIR}/"
+echo "==> Synchronizing deployment to V4M"
+
+rsync -az \
+    --info=progress2 \
+    --exclude='share/tests/*/frames/***' \
+    "${TARGET_DIR}/" \
+    "${REMOTE}:${REMOTE_DIR}/"
 
 echo "==> Deployment completed successfully"
 echo "    ${REMOTE}:${REMOTE_DIR}"

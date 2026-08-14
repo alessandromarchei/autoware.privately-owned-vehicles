@@ -58,6 +58,15 @@ struct AutoSteerOutput {
     bool                   valid = false;
 };
 
+//monolithic model output struct
+struct VisionPilotOutput {
+    AutoDriveOutput auto_drive;
+    AutoSpeedOutput auto_speed;
+    AutoSteerOutput auto_steer;
+    bool valid = false;
+
+};
+
 }
 
 #endif //VISIONPILOT_MODELS_HPP

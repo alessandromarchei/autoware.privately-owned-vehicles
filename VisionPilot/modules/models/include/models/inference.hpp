@@ -1,11 +1,8 @@
 #pragma once
 
-#include "auto_drive.hpp"
 #include <fusion/lateral_fusion.hpp>
 #include <fusion/longitudinal_fusion.hpp>
-#include <models/auto_drive.hpp>
-#include <models/auto_steer.hpp>
-#include <models/auto_speed.hpp>
+#include <models/visionpilot_single.hpp>
 #include <opencv2/core.hpp>
 
 #include <cstdint>
@@ -20,18 +17,16 @@ struct Config {
     std::string precision    = "fp32";
     std::string core         = "core0";
 
-    std::string auto_drive_model_path;
-    std::string auto_steer_model_path;
-    std::string auto_speed_model_path;
+    std::string visionpilot_model_path;
     
     bool        fusion_debug = false;
     float       cte_bias_m   = 0.0f;  // camera mounting offset [m] — subtracted from raw CTE before filter
 };
 
 struct LatencyStats {
-    double pre{0}, ad{0}, as{0}, asp{0}, wall{0};
+    double pre{0}, visionpilot{0}, wall{0};
 
-    void update(double pre_, double ad_, double as_, double asp_, double wall_);
+    void update(double pre_, double visionpilot_, double wall_);
     void print() const;
     void reset();
 };
@@ -40,13 +35,15 @@ struct InferenceFrameResult {
     uint64_t    frame_id = 0;
     double      wall_ms  = 0;
     double      pre_ms   = 0;
-    double      ad_ms    = 0;
-    double      as_ms    = 0;
-    double      asp_ms   = 0;
+    // double      ad_ms    = 0;
+    // double      as_ms    = 0;
+    // double      asp_ms   = 0;
+    double      visionpilot_ms = 0;
 
-    common::AutoDriveOutput              auto_drive;
-    common::AutoSteerOutput              auto_steer;
-    common::AutoSpeedOutput              auto_speed;
+    common::VisionPilotOutput              visionpilot;
+    // common::AutoDriveOutput              auto_drive;
+    // common::AutoSteerOutput              auto_steer;
+    // common::AutoSpeedOutput              auto_speed;
     fusion::CIPOFusionEstimate   cipo;
     fusion::LateralFusionEstimate  lateral;
 };
@@ -85,9 +82,10 @@ public:
 private:
     cv::Mat H_resized_;
     cv::Mat H_world2resized_;
-    models::AutoDrive          auto_drive_;
-    models::AutoSteer          auto_steer_;
-    models::AutoSpeed          auto_speed_;
+    // models::AutoDrive          auto_drive_;
+    // models::AutoSteer          auto_steer_;
+    // models::AutoSpeed          auto_speed_;
+    models::VisionPilot          visionpilot_;
     fusion::LongitudinalFusion long_fusion_;
     fusion::LateralFusion      lat_fusion_;
     LatencyStats       stats_;
