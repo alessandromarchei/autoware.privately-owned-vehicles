@@ -123,6 +123,8 @@ add_subdirectory(modules/safety_guardian/planning)
 add_subdirectory(modules/sensing/vehicle_interface)
 add_subdirectory(modules/sensing/camera_interface)
 
+add_subdirectory(modules/middleware_interfaces/tcpip_client)
+
 # add_subdirectory(modules/visualization)   //not needed for now
 
 add_subdirectory(modules/debug)
@@ -162,6 +164,7 @@ include(
 set(vision_pilot_libraries
     config           # VisionPilotConfig, load_vision_pilot_config
     logging          # VP_INFO / VP_WARN / VP_ERROR
+    tcpip_client     # TCP/IP client
     common           # Common module
     engine           # OnnxEngine
     models           # AutoDrive, AutoSteer, AutoSpeed
