@@ -166,7 +166,7 @@ set(vision_pilot_libraries
     logging          # VP_INFO / VP_WARN / VP_ERROR
     tcpip_client     # TCP/IP client
     common           # Common module
-    engine           # OnnxEngine
+    engine           # V4MEngine
     models           # AutoDrive, AutoSteer, AutoSpeed
     fusion           # LongitudinalFusion, LateralFusion
     planning         # Planner

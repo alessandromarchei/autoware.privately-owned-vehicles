@@ -207,6 +207,7 @@ bool TCPClient::receive_frame(cv::Mat& frame,
     frame = view.clone();
     received.frame_id = header.sequence;
     received.timestamp_ns = metadata.timestamp_ns;
+    received.vehicle_speed_ms = metadata.vehicle_speed_ms;
     last_error_.clear();
     return true;
 }

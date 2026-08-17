@@ -38,6 +38,7 @@ struct ImageMetadata {
     std::uint32_t stride{0};
     ImageEncoding encoding{ImageEncoding::Bgr8};
     std::uint32_t data_size{0};
+    float vehicle_speed_ms{0.0F};
 };
 
 struct VisionResult {
@@ -58,6 +59,7 @@ struct VisionResult {
 struct ReceivedFrame {
     std::uint64_t frame_id{0};
     std::uint64_t timestamp_ns{0};
+    float vehicle_speed_ms{0.0F};
 };
 
 } // namespace visionpilot::tcp

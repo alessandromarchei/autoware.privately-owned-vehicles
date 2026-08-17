@@ -49,4 +49,7 @@ private:
     std::string last_error_;
 };
 
+// Compatibility name for the shorter class name used by VisionPilot.
+using TCPClient = TCPClient;
+
 } // namespace visionpilot::tcp

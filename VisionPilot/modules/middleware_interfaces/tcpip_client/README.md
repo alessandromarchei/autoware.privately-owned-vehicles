@@ -34,7 +34,9 @@ On Predator:
 
 ```bash
 python3 -m pip install opencv-python
-python3 python/image_server.py /path/to/images --bind 10.0.0.1 --port 5000
+python3 python/image_server.py /path/to/images \
+  --speed-file /path/to/frame_speed.txt \
+  --bind 10.0.0.1 --port 5000
 ```
 
 On V4M:
@@ -42,6 +44,10 @@ On V4M:
 ```bash
 ./v4m_image_client 10.0.0.1 5000
 ```
+
+The speed file must contain exactly one speed in m/s for every sorted image.
+The speed is transmitted inside the same Image message and is available as
+`ReceivedFrame::vehicle_speed_ms`.
 
 The Python server sends one frame and waits for its corresponding result, so
 the test cannot accumulate a frame backlog.
@@ -71,6 +77,7 @@ cv::Mat frame;
 visionpilot::tcp::ReceivedFrame rx;
 if (source.receive_frame(frame, rx, 5000)) {
     // pipeline.process(frame, ...)
+    const float vehicle_speed_ms = rx.vehicle_speed_ms;
     visionpilot::tcp::VisionResult result{};
     result.frame_id = rx.frame_id;
     result.timestamp_ns = rx.timestamp_ns;

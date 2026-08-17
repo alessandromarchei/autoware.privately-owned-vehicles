@@ -92,11 +92,11 @@ bool file_ok(const std::string& p) { return !p.empty() && std::filesystem::is_re
 
 SourceMode parse_source_mode(const std::string& v)
 {
-    if (v=="0"||v=="ros2")  return SourceMode::Ros2;
     if (v=="1"||v=="v4l2")  return SourceMode::V4l2;
     if (v=="2"||v=="video") return SourceMode::Video;
     if (v=="3"||v=="frames") return SourceMode::Frames;
-    throw std::runtime_error("Invalid source.mode: '" + v + "'. Use video|ros2|v4l2|frames (or 0/1/2/3)");
+    if (v=="4"||v=="tcpip_frames") return SourceMode::TCPIP_Frames;
+    throw std::runtime_error("Invalid source.mode: '" + v + "'. Use video|v4l2|frames|tcpip_frames (or 0/1/2/3/4)");
 }
 
 std::string source_label(const SourceConfig& source)
@@ -104,8 +104,8 @@ std::string source_label(const SourceConfig& source)
     switch (source.mode) {
     case SourceMode::Video: return "video";
     case SourceMode::V4l2:  return source.v4l2_device;
-    case SourceMode::Ros2:  return source.input_camera_topic;
     case SourceMode::Frames: return "frames";
+    case SourceMode::TCPIP_Frames: return "tcpip_frames";
     default: return "unknown";
     }
     return {};

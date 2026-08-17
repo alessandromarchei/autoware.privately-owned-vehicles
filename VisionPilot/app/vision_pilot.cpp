@@ -20,7 +20,7 @@
 #include "camera_interface/v4l2_camera_interface.hpp"
 #include "camera_interface/file_interface.hpp"
 #include "vehicle_interface/file_interface.hpp"
-
+#include <tcp/tcp_frame_client.hpp>
 
 namespace ve = visionpilot::engine;
 namespace vm = visionpilot::models;
@@ -38,6 +38,9 @@ int main(int argc, char** argv)
     std::string test_video_path;
     std::string test_vehicle_speed_path;
     std::string test_frames_path;
+
+    std::string tcp_server_address = "10.0.0.1";
+    std::uint16_t tcp_server_port = 5000;
 
     SourceMode source_mode = SourceMode::Frames;
 
@@ -116,7 +119,7 @@ int main(int argc, char** argv)
         {
             if (i + 1 >= argc)
             {
-                VP_ERROR("Missing argument after --source-mode. Specify source mode: video|ros2|v4l2|frames");
+                VP_ERROR("Missing argument after --source-mode. Specify source mode: video|v4l2|frames|tcpip_frames");
                 return 1;
             }
 
@@ -130,6 +133,35 @@ int main(int argc, char** argv)
                 VP_ERROR("Invalid source mode: %s", e.what());
                 return 1;
             }
+        }
+        else if (arg == "--tcp-server")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --tcp-server");
+                return 1;
+            }
+
+            tcp_server_address = argv[++i];
+        }
+        else if (arg == "--tcp-port")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --tcp-port");
+                return 1;
+            }
+
+            const int port = std::stoi(argv[++i]);
+
+            if (port <= 0 || port > 65535)
+            {
+                VP_ERROR("Invalid TCP port: %d", port);
+                return 1;
+            }
+
+            tcp_server_port =
+                static_cast<std::uint16_t>(port);
         }
         else
         {
@@ -179,6 +211,7 @@ int main(int argc, char** argv)
 
     std::shared_ptr<CameraInterface> camera_interface;
     std::shared_ptr<VehicleInterface> vehicle_interface;
+    std::unique_ptr<visionpilot::tcp::TCPClient> tcp_client;
 
     ImagePreprocessor preprocessor;
 
@@ -221,6 +254,24 @@ int main(int argc, char** argv)
             std::make_shared<FileInterface>(
                 cfg.source.input_vehicle_speed);
     }
+    else if (cfg.source.mode == SourceMode::TCPIP_Frames)
+    {
+        VP_INFO("Using TCP/IP frame source mode");
+        VP_INFO("TCP server: %s:%u", tcp_server_address.c_str(),static_cast<unsigned>(tcp_server_port));
+
+        tcp_client = std::make_unique<visionpilot::tcp::TCPClient>();
+
+        if (!tcp_client->connect_to(tcp_server_address, tcp_server_port, 5000))
+        {
+            VP_ERROR( "Cannot connect to TCP server %s:%u: %s",tcp_server_address.c_str(),
+                static_cast<unsigned>(tcp_server_port),
+                tcp_client->last_error().c_str());
+
+            return 1;
+        }
+
+        VP_INFO("Connected to TCP image server");
+    }
     else
     {
         VP_INFO("Using live source mode: %s", source_label(cfg.source).c_str());
@@ -257,14 +308,32 @@ int main(int argc, char** argv)
         VP_INFO("[Viz] Production mode — clean HUD");
     }
 
-    // ── Initialize camera interface ───────────────────────────────────────────
+    // ── Initialize camera interface or TCPIP Client interface ──────────────────────────────────
 
-    if (!camera_interface || !camera_interface->is_device_open())
+    if (cfg.source.mode == SourceMode::TCPIP_Frames)
     {
-        VP_ERROR("Cannot open frame source");
-        return 1;
+        if (!tcp_client ||
+            !tcp_client->is_connected())
+        {
+            VP_ERROR("TCP client is not connected");
+            return 1;
+        }
     }
+    else
+    {
+        if (!camera_interface ||
+            !camera_interface->is_device_open())
+        {
+            VP_ERROR("Cannot open frame source");
+            return 1;
+        }
 
+        if (!vehicle_interface)
+        {
+            VP_ERROR("Vehicle interface is not available");
+            return 1;
+        }
+    }
 
     const cv::Size net_size(vm::AutoDrive::NET_W, vm::AutoDrive::NET_H);
     cv::Mat frame, warped, resized;
@@ -273,13 +342,71 @@ int main(int argc, char** argv)
 
     VP_INFO("Starting main loop. Press Ctrl+C to exit.");
 
+
+    std::uint64_t current_frame_id = 0;
+    std::uint64_t current_timestamp_ns = 0;
+    double current_ego_speed_ms = 0.0;
+
+
     while (true)
     {
-        auto [ok, frame] = camera_interface->get_latest_frame();
+        bool ok = false;
+
+        if (cfg.source.mode == SourceMode::TCPIP_Frames)
+        {
+            visionpilot::tcp::ReceivedFrame received{};
+
+            ok = tcp_client->receive_frame(frame,received,10000);
+
+            if (!ok)
+            {
+                VP_ERROR("TCP frame reception failed: %s", tcp_client->last_error().c_str());
+
+                // La ricezione fallita chiude la socket.
+                // Prova a riconnetterti al server Python.
+                while (!tcp_client->reconnect(5000))
+                {
+                    VP_ERROR("TCP reconnect failed: %s", tcp_client->last_error().c_str());
+
+                    std::this_thread::sleep_for(std::chrono::seconds(1));
+                }
+
+                VP_INFO("TCP connection restored");
+                continue;
+            }
+
+            current_frame_id = received.frame_id;
+
+            current_timestamp_ns = received.timestamp_ns;
+
+            current_ego_speed_ms = static_cast<double>(received.vehicle_speed_ms);
+
+            VP_INFO("TCP frame=%llu speed=%.3f m/s size=%dx%d", static_cast<unsigned long long>(current_frame_id),
+                current_ego_speed_ms,
+                frame.cols,
+                frame.rows);
+        }
+        else
+        {
+            auto capture = camera_interface->get_latest_frame();
+
+            //retrieve data from the tuple
+            ok = std::get<0>(capture);
+            frame = std::move(std::get<1>(capture));
+
+            //retrieve speed from vehicle interface only if frame is valid
+            if (ok && !frame.empty())
+            {
+                current_ego_speed_ms = vehicle_interface->read();
+            }
+        }
+
         if (!ok || frame.empty())
         {
-            if (cfg.source.mode == SourceMode::Video || cfg.source.mode == SourceMode::Frames) {
+            if (cfg.source.mode == SourceMode::Video || cfg.source.mode == SourceMode::Frames)
+            {
                 VP_INFO("End of video/frames reached. Exiting.");
+
                 break;
             }
 
@@ -287,6 +414,7 @@ int main(int argc, char** argv)
 
             continue;
         }
+
 
         preprocessor.preprocess(frame, warped, resized, net_size);
         cv::Size frame_size = frame.size();
@@ -305,7 +433,6 @@ int main(int argc, char** argv)
         {
             pipeline.latency().print();
 
-            const double ego_v = vehicle_interface->read();
             const double cte = r->lateral.cte_m;
             const double epsi = r->lateral.yaw_rad;
             const double kappa = r->lateral.curvature;
@@ -320,7 +447,7 @@ int main(int argc, char** argv)
             const double raw_cte = r->lateral.path_valid
                                        ? static_cast<double>(r->lateral.raw_cte_m)
                                        : cte;
-            const Plan plan = planner.compute_plan(cte, epsi, kappa, ego_v, has_cipo, cipo_v, cipo_dist);
+            const Plan plan = planner.compute_plan(cte, epsi, kappa, current_ego_speed_ms, has_cipo, cipo_v, cipo_dist);
 
             VP_INFO(
                 "plan: tyre=%.4f rad  accel=%.3f m/s²  |  cte=%.2fm(raw=%.2fm)  |  cipo=%s  dist=%.1f m  vel=%+.2f m/s",
@@ -332,9 +459,36 @@ int main(int argc, char** argv)
                 cipo_dist,
                 r->cipo.velocity_ms);
 
-            vehicle_interface->write(
-                plan.steering.empty() ? 0.0 : plan.steering[0],
-                plan.acceleration);
+            //send data to TCP server if in TCPIP_Frames mode, otherwise send to vehicle interface
+            if (cfg.source.mode == SourceMode::TCPIP_Frames)
+            {
+                visionpilot::tcp::VisionResult tcp_result{};
+
+                tcp_result.frame_id = current_frame_id;
+                tcp_result.timestamp_ns = current_timestamp_ns;
+                tcp_result.steering_rad = static_cast<float>(plan.steering.empty() ? 0.0 : plan.steering[0]);
+                tcp_result.acceleration_ms2 = static_cast<float>(plan.acceleration);
+                tcp_result.cte_m = static_cast<float>(cte);
+                tcp_result.yaw_rad = static_cast<float>(epsi);
+                tcp_result.curvature_1pm = static_cast<float>(kappa);
+                tcp_result.cipo_distance_m = static_cast<float>(cipo_dist);
+                tcp_result.cipo_velocity_ms = static_cast<float>(r->cipo.velocity_ms);
+                tcp_result.cipo_valid = has_cipo;
+                tcp_result.path_valid = r->lateral.path_valid;
+
+                //send to TCP server
+                if (!tcp_client->send_result(tcp_result))
+                {
+                    VP_ERROR("Cannot send result for frame %llu: %s",static_cast<unsigned long long>(
+                            current_frame_id),
+                        tcp_client->last_error().c_str());
+                }
+            }
+            else
+            {
+                vehicle_interface->write( plan.steering.empty() ? 0.0 : plan.steering[0], plan.acceleration);
+            }
+
 
         }
 

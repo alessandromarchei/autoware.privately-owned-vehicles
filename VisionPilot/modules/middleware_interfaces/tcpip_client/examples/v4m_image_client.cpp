@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     const auto port = static_cast<std::uint16_t>(
         argc > 2 ? std::stoi(argv[2]) : 5000);
 
-    visionpilot::tcp::TCPClient client;
+    visionpilot::tcp::TcpFrameClient client;
     if (!client.connect_to(address, port, 5000)) {
         std::cerr << "Connection failed: " << client.last_error() << '\n';
         return 1;
@@ -35,6 +35,7 @@ int main(int argc, char** argv)
         std::cout << "frame=" << received.frame_id
                   << " size=" << frame.cols << 'x' << frame.rows
                   << " channels=" << frame.channels()
+                  << " vehicle_speed_ms=" << received.vehicle_speed_ms
                   << " receive_ms=" << receive_ms << '\n';
 
         visionpilot::tcp::VisionResult result{};

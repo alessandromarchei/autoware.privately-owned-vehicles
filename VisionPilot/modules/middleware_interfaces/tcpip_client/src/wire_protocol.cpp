@@ -59,6 +59,15 @@ std::uint64_t get_u64(const std::uint8_t* in)
     return swap_u64(value);
 }
 
+float get_f32(const std::uint8_t* in)
+{
+    const std::uint32_t bits = get_u32(in);
+    float value;
+    static_assert(sizeof(bits) == sizeof(value));
+    std::memcpy(&value, &bits, sizeof(value));
+    return value;
+}
+
 void put_f32(std::uint8_t* out, float value)
 {
     std::uint32_t bits;
@@ -147,6 +156,7 @@ bool decode_image_metadata(const std::uint8_t* wire, ImageMetadata& metadata)
     metadata.stride = get_u32(wire + 16);
     metadata.encoding = static_cast<ImageEncoding>(get_u16(wire + 20));
     metadata.data_size = get_u32(wire + 24);
+    metadata.vehicle_speed_ms = get_f32(wire + 28);
     return true;
 }
 
