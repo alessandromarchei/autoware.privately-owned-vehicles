@@ -1,4 +1,4 @@
-#include "wire_protocol.hpp"
+#include <tcp/wire_protocol.hpp>
 
 #include <algorithm>
 #include <cerrno>
@@ -78,37 +78,51 @@ void put_f32(std::uint8_t* out, float value)
 
 } // namespace
 
-bool send_all(int fd, const void* data, std::size_t size)
+bool send_all(
+    int socket,
+    const void* data,
+    std::size_t size)
 {
-    const auto* bytes = static_cast<const std::uint8_t*>(data);
-    std::size_t sent = 0;
-    while (sent < size) {
-        const ssize_t result = ::send(fd, bytes + sent, size - sent, MSG_NOSIGNAL);
-        if (result > 0) {
-            sent += static_cast<std::size_t>(result);
-        } else if (result < 0 && errno == EINTR) {
-            continue;
-        } else {
+    const auto* current =
+        static_cast<const std::uint8_t*>(data);
+
+    while (size > 0)
+    {
+        const ssize_t sent = ::send(
+            socket,
+            current,
+            size,
+            MSG_NOSIGNAL);
+
+        if (sent <= 0)
             return false;
-        }
+
+        current += sent;
+        size -= static_cast<std::size_t>(sent);
     }
+
     return true;
 }
 
-bool recv_all(int fd, void* data, std::size_t size)
+bool recv_all(
+    int socket,
+    void* data,
+    std::size_t size)
 {
-    auto* bytes = static_cast<std::uint8_t*>(data);
-    std::size_t received = 0;
-    while (received < size) {
-        const ssize_t result = ::recv(fd, bytes + received, size - received, 0);
-        if (result > 0) {
-            received += static_cast<std::size_t>(result);
-        } else if (result < 0 && errno == EINTR) {
-            continue;
-        } else {
+    auto* current = static_cast<std::uint8_t*>(data);
+
+    while (size > 0)
+    {
+        const ssize_t received =
+            ::recv(socket, current, size, 0);
+
+        if (received <= 0)
             return false;
-        }
+
+        current += received;
+        size -= static_cast<std::size_t>(received);
     }
+
     return true;
 }
 
@@ -164,19 +178,24 @@ std::array<std::uint8_t, WIRE_RESULT_SIZE>
 encode_result(const VisionResult& result)
 {
     std::array<std::uint8_t, WIRE_RESULT_SIZE> wire{};
-    put_u64(wire.data(), result.timestamp_ns);
-    put_f32(wire.data() + 8, result.steering_rad);
-    put_f32(wire.data() + 12, result.acceleration_ms2);
-    put_f32(wire.data() + 16, result.cte_m);
-    put_f32(wire.data() + 20, result.yaw_rad);
-    put_f32(wire.data() + 24, result.curvature_1pm);
-    put_f32(wire.data() + 28, result.cipo_distance_m);
-    put_f32(wire.data() + 32, result.cipo_velocity_ms);
-    put_f32(wire.data() + 36, result.inference_ms);
-    std::uint32_t flags = 0;
-    if (result.cipo_valid) flags |= 1U;
-    if (result.path_valid) flags |= 2U;
-    put_u32(wire.data() + 40, flags);
+
+    put_u64(wire.data() + 0, result.frame_id);
+    put_u64(wire.data() + 8, result.timestamp_ns);
+
+    put_f32(wire.data() + 16, result.steering_rad);
+    put_f32(wire.data() + 20, result.acceleration_ms2);
+    put_f32(wire.data() + 24, result.cte_m);
+    put_f32(wire.data() + 28, result.yaw_rad);
+    put_f32(wire.data() + 32, result.curvature_1pm);
+    put_f32(wire.data() + 36, result.cipo_distance_m);
+    put_f32(wire.data() + 40, result.cipo_velocity_ms);
+    put_f32(wire.data() + 44, result.inference_ms);
+
+    wire[48] = result.cipo_valid ? 1U : 0U;
+    wire[49] = result.path_valid ? 1U : 0U;
+
+    // wire[50] e wire[51] rimangono reserved = 0.
+
     return wire;
 }
 

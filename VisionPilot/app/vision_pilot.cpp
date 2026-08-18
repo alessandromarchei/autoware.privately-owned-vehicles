@@ -40,7 +40,8 @@ int main(int argc, char** argv)
     std::string test_frames_path;
 
     std::string tcp_server_address = "10.0.0.1";
-    std::uint16_t tcp_server_port = 5000;
+    std::uint16_t tcp_frame_port = 8080;
+    std::uint16_t tcp_result_port = 8081;
 
     SourceMode source_mode = SourceMode::Frames;
 
@@ -144,11 +145,11 @@ int main(int argc, char** argv)
 
             tcp_server_address = argv[++i];
         }
-        else if (arg == "--tcp-port")
+        else if (arg == "--tcp-frame-port")
         {
             if (i + 1 >= argc)
             {
-                VP_ERROR("Missing argument after --tcp-port");
+                VP_ERROR("Missing argument after --tcp-frame-port");
                 return 1;
             }
 
@@ -156,11 +157,30 @@ int main(int argc, char** argv)
 
             if (port <= 0 || port > 65535)
             {
-                VP_ERROR("Invalid TCP port: %d", port);
+                VP_ERROR("Invalid TCP frame port: %d", port);
                 return 1;
             }
 
-            tcp_server_port =
+            tcp_frame_port =
+                static_cast<std::uint16_t>(port);
+        }
+        else if (arg == "--tcp-result-port")
+        {
+            if (i + 1 >= argc)
+            {
+                VP_ERROR("Missing argument after --tcp-result-port");
+                return 1;
+            }
+
+            const int port = std::stoi(argv[++i]);
+
+            if (port <= 0 || port > 65535)
+            {
+                VP_ERROR("Invalid TCP result port: %d", port);
+                return 1;
+            }
+
+            tcp_result_port =
                 static_cast<std::uint16_t>(port);
         }
         else
@@ -255,22 +275,35 @@ int main(int argc, char** argv)
                 cfg.source.input_vehicle_speed);
     }
     else if (cfg.source.mode == SourceMode::TCPIP_Frames)
-    {
-        VP_INFO("Using TCP/IP frame source mode");
-        VP_INFO("TCP server: %s:%u", tcp_server_address.c_str(),static_cast<unsigned>(tcp_server_port));
+    {   
+        VP_INFO(
+            "TCP frame server: %s:%u",
+            tcp_server_address.c_str(),
+            static_cast<unsigned>(tcp_frame_port));
 
-        tcp_client = std::make_unique<visionpilot::tcp::TCPClient>();
+        VP_INFO(
+            "TCP result server: %s:%u",
+            tcp_server_address.c_str(),
+            static_cast<unsigned>(tcp_result_port));
 
-        if (!tcp_client->connect_to(tcp_server_address, tcp_server_port, 5000))
+        tcp_client =
+            std::make_unique<visionpilot::tcp::TCPClient>();
+
+        if (!tcp_client->connect_to(
+                tcp_server_address,
+                tcp_frame_port,
+                tcp_result_port,
+                5000))
         {
-            VP_ERROR( "Cannot connect to TCP server %s:%u: %s",tcp_server_address.c_str(),
-                static_cast<unsigned>(tcp_server_port),
+            VP_ERROR(
+                "Cannot connect to TCP servers %s:%u/%u: %s",
+                tcp_server_address.c_str(),
+                static_cast<unsigned>(tcp_frame_port),
+                static_cast<unsigned>(tcp_result_port),
                 tcp_client->last_error().c_str());
 
             return 1;
         }
-
-        VP_INFO("Connected to TCP image server");
     }
     else
     {
