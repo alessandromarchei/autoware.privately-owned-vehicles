@@ -6,6 +6,7 @@
 #include <common/types.hpp>
 #include <planning/longitudinal_planning.hpp>
 #include <planning/lateral_planning.hpp>
+#include <common/models.hpp>
 
 class Planner {
 public:
@@ -31,7 +32,7 @@ public:
     // 0 in planning.cpp for pure constant-curvature behaviour.
     //
     // Returns { acceleration, [delta_0, delta_0, delta_1, ..., delta_{N-2}] }
-    Plan compute_plan(
+    visionpilot::common::Plan compute_plan(
         double cte,
         double epsi,
         double kappa,

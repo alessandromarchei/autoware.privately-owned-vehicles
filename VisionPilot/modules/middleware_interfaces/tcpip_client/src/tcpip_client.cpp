@@ -320,24 +320,23 @@ bool TCPClient::receive_frame(
     // Receive and decode MessageHeader
     // -------------------------------------------------------------------------
 
-    std::array<std::uint8_t, WIRE_HEADER_SIZE>
-        header_wire{};
+    std::array<std::uint8_t, WIRE_HEADER_SIZE> header_wire{};
 
     if (!detail::recv_all(
-            frame_socket_fd_,
-            header_wire.data(),
-            header_wire.size()))
+        frame_socket_fd_,
+        header_wire.data(),
+        header_wire.size()))
     {
         return fail_socket_locked(
             frame_socket_fd_,
             "failed to receive image message header");
     }
 
+    // dump_wire("[V4M RX header]",header_wire.data(),header_wire.size());
+
     MessageHeader header{};
 
-    if (!detail::decode_header(
-            header_wire.data(),
-            header))
+    if (!detail::decode_header(header_wire, header))
     {
         return fail_socket_locked(
             frame_socket_fd_,
@@ -398,7 +397,7 @@ bool TCPClient::receive_frame(
     ImageMetadata metadata{};
 
     if (!detail::decode_image_metadata(
-            metadata_wire.data(),
+            metadata_wire,
             metadata))
     {
         return fail_socket_locked(
@@ -601,7 +600,7 @@ bool TCPClient::receive_frame(
 }
 
 bool TCPClient::send_result(
-    const VisionResult& result)
+    const visionpilot::common::VisionPilotOutput& result)
 {
     std::lock_guard lock(send_mutex_);
 
@@ -613,22 +612,59 @@ bool TCPClient::send_result(
             false);
     }
 
-    const auto payload =
-        detail::encode_result(result);
+    const auto payload = detail::encode_result(result);
+
+    if (payload.empty())
+    {
+        std::cerr
+            << "[TCPClient] encode_result returned an empty payload"
+            << " frame=" << result.inference.frame_id
+            << " detections="
+            << result.inference.auto_speed.detections.size()
+            << " steering="
+            << result.plan.steering.size()
+            << " warnings="
+            << result.plan.warnings.size()
+            << '\n';
+
+        return false;
+    }
+
+    if (payload.size() >
+        std::numeric_limits<std::uint32_t>::max())
+    {
+        std::cerr
+            << "[TCPClient] Result payload is too large: "
+            << payload.size()
+            << '\n';
+
+        return false;
+    }
 
     const MessageHeader header{
         MessageType::Result,
         static_cast<std::uint32_t>(payload.size()),
-        result.frame_id
+        result.inference.frame_id
     };
 
-    const auto wire_header =
-        detail::encode_header(header);
+    const auto wireHeader = detail::encode_header(header);
+
+    std::cerr
+        << "[V4M TX result]"
+        << " frame=" << result.inference.frame_id
+        << " payload=" << payload.size()
+        << " detections="
+        << result.inference.auto_speed.detections.size()
+        << " steering="
+        << result.plan.steering.size()
+        << " warnings="
+        << result.plan.warnings.size()
+        << '\n';
 
     if (!detail::send_all(
             result_socket_fd_,
-            wire_header.data(),
-            wire_header.size()) ||
+            wireHeader.data(),
+            wireHeader.size()) ||
         !detail::send_all(
             result_socket_fd_,
             payload.data(),
@@ -636,7 +672,7 @@ bool TCPClient::send_result(
     {
         return fail_socket_locked(
             result_socket_fd_,
-            "failed to send VisionResult");
+            "failed to send VisionPilotOutput");
     }
 
     return true;

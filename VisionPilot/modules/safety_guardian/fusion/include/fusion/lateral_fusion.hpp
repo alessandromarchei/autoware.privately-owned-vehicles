@@ -1,11 +1,10 @@
 #pragma once
-
 #include <opencv2/core.hpp>
 #include <random>
 #include <string>
 #include <vector>
-
 #include <common/models.hpp>
+#include <common/types.hpp>
 
 namespace visionpilot::fusion {
 
@@ -15,32 +14,7 @@ namespace visionpilot::fusion {
 //    x = forward  [m]
 //    y = lateral  [m, positive = left]
 //
-struct LateralFusionEstimate {
-    bool valid = false;
 
-    // ── Particle-filter tracked outputs (ready for planning) ──────────────────
-    float cte_m          = 0.f;   // cross-track error [m]; +ve = ego right of path
-    float yaw_rad        = 0.f;   // yaw error [rad];  +ve = path heading left
-    float cte_stddev_m   = 0.f;
-    float yaw_stddev_rad = 0.f;
-
-    float curvature      = 0.f;   // fused curvature [1/m]; +ve = left turn
-    float curv_stddev    = 0.f;
-
-    // ── Raw intermediates for debug / downstream use ───────────────────────────
-    bool  path_valid         = false;  // RANSAC polynomial fit succeeded
-    float raw_cte_m          = 0.f;   // CTE direct from polynomial (= c-coeff)
-    float raw_yaw_rad        = 0.f;   // yaw direct from polynomial (= atan(b))
-    float raw_path_curvature = 0.f;   // κ sampled along fitted path (median)
-    float raw_ad_curvature   = 0.f;   // curvature_raw from AutoDrive (scaled)
-    int   path_inliers       = 0;     // RANSAC inlier count
-    int   path_points        = 0;     // world points projected from waypoints
-    // Fitted polynomial y = path_a·x² + path_b·x + path_c  (world frame)
-    float path_a = 0.f, path_b = 0.f, path_c = 0.f;
-    // Forward extent of RANSAC inliers [m] — cap path visualization / MPC samples
-    float path_x_min_m = 0.f;
-    float path_x_max_m = 0.f;
-};
 
 // ─── LateralFusion ────────────────────────────────────────────────────────────
 //
@@ -51,8 +25,8 @@ struct LateralFusionEstimate {
 //    2. 2nd-order polynomial RANSAC on world points:
 //         y_lateral = a·x² + b·x + c
 //       → CTE = c, Yaw = atan(b), Curvature = median κ(x) at waypoint x in [curv_x_min, curv_x_max]
-//    3. CTE/Yaw particle filter: state [cte, yaw], random-walk process,
-//       Gaussian update from step-2 when path is valid.
+//    3. CTE/Yaw particle filter: state [cte, cte_dot, epsi, epsi_dot],
+//       constant-velocity predict; measure cte/epsi when path is valid.
 //    4. Curvature particle filter: state [curv], fuses
 //       a) path curvature from step-2  (when path_valid)
 //       b) AutoDrive curvature_raw * ad_curvature_scale  (when drive.valid)
@@ -63,10 +37,12 @@ public:
         int   n_particles            = 300;
         float dt_s                   = 0.10f;   // nominal dt; overridden per-call
 
-        // Process noise (random-walk, scaled by dt internally)
-        float proc_noise_cte_m       = 0.05f;   // allows ~0.05m/s RMS drift for smooth tracking
-        float proc_noise_yaw_rad     = 0.01f;
-        float proc_noise_curv        = 0.002f;
+        // Process noise (scaled by dt internally)
+        float proc_noise_cte_m         = 0.02f;   // small position walk on top of CV model
+        float proc_noise_cte_rate_mps  = 0.15f;   // cte_dot random-walk [m/s²-ish]
+        float proc_noise_yaw_rad       = 0.005f;
+        float proc_noise_yaw_rate_rps  = 0.05f;   // epsi_dot random-walk
+        float proc_noise_curv          = 0.002f;
 
         // Camera mounting offset compensation.  Set to the observed steady-state
         // CTE on a straight road (camera not at vehicle centreline).
@@ -77,7 +53,7 @@ public:
         // Measurement 1-sigma
         float meas_noise_cte_m       = 0.15f;   // tighter now that CTE is at x_min (not extrapolated)
         float meas_noise_yaw_rad     = 0.05f;
-        float meas_noise_curv_path   = 0.008f;  // AutoSteer polynomial curvature
+        float meas_noise_curv_path   = 0.005f;  // AutoSteer polynomial curvature
         float meas_noise_curv_ad     = 0.010f;  // AutoDrive curvature (scaled)
 
         // RANSAC polynomial fit
@@ -93,31 +69,9 @@ public:
         // curvature_raw × scale → physical κ [1/m] (CURV_SCALE = 0.21 in training).
         float ad_curvature_scale     = 0.21f;
         int   ransac_min_inliers     = 12;      // reject path fit if fewer inliers
-        float max_abs_cte_m          = 3.0f;    // reject RANSAC fits with |cte| > 3m
+        float max_abs_cte_m          = 3.0f;    // reject RANSAC fits with |cte| > 3m (full lane width guard)
         float curv_x_min_m           = 3.f;     // κ sampled only at waypoint x ≥ this
         float curv_x_max_m           = 25.f;    // κ sampled only at waypoint x ≤ this
-
-        // ── Polynomial-coefficient Kalman smoother (pre-PF stage) ─────────
-        // Smooths the raw RANSAC (a, b, c) polynomial before it drives both
-        // the particle filter inputs AND the visualization path corridor.
-        // This is the primary fix for sudden path jumps during lane merges.
-        // proc noise per second — larger = faster tracking, less smooth.
-        // poly_meas_R_a / R_b: keep moderate — too large and the yellow fused path
-        // lags real curves (sticks to straight-road memory).  poly_meas_R_c stays
-        // large to smooth lateral jumps at merges.
-        float poly_proc_a_s  = 2e-3f;   // curvature coeff [(1/m)/s]
-        float poly_proc_b_s  = 0.08f;   // slope [rad/s] — tracks heading on curves
-        float poly_proc_c_s  = 0.50f;   // lateral offset [m/s] — merge smoothing
-        float poly_meas_R_a  = 4e-4f;   // [(1/m)²]
-        float poly_meas_R_b  = 0.015f;  // [rad²]
-        float poly_meas_R_c  = 0.50f;   // [m²]
-
-        // ── Rao-Blackwellized Kalman smoother (post-PF stage) ──────────────
-        // Second stage: smooths scalar PF outputs (cte, yaw, curvature).
-        float kf_proc_cte_m_s   = 0.50f;   // [m / s]
-        float kf_proc_yaw_rad_s = 0.15f;   // [rad / s]
-        float kf_proc_curv_s    = 0.004f;  // [(1/m) / s]
-        float kf_meas_R_curv_min = 1e-7f;  // post-PF KF curvature meas-noise floor [(1/m)²]
 
         // Same YAML used by LongitudinalFusion (shared config field).
         bool debug = false;
@@ -126,7 +80,7 @@ public:
     LateralFusion();
     explicit LateralFusion(Config cfg);
 
-    LateralFusionEstimate update(
+    visionpilot::common::LateralFusionEstimate update(
         const visionpilot::common::AutoSteerOutput& steer,
         const visionpilot::common::AutoDriveOutput& drive,
         float dt_s = -1.f
@@ -169,8 +123,8 @@ private:
     // Project a single image point (u,v) → (x_forward [m], y_lateral [m])
     static std::pair<float, float> project_world(const cv::Mat& H, float u, float v);
 
-    // ── CTE / Yaw particle filter  [state: cte, yaw] ─────────────────────────
-    struct CYParticle { float cte, yaw, log_w; };
+    // ── CTE / Yaw particle filter  [cte, cte_dot, epsi, epsi_dot] ─────────────
+    struct CYParticle { float cte, cte_dot, yaw, yaw_dot, log_w; };
     void  cy_predict(float dt);
     void  cy_update(float meas_cte, float noise_cte,
                     float meas_yaw, float noise_yaw);
@@ -185,32 +139,6 @@ private:
     void  k_resample();
     float k_eff_n() const;
     void  k_init(float curv);
-
-    // ── Polynomial-coefficient Kalman smoother (pre-PF) ──────────────────────
-    //  Smooths the raw RANSAC (a, b, c) each frame before they feed the PF and
-    //  the visualization.  This eliminates sudden path-corridor jumps at merges.
-    //  State: x = [a, b, c]  (diagonal — 3 independent scalars)
-    //  Process: random-walk  F = I,  Q = diag(q_i² · dt)
-    //  Measurement: H = I,  z = raw RANSAC coefficients,  R = cfg_.poly_meas_R_*
-    struct PolyKF {
-        float x[3] = {};   // [a, b, c]
-        float P[3] = {};   // diagonal covariances
-        bool  init  = false;
-    };
-    void poly_kf_predict(float dt);
-    // z = raw RANSAC [a, b, c]; quality = inliers / ransac_min_inliers
-    void poly_kf_update(float a, float b, float c, float quality);
-
-    // ── Rao-Blackwellized Kalman smoother (post-PF) ───────────────────────────
-    //  Sits after the PF: consumes PF posterior mean + variance as measurement,
-    //  outputs a smoothed [cte, yaw, curvature] estimate.
-    struct KFState {
-        float x[3] = {};   // [cte, yaw, curvature]
-        float P[3] = {};   // diagonal covariances
-        bool  init  = false;
-    };
-    void kf_predict(float dt);
-    void kf_update(const float z[3], const float R[3]);
 
     // ── Shared helpers ────────────────────────────────────────────────────────
     static float gauss_loglik(float z, float mean, float sigma);
@@ -228,9 +156,6 @@ private:
 
     std::vector<KParticle>  k_;
     bool                    k_init_  = false;
-
-    PolyKF  poly_kf_;  // Polynomial-coefficient smoother (pre-PF, pre-viz)
-    KFState kf_;       // Rao-Blackwellized scalar smoother (post-PF)
 
     std::mt19937 rng_;
     // DO NOT MODIFY! VisionPilot model-view homography (1024x512 pixel -> world). Zenseact Open Dataset

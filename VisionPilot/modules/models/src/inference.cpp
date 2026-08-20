@@ -2,6 +2,7 @@
 
 #include <common/utils.hpp>
 #include <logging/logger.hpp>
+#include <common/models.hpp>
 
 #include <opencv2/imgproc.hpp>
 
@@ -120,8 +121,7 @@ void InferencePipeline::set_H_resized(const cv::Mat& H, cv::Size raw_size)
             raw_size.width, raw_size.height, crop_top, sx, sy);
 }
 
-std::optional<InferenceFrameResult>
-InferencePipeline::process(const cv::Mat& warped,
+std::optional<visionpilot::common::InferenceFrameResult> InferencePipeline::process(const cv::Mat& warped,
                            const cv::Mat& resized)
 {
     using Clock = std::chrono::steady_clock;
@@ -159,21 +159,20 @@ InferencePipeline::process(const cv::Mat& warped,
     //move the current frame to previous frame for the next iteration
     prev_warped_imn_ = std::move(curr_warped_imn);
 
-    InferenceFrameResult out;
+    visionpilot::common::InferenceFrameResult out;
     out.frame_id = frame_count_;
     out.pre_ms = ms_pre;
     out.visionpilot_ms = ms_visionpilot;
-    out.visionpilot = std::move(result);
 
     out.cipo = long_fusion_.update(
-        out.visionpilot.auto_drive,
-        out.visionpilot.auto_speed,
+        out.auto_drive,
+        out.auto_speed,
         warped
     );
 
     out.lateral = lat_fusion_.update(
-        out.visionpilot.auto_steer,
-        out.visionpilot.auto_drive
+        out.auto_steer,
+        out.auto_drive
     );
 
     stats_.update(ms_pre, ms_visionpilot);

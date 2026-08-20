@@ -85,13 +85,23 @@ message(STATUS "CMAKE_C_COMPILER_ID: ${CMAKE_C_COMPILER_ID}")
 # Add warning flags
 #----------------------------------------------------------------------------------------------------------------------
 if(RCAR_TARGET_OS STREQUAL "linux" AND CMAKE_C_COMPILER_ID STREQUAL "ARMClang")
-    add_compile_options(-Wall -Wextra -pedantic -Werror
-                        -Wno-sign-conversion
-                        -Wno-unused-variable)
+    add_compile_options(
+        -Wall
+        -Wextra
+        -pedantic
+        -Werror
+        -Wno-sign-conversion
+        -Wno-unused-variable
+    )
 else()
-    add_compile_options(-Wall -Wextra -pedantic -Werror)
+    add_compile_options(
+        -Wall
+        -Wextra
+        -pedantic
+        -Werror
+        -Wno-unused-variable
+    )
 endif()
-
 
 set(Python3_EXECUTABLE /usr/bin/python3 CACHE FILEPATH "" FORCE)
 find_package(Python3 REQUIRED)

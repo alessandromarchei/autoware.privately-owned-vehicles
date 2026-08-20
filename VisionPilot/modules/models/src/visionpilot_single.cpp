@@ -83,12 +83,14 @@ visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_chw_
     visionpilot::common::VisionPilotOutput result{};
 
     //postprocess the outputs and fill the result struct
-    result.auto_drive = postprocess_autodrive(autodrive_dist_normalized, autodrive_curvature_raw, autodrive_flag_logit);
-    result.auto_steer = postprocess_autosteer(autosteer_lane_value, autosteer_height);
-    result.auto_speed = postprocess_autospeed(autospeed_detections);    //default conf_thres :0.6f, default iou_thres : 0.45f
+    result.inference.auto_drive = postprocess_autodrive(autodrive_dist_normalized, autodrive_curvature_raw, autodrive_flag_logit);
+    result.inference.auto_steer = postprocess_autosteer(autosteer_lane_value, autosteer_height);
+    result.inference.auto_speed = postprocess_autospeed(autospeed_detections);    //default conf_thres :0.6f, default iou_thres : 0.45f
 
     //return the complete struct containing all the 3 outpouts and a valid flag
-    result.valid     = true;
+    result.inference.auto_speed.valid     = true;
+    result.inference.auto_steer.valid     = true;
+    result.inference.auto_drive.valid     = true;
 
     return result;
 }

@@ -33,14 +33,14 @@ void LongitudinalFusion::reset()
     initialised_ = false;
 }
 
-CIPOFusionEstimate LongitudinalFusion::update(
+visionpilot::common::CIPOFusionEstimate LongitudinalFusion::update(
     const visionpilot::common::AutoDriveOutput& autodrive,
     const visionpilot::common::AutoSpeedOutput& autospeed,
     const cv::Mat& /*preprocessed_frame*/,
     float dt_s)
 {
     // ── Step 2: AutoSpeed → world distance via homography ────────────────────
-    CIPOFusionEstimate est;
+    visionpilot::common::CIPOFusionEstimate est;
     Meas cipo_raw;
     if (autospeed.valid) {
         const auto sel = select_cipo(autospeed.detections);

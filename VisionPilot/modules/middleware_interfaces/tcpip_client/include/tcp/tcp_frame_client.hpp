@@ -7,6 +7,7 @@
 #include <opencv2/core/mat.hpp>
 
 #include <tcp/protocol.hpp>
+#include <common/models.hpp>
 
 namespace visionpilot::tcp {
 
@@ -44,7 +45,7 @@ public:
         int timeout_ms = -1);
 
     // Invia al ServerReceiver del Predator.
-    bool send_result(const VisionResult& result);
+    bool send_result(const visionpilot::common::VisionPilotOutput& result);
 
     const std::string& server_address() const noexcept;
 

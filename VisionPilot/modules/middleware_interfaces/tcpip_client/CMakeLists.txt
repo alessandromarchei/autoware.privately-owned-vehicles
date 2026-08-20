@@ -5,7 +5,6 @@ find_package(Threads REQUIRED)
 
 add_library(tcpip_client
     src/tcpip_client.cpp
-    src/wire_protocol.cpp
 )
 
 target_include_directories(tcpip_client
@@ -16,6 +15,7 @@ target_include_directories(tcpip_client
 target_link_libraries(tcpip_client
         PUBLIC
         logging
+        common
         ${OpenCV_LIBS}
         Threads::Threads
 )

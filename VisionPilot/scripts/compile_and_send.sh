@@ -59,6 +59,9 @@ rsync -az \
 echo "==> Deployment completed successfully"
 echo "    ${REMOTE}:${REMOTE_DIR}"
 
+#make run_vision_pilot.sh executable on v4m (like chmod +x ${REMOTE_DIR}/run_vision_pilot.sh)
+ssh "${REMOTE}" "chmod +x ${REMOTE_DIR}/run_vision_pilot.sh"
+
 
 #now send the 3 model.msgpack to the respective folders on the v4m
 # echo "==> Copying model.msgpack to V4M"

@@ -19,6 +19,7 @@
 
 #include "camera_interface/v4l2_camera_interface.hpp"
 #include "camera_interface/file_interface.hpp"
+#include "common/models.hpp"
 #include "vehicle_interface/file_interface.hpp"
 #include <tcp/tcp_frame_client.hpp>
 
@@ -289,7 +290,7 @@ int main(int argc, char** argv)
         tcp_client =
             std::make_unique<visionpilot::tcp::TCPClient>();
 
-        if (!tcp_client->connect_to(
+        while (!tcp_client->connect_to(
                 tcp_server_address,
                 tcp_frame_port,
                 tcp_result_port,
@@ -301,8 +302,9 @@ int main(int argc, char** argv)
                 static_cast<unsigned>(tcp_frame_port),
                 static_cast<unsigned>(tcp_result_port),
                 tcp_client->last_error().c_str());
-
-            return 1;
+            VP_INFO("Retrying in 1 second...");
+            
+            std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
     else
@@ -377,7 +379,6 @@ int main(int argc, char** argv)
 
 
     std::uint64_t current_frame_id = 0;
-    std::uint64_t current_timestamp_ns = 0;
     double current_ego_speed_ms = 0.0;
 
 
@@ -389,7 +390,8 @@ int main(int argc, char** argv)
         {
             visionpilot::tcp::ReceivedFrame received{};
 
-            ok = tcp_client->receive_frame(frame,received,10000);
+            //receive frame from TCP server, blocking call with timeout -1 (infinite)
+            ok = tcp_client->receive_frame(frame,received,-1);
 
             if (!ok)
             {
@@ -409,8 +411,6 @@ int main(int argc, char** argv)
             }
 
             current_frame_id = received.frame_id;
-
-            current_timestamp_ns = received.timestamp_ns;
 
             current_ego_speed_ms = static_cast<double>(received.vehicle_speed_ms);
 
@@ -459,28 +459,30 @@ int main(int argc, char** argv)
             h_resized_set = true;
         }
 
-        // ── Default frame no inference ────────────────────────────────────────────
+        // ── Default frame  ────────────────────────────────────────────
         cv::Mat display_frame = resized;
 
-        if (const auto r = pipeline.process(warped, resized))
+        //execute inference
+        auto inference_result = pipeline.process(warped, resized);
+        if (inference_result != std::nullopt)
         {
             pipeline.latency().print();
 
-            const double cte = r->lateral.cte_m;
-            const double epsi = r->lateral.yaw_rad;
-            const double kappa = r->lateral.curvature;
+            const double cte = inference_result->lateral.cte_m;
+            const double epsi = inference_result->lateral.yaw_rad;
+            const double kappa = inference_result->lateral.curvature;
 
             // has_cipo: tracker-based — true only when filter tracks a target
             // closer than D_MAX. cipo_raw_found alone must not gate the planner.
             static constexpr double D_MAX = 150.0;
-            const bool has_cipo = r->cipo.valid && r->cipo.distance_m < D_MAX;
-            const double cipo_v = has_cipo ? r->cipo.velocity_ms : cfg.speed_limit;
-            const double cipo_dist = r->cipo.distance_m;
+            const bool has_cipo = inference_result->cipo.valid && inference_result->cipo.distance_m < D_MAX;
+            const double cipo_v = has_cipo ? inference_result->cipo.velocity_ms : cfg.speed_limit;
+            const double cipo_dist = inference_result->cipo.distance_m;
 
-            const double raw_cte = r->lateral.path_valid
-                                       ? static_cast<double>(r->lateral.raw_cte_m)
+            const double raw_cte = inference_result->lateral.path_valid
+                                       ? static_cast<double>(inference_result->lateral.raw_cte_m)
                                        : cte;
-            const Plan plan = planner.compute_plan(cte, epsi, kappa, current_ego_speed_ms, has_cipo, cipo_v, cipo_dist);
+            const visionpilot::common::Plan plan = planner.compute_plan(cte, epsi, kappa, current_ego_speed_ms, has_cipo, cipo_v, cipo_dist);
 
             VP_INFO(
                 "plan: tyre=%.4f rad  accel=%.3f m/s²  |  cte=%.2fm(raw=%.2fm)  |  cipo=%s  dist=%.1f m  vel=%+.2f m/s",
@@ -490,24 +492,26 @@ int main(int argc, char** argv)
                 raw_cte,
                 has_cipo ? "true" : "false",
                 cipo_dist,
-                r->cipo.velocity_ms);
+                inference_result->cipo.velocity_ms);
 
             //send data to TCP server if in TCPIP_Frames mode, otherwise send to vehicle interface
             if (cfg.source.mode == SourceMode::TCPIP_Frames)
             {
-                visionpilot::tcp::VisionResult tcp_result{};
+                visionpilot::common::VisionPilotOutput tcp_result{};
+                
+                //pass inference results to tcp_result
+                tcp_result.inference.frame_id = current_frame_id;
+                tcp_result.inference.wall_ms = inference_result->wall_ms;
+                tcp_result.inference.pre_ms = inference_result->pre_ms;
+                tcp_result.inference.visionpilot_ms = inference_result->visionpilot_ms;
+                tcp_result.inference.auto_drive = inference_result->auto_drive;
+                tcp_result.inference.auto_steer = inference_result->auto_steer;
+                tcp_result.inference.auto_speed = inference_result->auto_speed;
+                tcp_result.inference.cipo = inference_result->cipo;
+                tcp_result.inference.lateral = inference_result->lateral;
 
-                tcp_result.frame_id = current_frame_id;
-                tcp_result.timestamp_ns = current_timestamp_ns;
-                tcp_result.steering_rad = static_cast<float>(plan.steering.empty() ? 0.0 : plan.steering[0]);
-                tcp_result.acceleration_ms2 = static_cast<float>(plan.acceleration);
-                tcp_result.cte_m = static_cast<float>(cte);
-                tcp_result.yaw_rad = static_cast<float>(epsi);
-                tcp_result.curvature_1pm = static_cast<float>(kappa);
-                tcp_result.cipo_distance_m = static_cast<float>(cipo_dist);
-                tcp_result.cipo_velocity_ms = static_cast<float>(r->cipo.velocity_ms);
-                tcp_result.cipo_valid = has_cipo;
-                tcp_result.path_valid = r->lateral.path_valid;
+                tcp_result.plan = plan;
+
 
                 //send to TCP server
                 if (!tcp_client->send_result(tcp_result))

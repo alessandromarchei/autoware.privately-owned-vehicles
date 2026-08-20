@@ -4,6 +4,8 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <cstdint>
+#include <common/types.hpp>
 
 namespace visionpilot::common {
 
@@ -58,14 +60,80 @@ struct AutoSteerOutput {
     bool                   valid = false;
 };
 
-//monolithic model output struct
-struct VisionPilotOutput {
-    AutoDriveOutput auto_drive;
-    AutoSpeedOutput auto_speed;
-    AutoSteerOutput auto_steer;
+
+struct LateralFusionEstimate {
     bool valid = false;
 
+    // ── Particle-filter tracked outputs (ready for planning) ──────────────────
+    float cte_m          = 0.f;   // cross-track error [m]; +ve = ego right of path
+    float cte_rate_mps   = 0.f;   // d(cte)/dt [m/s]
+    float yaw_rad        = 0.f;   // yaw error [rad];  +ve = path heading left
+    float yaw_rate_rps   = 0.f;   // d(yaw)/dt [rad/s]
+    float cte_stddev_m   = 0.f;
+    float yaw_stddev_rad = 0.f;
+
+    float curvature      = 0.f;   // fused curvature [1/m]; +ve = left turn
+    float curv_stddev    = 0.f;
+
+    // ── Raw intermediates for debug / downstream use ───────────────────────────
+    bool  path_valid         = false;  // RANSAC polynomial fit succeeded
+    float raw_cte_m          = 0.f;   // CTE direct from polynomial (= c-coeff)
+    float raw_yaw_rad        = 0.f;   // yaw direct from polynomial (= atan(b))
+    float raw_path_curvature = 0.f;   // κ sampled along fitted path (median)
+    float raw_ad_curvature   = 0.f;   // curvature_raw from AutoDrive (scaled)
+    int   path_inliers       = 0;     // RANSAC inlier count
+    int   path_points        = 0;     // world points projected from waypoints
+    // Fitted polynomial y = path_a·x² + path_b·x + path_c  (world frame)
+    float path_a = 0.f, path_b = 0.f, path_c = 0.f;
+    // Forward extent of RANSAC inliers [m] — cap path visualization / MPC samples
+    float path_x_min_m = 0.f;
+    float path_x_max_m = 0.f;
 };
+
+
+struct CIPOFusionEstimate {
+    bool  valid             = false;
+
+    // Particle-filter fused posterior
+    float distance_m        = 0.f;
+    float velocity_ms       = 0.f;   // negative = approaching; from particle ensemble
+    float distance_stddev_m = 0.f;
+
+    // Raw CIPO distance from AutoSpeed bboxes via homography (no tracking state)
+    bool  cipo_raw_found    = false;
+    float cipo_raw_dist_m   = 0.f;
+    bool  cut_in_detected   = false; // Level 2 is closer than Level 1
+};
+
+
+struct InferenceFrameResult {
+    uint64_t    frame_id = 0;
+    double      wall_ms  = 0;
+    double      pre_ms   = 0;
+    // double      ad_ms    = 0;
+    // double      as_ms    = 0;
+    // double      asp_ms   = 0;
+    double      visionpilot_ms = 0;
+
+    //common::VisionPilotOutput              visionpilot;
+    AutoDriveOutput              auto_drive;
+    AutoSteerOutput              auto_steer;
+    AutoSpeedOutput              auto_speed;
+    CIPOFusionEstimate   cipo;
+    LateralFusionEstimate  lateral;
+};
+
+struct Plan {
+    double                acceleration;
+    std::vector<double>   steering;
+    std::vector<Warning>  warnings;
+};
+
+struct VisionPilotOutput {
+    InferenceFrameResult    inference;
+    Plan                    plan;
+};
+
 
 }
 

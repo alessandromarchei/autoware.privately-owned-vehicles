@@ -31,23 +31,6 @@ struct LatencyStats {
     void reset();
 };
 
-struct InferenceFrameResult {
-    uint64_t    frame_id = 0;
-    double      wall_ms  = 0;
-    double      pre_ms   = 0;
-    // double      ad_ms    = 0;
-    // double      as_ms    = 0;
-    // double      asp_ms   = 0;
-    double      visionpilot_ms = 0;
-
-    common::VisionPilotOutput              visionpilot;
-    // common::AutoDriveOutput              auto_drive;
-    // common::AutoSteerOutput              auto_steer;
-    // common::AutoSpeedOutput              auto_speed;
-    fusion::CIPOFusionEstimate   cipo;
-    fusion::LateralFusionEstimate  lateral;
-};
-
 // Two-frame buffer → parallel ONNX → longitudinal + lateral fusion.
 class InferencePipeline {
 public:
@@ -57,8 +40,8 @@ public:
     // warped  : BEV 1024×512 image → AutoDrive only.
     // resized : plain-resized 1024×512 image → AutoSteer + AutoSpeed.
     //           If empty, falls back to warped for all networks (legacy behaviour).
-    std::optional<InferenceFrameResult> process(const cv::Mat& warped,
-                                                const cv::Mat& resized = {});
+    std::optional<visionpilot::common::InferenceFrameResult> process(const cv::Mat& warped,
+                                                                     const cv::Mat& resized = {});
 
     // Compute and apply H_resized to both fusion modules so that AutoSteer /
     // AutoSpeed outputs are projected correctly when they run on a resized

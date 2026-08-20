@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-VISION_PILOT_ROOT="$(
-    CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &&
-    pwd
-)"
+VISION_PILOT_ROOT="/home/root/vision_pilot"
+
+LOG_FILE="${VISION_PILOT_ROOT}/vision_pilot.log"
+
+# Append stdout and stderr of this script and VisionPilot to the log.
+exec >> "${LOG_FILE}" 2>&1
+
+echo
+echo "============================================================"
+echo "VisionPilot start requested at $(date '+%Y-%m-%d %H:%M:%S')"
+echo "============================================================"
 
 OPENBLAS_LIBRARY="${VISION_PILOT_ROOT}/lib/libopenblas.so"
 
@@ -39,6 +46,7 @@ echo "Starting VisionPilot:"
 echo "  build:      ${BUILD_TYPE}"
 echo "  executable: ${VISION_PILOT_EXECUTABLE}"
 echo "  BLAS:       ${LBT_DEFAULT_LIBS}"
+echo "  arguments:  $*"
 
 cd "${VISION_PILOT_ROOT}"
 
