@@ -649,17 +649,8 @@ bool TCPClient::send_result(
 
     const auto wireHeader = detail::encode_header(header);
 
-    std::cerr
-        << "[V4M TX result]"
-        << " frame=" << result.inference.frame_id
-        << " payload=" << payload.size()
-        << " detections="
-        << result.inference.auto_speed.detections.size()
-        << " steering="
-        << result.plan.steering.size()
-        << " warnings="
-        << result.plan.warnings.size()
-        << '\n';
+    //dump every element of VisionPilotOutput
+    dump_visionpilot_result(result);
 
     if (!detail::send_all(
             result_socket_fd_,

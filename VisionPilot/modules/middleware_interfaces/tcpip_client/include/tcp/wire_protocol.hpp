@@ -58,6 +58,87 @@ inline void dump_wire(
         << '\n';
 }
 
+
+inline void dump_visionpilot_result(const visionpilot::common::VisionPilotOutput& vpo) {
+    const auto& inf = vpo.inference;
+
+    std::cout << "====================================================\n";
+    std::cout << "               VISIONPILOT OUTPUT DUMP              \n";
+    std::cout << "====================================================\n";
+
+    // ─── INFERENCE METADATA ──────────────────────────────────────────────
+    std::cout << " [INFERENCE METRICS]\n"
+              << "   Frame ID        : " << inf.frame_id << "\n"
+              << "   Wall Time       : " << std::fixed << std::setprecision(2) << inf.wall_ms << " ms\n"
+              << "   Pre-proc Time   : " << inf.pre_ms << " ms\n"
+              << "   VisionPilot Time: " << inf.visionpilot_ms << " ms\n\n";
+
+    // ─── AUTODRIVE OUTPUT ────────────────────────────────────────────────
+    std::cout << " [AUTODRIVE]\n"
+              << "   Valid           : " << (inf.auto_drive.valid ? "true" : "false") << "\n"
+              << "   Dist Normalized : " << inf.auto_drive.dist_normalized << "\n"
+              << "   Curvature Raw   : " << inf.auto_drive.curvature_raw << "\n"
+              << "   Flag Prob (CIPO): " << inf.auto_drive.flag_prob << "\n\n";
+
+    // ─── AUTOSTEER OUTPUT ────────────────────────────────────────────────
+    std::cout << " [AUTOSTEER]\n"
+              << "   Valid           : " << (inf.auto_steer.valid ? "true" : "false") << "\n"
+              << "   Waypoints (xp)  : [";
+    for (size_t i = 0; i < inf.auto_steer.xp.size(); ++i) {
+        std::cout << inf.auto_steer.xp[i] << (i + 1 < inf.auto_steer.xp.size() ? ", " : "");
+    }
+    std::cout << "]\n   Confidence (h)  : [";
+    for (size_t i = 0; i < inf.auto_steer.h_vector.size(); ++i) {
+        std::cout << inf.auto_steer.h_vector[i] << (i + 1 < inf.auto_steer.h_vector.size() ? ", " : "");
+    }
+    std::cout << "]\n\n";
+
+    // ─── AUTOSPEED OUTPUT ────────────────────────────────────────────────
+    std::cout << " [AUTOSPEED]\n"
+              << "   Valid           : " << (inf.auto_speed.valid ? "true" : "false") << "\n"
+              << "   Detections Count: " << inf.auto_speed.detections.size() << "\n";
+    for (size_t i = 0; i < inf.auto_speed.detections.size(); ++i) {
+        const auto& d = inf.auto_speed.detections[i];
+        std::cout << "     #" << i << " | Class: " << d.class_id
+                  << " | Score: " << std::setprecision(3) << d.score
+                  << " | BBox: [" << std::setprecision(1) 
+                  << d.x1 << ", " << d.y1 << ", " << d.x2 << ", " << d.y2 << "]\n";
+    }
+    std::cout << "\n";
+
+    // ─── CIPO FUSION ESTIMATE ────────────────────────────────────────────
+    std::cout << " [CIPO FUSION]\n"
+              << "   Valid           : " << (inf.cipo.valid ? "true" : "false") << "\n"
+              << "   Distance        : " << std::setprecision(2) << inf.cipo.distance_m << " m (stddev: " << inf.cipo.distance_stddev_m << " m)\n"
+              << "   Velocity        : " << inf.cipo.velocity_ms << " m/s\n"
+              << "   CIPO Raw Found  : " << (inf.cipo.cipo_raw_found ? "true" : "false") << "\n"
+              << "   CIPO Raw Dist   : " << inf.cipo.cipo_raw_dist_m << " m\n"
+              << "   Cut-In Detected : " << (inf.cipo.cut_in_detected ? "true" : "false") << "\n\n";
+
+    // ─── LATERAL FUSION ESTIMATE ─────────────────────────────────────────
+    std::cout << " [LATERAL FUSION]\n"
+              << "   Valid           : " << (inf.lateral.valid ? "true" : "false") << "\n"
+              << "   CTE             : " << inf.lateral.cte_m << " m (stddev: " << inf.lateral.cte_stddev_m << " m, rate: " << inf.lateral.cte_rate_mps << " m/s)\n"
+              << "   Yaw             : " << inf.lateral.yaw_rad << " rad (stddev: " << inf.lateral.yaw_stddev_rad << " rad, rate: " << inf.lateral.yaw_rate_rps << " rad/s)\n"
+              << "   Curvature       : " << inf.lateral.curvature << " 1/m (stddev: " << inf.lateral.curv_stddev << ")\n"
+              << "   RANSAC Path     : valid=" << (inf.lateral.path_valid ? "true" : "false")
+              << ", inliers=" << inf.lateral.path_inliers << "/" << inf.lateral.path_points << "\n"
+              << "   Polynomial      : y = (" << inf.lateral.path_a << ")x^2 + (" << inf.lateral.path_b << ")x + (" << inf.lateral.path_c << ")\n"
+              << "   Path Extent X   : [" << inf.lateral.path_x_min_m << " m, " << inf.lateral.path_x_max_m << " m]\n\n";
+
+    // ─── PLAN ────────────────────────────────────────────────────────────
+    std::cout << " [PLAN]\n"
+              << "   Acceleration    : " << std::setprecision(2) << vpo.plan.acceleration << " m/s^2\n"
+              << "   Steering Points : " << vpo.plan.steering.size() << " [";
+    for (size_t i = 0; i < vpo.plan.steering.size(); ++i) {
+        std::cout << vpo.plan.steering[i] << (i + 1 < vpo.plan.steering.size() ? ", " : "");
+    }
+    std::cout << "]\n"
+              << "   Warnings Count  : " << vpo.plan.warnings.size() << "\n";
+
+    std::cout << "====================================================\n\n" << std::resetiosflags(std::ios_base::fixed);
+}
+
 namespace visionpilot::tcp::detail {
 
 
