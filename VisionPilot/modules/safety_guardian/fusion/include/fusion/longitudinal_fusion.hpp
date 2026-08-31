@@ -8,21 +8,6 @@
 
 namespace visionpilot::fusion {
 
-// ─── Output ────────────────────────────────────────────────────────────────────
-struct CIPOFusionEstimate {
-    bool  valid             = false;
-
-    // Particle-filter fused posterior
-    float distance_m        = 0.f;
-    float velocity_ms       = 0.f;   // negative = approaching; from particle ensemble
-    float distance_stddev_m = 0.f;
-
-    // Raw CIPO distance from AutoSpeed bboxes via homography (no tracking state)
-    bool  cipo_raw_found    = false;
-    float cipo_raw_dist_m   = 0.f;
-    bool  cut_in_detected   = false; // Level 2 is closer than Level 1
-};
-
 // ─── LongitudinalFusion ────────────────────────────────────────────────────────
 //
 //  Per-frame CIPO longitudinal estimation:
@@ -55,7 +40,7 @@ public:
     LongitudinalFusion();
     explicit LongitudinalFusion(Config cfg);
 
-    CIPOFusionEstimate update(
+    visionpilot::common::CIPOFusionEstimate update(
         const visionpilot::common::AutoDriveOutput& autodrive,
         const visionpilot::common::AutoSpeedOutput& autospeed,
         const cv::Mat& preprocessed_frame,

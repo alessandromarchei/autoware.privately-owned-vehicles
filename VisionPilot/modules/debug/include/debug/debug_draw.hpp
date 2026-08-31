@@ -31,28 +31,37 @@ struct DebugView {
     double      asp_ms     = 0;
     std::string src_label;
 
-    common::AutoDriveOutput       auto_drive;
-    common::AutoSteerOutput       auto_steer;
-    common::AutoSpeedOutput       auto_speed;
+    visionpilot::common::AutoDriveOutput       auto_drive;
+    visionpilot::common::AutoSteerOutput       auto_steer;
+    visionpilot::common::AutoSpeedOutput       auto_speed;
 
-    fusion::CIPOFusionEstimate    cipo;
-    fusion::LateralFusionEstimate   lateral;
+    visionpilot::common::CIPOFusionEstimate    cipo;
+    visionpilot::common::LateralFusionEstimate   lateral;
 
     VehicleParams vehicle;
     std::string wheel_dir;
 };
 
 inline DebugView debug_view_from(
-    const models::InferenceFrameResult& r,
+    const visionpilot::common::InferenceFrameResult& r,
     const std::string& src_label,
     const std::string& wheel_dir)
 {
     return {
-        r.frame_id, r.wall_ms, r.pre_ms, r.ad_ms, r.as_ms, r.asp_ms,
+        r.frame_id,
+        r.wall_ms,
+        r.pre_ms,
+        r.ad_ms,
+        r.as_ms,
+        r.asp_ms,
         src_label,
-        r.auto_drive, r.auto_steer, r.auto_speed,
-        r.cipo, r.lateral,
-        {}, wheel_dir,
+        r.auto_drive,
+        r.auto_steer,
+        r.auto_speed,
+        r.cipo,
+        r.lateral,
+        {},
+        wheel_dir,
     };
 }
 
@@ -72,7 +81,7 @@ void annotate_frame(cv::Mat& frame, const DebugView& view,
 // One-shot helper — mirrors visualization::ProductionView::visualize().
 // Builds a DebugView from result, annotates frame, and shows the window.
 bool visualize(cv::Mat& frame,
-               const models::InferenceFrameResult& result,
+               const visionpilot::common::InferenceFrameResult& result,
                const std::string& src_label,
                const std::string& wheel_dir,
                const cv::Mat& H_world_to_px = {});

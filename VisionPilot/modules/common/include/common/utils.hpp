@@ -6,6 +6,7 @@
 #include <filesystem>
 #include <opencv2/opencv.hpp>
 #include <logging/logger.hpp>
+#include <common/models.hpp>
 
 std::string find_config(const std::string& filename);
 
@@ -19,4 +20,10 @@ inline int compute_top_crop_2_1(int height, int width)
         static_cast<double>(height) - static_cast<double>(width) / 2.0)));
 }
 
+namespace visionpilot::common {
+void dump_visionpilot_output(
+    const VisionPilotOutput& output,
+    std::ostream& stream);
+}
+    
 #endif //VISIONPILOT_UTILS_HPP

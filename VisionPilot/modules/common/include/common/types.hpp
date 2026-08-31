@@ -12,10 +12,4 @@ enum class Warning : uint8_t {
     RLDW        = 4  // Right lane departure warning
 };
 
-struct Plan {
-    double                acceleration;
-    std::vector<double>   steering;
-    std::vector<Warning>  warnings;
-};
-
 #endif //VISIONPILOT_TYPES_HPP

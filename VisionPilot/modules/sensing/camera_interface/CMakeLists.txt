@@ -8,6 +8,7 @@ find_package(OpenCV REQUIRED COMPONENTS core videoio)
 add_library(camera_interface
         src/v4l2_camera_interface.cpp
         src/file_interface.cpp
+        src/frames_interface.cpp
 )
 
 # Set C++ standard
@@ -30,11 +31,6 @@ target_link_libraries(camera_interface
         opencv_core
         opencv_videoio
 )
-
-if(ENABLE_ROS2_INTERFACE)
-    target_compile_definitions(camera_interface PRIVATE ENABLE_ROS2_INTERFACE)
-    target_link_libraries(camera_interface PRIVATE camera_subscriber)
-endif()
 
 # Link threading support for std::mutex
 find_package(Threads REQUIRED)

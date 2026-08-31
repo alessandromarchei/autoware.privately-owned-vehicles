@@ -7,202 +7,223 @@
 
 #include <chrono>
 #include <cstring>
-#include <future>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
 namespace visionpilot::models {
-
 namespace {
 
-constexpr int NET_W    = AutoDrive::NET_W;
-constexpr int NET_H    = AutoDrive::NET_H;
-constexpr int CHW_SIZE = AutoDrive::CHW_SIZE;
+constexpr int NET_W = VisionPilot::NET_W;
+constexpr int NET_H = VisionPilot::NET_H;
+constexpr int CHW_SIZE = VisionPilot::CHW_SIZE;
 
 constexpr float MEAN[3] = {0.485f, 0.456f, 0.406f};
-constexpr float STD[3]  = {0.229f, 0.224f, 0.225f};
+constexpr float STD[3] = {0.229f, 0.224f, 0.225f};
+
+using Clock = std::chrono::steady_clock;
+using Milliseconds = std::chrono::duration<double, std::milli>;
+
+double elapsedMilliseconds(const Clock::time_point start)
+{
+    return Milliseconds(Clock::now() - start).count();
+}
 
 std::vector<float> chw_imagenet(const cv::Mat& bgr)
 {
-    cv::Mat rgb, f32;
+    cv::Mat rgb;
+    cv::Mat float_image;
     cv::cvtColor(bgr, rgb, cv::COLOR_BGR2RGB);
-    rgb.convertTo(f32, CV_32FC3, 1.0 / 255.0);
-    std::vector<cv::Mat> ch(3);
-    cv::split(f32, ch);
-    std::vector<float> out(CHW_SIZE);
-    for (int c = 0; c < 3; ++c) {
-        float* dst = out.data() + c * NET_H * NET_W;
-        const float* src = reinterpret_cast<const float*>(ch[c].data);
-        for (int i = 0; i < NET_H * NET_W; ++i)
-            dst[i] = (src[i] - MEAN[c]) / STD[c];
+    rgb.convertTo(float_image, CV_32FC3, 1.0 / 255.0);
+
+    std::vector<cv::Mat> channels(3);
+    cv::split(float_image, channels);
+
+    std::vector<float> output(CHW_SIZE);
+    for (int channel = 0; channel < 3; ++channel) {
+        float* destination = output.data() + channel * NET_H * NET_W;
+        const float* source =
+            reinterpret_cast<const float*>(channels[channel].data);
+
+        for (int index = 0; index < NET_H * NET_W; ++index) {
+            destination[index] =
+                (source[index] - MEAN[channel]) / STD[channel];
+        }
     }
-    return out;
+
+    return output;
 }
 
 std::vector<float> chw_01(const cv::Mat& bgr)
 {
-    cv::Mat rgb, f32;
+    cv::Mat rgb;
+    cv::Mat float_image;
     cv::cvtColor(bgr, rgb, cv::COLOR_BGR2RGB);
-    rgb.convertTo(f32, CV_32FC3, 1.0 / 255.0);
-    std::vector<cv::Mat> ch(3);
-    cv::split(f32, ch);
-    std::vector<float> out(CHW_SIZE);
-    for (int c = 0; c < 3; ++c)
-        std::memcpy(out.data() + c * NET_H * NET_W, ch[c].data,
-                    static_cast<std::size_t>(NET_H * NET_W) * sizeof(float));
-    return out;
-}
+    rgb.convertTo(float_image, CV_32FC3, 1.0 / 255.0);
 
-std::string find_model(const std::string& bundle_name, const std::string& core = "core0") {
-    //const std::string local  = "modules/models/weights/" + filename;
+    std::vector<cv::Mat> channels(3);
+    cv::split(float_image, channels);
 
+    std::vector<float> output(CHW_SIZE);
+    for (int channel = 0; channel < 3; ++channel) {
+        std::memcpy(
+            output.data() + channel * NET_H * NET_W,
+            channels[channel].data,
+            static_cast<std::size_t>(NET_H * NET_W) * sizeof(float));
+    }
 
-    //models are stored in modules/models/bundles/name_core0/name.msgpack
-    const std::string local  = "modules/models/bundles/" + bundle_name + "_" + core + "/" + bundle_name + ".msgpack";
-
-    if (std::filesystem::exists(local))  return local;
-
-    throw std::runtime_error("Config file not found: " + bundle_name + " (tried: " + local + ")");
+    return output;
 }
 
 }  // namespace
 
-void LatencyStats::update(double pre_, double ad_, double as_, double asp_, double wall_)
+void LatencyStats::update(
+    double pre_ms,
+    double autodrive_ms,
+    double autosteer_ms,
+    double autospeed_ms,
+    double inference_ms,
+    double wall_ms)
 {
-    pre = pre_; ad = ad_; as = as_; asp = asp_; wall = wall_;
+    pre = pre_ms;
+    ad = autodrive_ms;
+    as = autosteer_ms;
+    asp = autospeed_ms;
+    inference = inference_ms;
+    wall = wall_ms;
 }
 
 void LatencyStats::print() const
 {
-    const double total = pre + wall;
-    VP_INFO("Latency  pre=%.1f ms  AD=%.1f ms  AS=%.1f ms  ASp=%.1f ms  "
-            "parallel=%.1f ms  wall=%.1f ms  %.0f fps",
-            pre, ad, as, asp, wall, total, total > 0 ? 1000.0 / total : 0.0);
+    VP_INFO(
+        "Latency pre=%.2f ms AutoDrive=%.2f ms AutoSteer=%.2f ms "
+        "AutoSpeed=%.2f ms inference=%.2f ms wall=%.2f ms",
+        pre,
+        ad,
+        as,
+        asp,
+        inference,
+        wall);
 }
 
-void LatencyStats::reset() { *this = {}; }
+void LatencyStats::reset()
+{
+    *this = {};
+}
 
 InferencePipeline::InferencePipeline(const Config& cfg)
-    : auto_drive_(cfg.auto_drive_model_path.empty() ? find_model("autodrive", cfg.core) : cfg.auto_drive_model_path)
-    , auto_steer_(cfg.auto_steer_model_path.empty() ? find_model("autosteer", cfg.core) : cfg.auto_steer_model_path)
-    , auto_speed_(cfg.auto_speed_model_path.empty() ? find_model("autospeed", cfg.core) : cfg.auto_speed_model_path)
+    : visionpilot_(
+          cfg.auto_drive_model_path,
+          cfg.auto_steer_model_path,
+          cfg.auto_speed_model_path)
 {
-    fusion::LongitudinalFusion::Config lc;
-    lc.debug           = cfg.fusion_debug;
-    long_fusion_ = fusion::LongitudinalFusion{lc};
+    fusion::LongitudinalFusion::Config longitudinal_config;
+    longitudinal_config.debug = cfg.fusion_debug;
+    long_fusion_ = fusion::LongitudinalFusion{longitudinal_config};
 
-    fusion::LateralFusion::Config latc;
-    latc.debug      = cfg.fusion_debug;
-    latc.cte_bias_m = cfg.cte_bias_m;
-    lat_fusion_ = fusion::LateralFusion{latc};
+    fusion::LateralFusion::Config lateral_config;
+    lateral_config.debug = cfg.fusion_debug;
+    lateral_config.cte_bias_m = cfg.cte_bias_m;
+    lat_fusion_ = fusion::LateralFusion{lateral_config};
 }
-
-// V matrix — warped BEV 1024×512 → world.  Matches lateral/longitudinal fusion H_.
-// DO NOT MODIFY — must stay in sync with the hardcoded H_ in both fusion modules.
-static const cv::Matx33d kV(
-     0.00209514907, -0.000941721466, -9.24906396,
-     0.00662758637, -0.000352940531, -3.33396502,
-     0.000120077371, -0.00411343505,  1.0);
 
 void InferencePipeline::set_H_resized(const cv::Mat& H, cv::Size raw_size)
 {
-    // H_resized: resized_px → world  (AutoSteer / AutoSpeed path)
-    // Preprocessor: top-crop to 2:1, then resize → 1024×512.
-    //   u_raw = u_r · (raw_w / 1024)
-    //   v_raw = v_r · (crop_h / 512) + crop_top
-    //   world = H × raw_px  ⟹  H_resized = H × T
     cv::Mat H64;
     H.convertTo(H64, CV_64F);
 
-    const int crop_top = compute_top_crop_2_1(raw_size.height, raw_size.width);
-    const double crop_h = static_cast<double>(raw_size.height - crop_top);
-    const double sx = static_cast<double>(raw_size.width) / 1024.0;
-    const double sy = crop_h / 512.0;
+    const int crop_top =
+        compute_top_crop_2_1(raw_size.height, raw_size.width);
+    const double crop_height =
+        static_cast<double>(raw_size.height - crop_top);
+    const double scale_x = static_cast<double>(raw_size.width) / NET_W;
+    const double scale_y = crop_height / NET_H;
 
-    const cv::Matx33d T(sx, 0,  0,
-                        0,  sy, static_cast<double>(crop_top),
-                        0,   0, 1);
+    const cv::Matx33d transform(
+        scale_x, 0.0, 0.0,
+        0.0, scale_y, static_cast<double>(crop_top),
+        0.0, 0.0, 1.0);
 
-    const cv::Mat H_resized = H64 * cv::Mat(T);
+    H_resized_ = H64 * cv::Mat(transform);
+    cv::Mat inverse = H_resized_.inv();
+    inverse.convertTo(H_world2resized_, CV_32F);
 
-    H_resized_ = H_resized.clone();
-    cv::Mat H64_inv = H_resized.inv();   // MatExpr → cv::Mat
-    H64_inv.convertTo(H_world2resized_, CV_32F);
     lat_fusion_.set_H(H_resized_);
     long_fusion_.set_H(H_resized_);
-    VP_INFO("[Pipeline] H_resized set — raw=%dx%d  top_crop=%d  sx=%.4f sy=%.4f",
-            raw_size.width, raw_size.height, crop_top, sx, sy);
+
+    VP_INFO(
+        "[Pipeline] H_resized set raw=%dx%d top_crop=%d sx=%.4f sy=%.4f",
+        raw_size.width,
+        raw_size.height,
+        crop_top,
+        scale_x,
+        scale_y);
 }
 
-std::optional<InferenceFrameResult> InferencePipeline::process(const cv::Mat& warped,
-                                                               const cv::Mat& resized)
+std::optional<visionpilot::common::InferenceFrameResult>
+InferencePipeline::process(const cv::Mat& warped, const cv::Mat& resized)
 {
-    using Clock = std::chrono::steady_clock;
-    using Ms    = std::chrono::duration<double, std::milli>;
+    if (warped.empty()) {
+        throw std::invalid_argument("InferencePipeline received an empty warped frame");
+    }
 
-    // Two-frame buffer is warped (for AutoDrive only)
-    prev_frame_ = curr_frame_.empty() ? warped.clone() : curr_frame_;
-    curr_frame_ = warped.clone();
-    if (frame_buf_count_ < 1) frame_buf_count_ = 1;
-    else                       frame_buf_count_ = 2;
-
+    const auto wall_start = Clock::now();
     ++frame_count_;
-    if (frame_buf_count_ < 2) return std::nullopt;
 
-    // AutoSteer + AutoSpeed use resized if provided, else fall back to warped
-    const cv::Mat& as_input = (!resized.empty()) ? resized : warped;
+    // This is the single current image shared by AutoSteer and AutoSpeed.
+    // Pass resized when those models expect the non-BEV view; leave it empty
+    // when they should consume the warped view.
+    const cv::Mat& steer_speed_frame = resized.empty() ? warped : resized;
 
-    auto t0          = Clock::now();
-    auto prev_imn    = chw_imagenet(prev_frame_);
-    auto curr_imn    = chw_imagenet(curr_frame_);
-    auto curr_01_as  = chw_01(as_input);
-    auto curr_01_asp = curr_01_as;   // shared preprocessing (same image)
-    const double ms_pre = Ms(Clock::now() - t0).count();
+    const auto preprocess_start = Clock::now();
+    auto current_warped_imagenet = chw_imagenet(warped);
+    auto current_steer_speed_01 = chw_01(steer_speed_frame);
+    const double preprocess_ms = elapsedMilliseconds(preprocess_start);
 
-    auto t_wall = Clock::now();
-    auto f_drive = std::async(std::launch::async, [&] {
-        auto t = Clock::now();
-        auto r = auto_drive_.infer(prev_imn.data(), curr_imn.data());
-        return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
-    });
-    auto f_steer = std::async(std::launch::async, [&] {
-        auto t = Clock::now();
-        auto r = auto_steer_.infer(curr_01_as.data());
-        return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
-    });
-    auto f_speed = std::async(std::launch::async, [&] {
-        auto t = Clock::now();
-        auto r = auto_speed_.infer(curr_01_asp.data());
-        return std::make_pair(std::move(r), Ms(Clock::now() - t).count());
-    });
+    // AutoDrive needs t-1. The first frame only initializes history.
+    if (previous_warped_imagenet_.empty()) {
+        previous_warped_imagenet_ = std::move(current_warped_imagenet);
+        return std::nullopt;
+    }
 
-    auto [res_drive, ms_drive] = f_drive.get();
-    auto [res_steer, ms_steer] = f_steer.get();
-    auto [res_speed, ms_speed] = f_speed.get();
-    const double ms_wall = Ms(Clock::now() - t_wall).count();
+    const auto inference_start = Clock::now();
+    const auto visionpilot_result = visionpilot_.infer(
+        previous_warped_imagenet_.data(),
+        current_warped_imagenet.data(),
+        current_steer_speed_01.data());
+    const double measured_inference_ms = elapsedMilliseconds(inference_start);
 
-    InferenceFrameResult out;
-    out.frame_id   = frame_count_;
-    out.wall_ms    = ms_wall;
-    out.pre_ms     = ms_pre;
-    out.ad_ms      = ms_drive;
-    out.as_ms      = ms_steer;
-    out.asp_ms     = ms_speed;
-    out.auto_drive = res_drive;
-    out.auto_steer = res_steer;
-    out.auto_speed = res_speed;
-    out.cipo       = long_fusion_.update(res_drive, res_speed, warped);
-    out.lateral    = lat_fusion_.update(res_steer, res_drive);
+    const auto& timings = visionpilot_.last_timings();
 
-    stats_.update(ms_pre, ms_drive, ms_steer, ms_speed, ms_wall);
-    return out;
+    visionpilot::common::InferenceFrameResult output{};
+    output.frame_id = frame_count_;
+    output.pre_ms = preprocess_ms;
+    output.ad_ms = timings.autodrive_ms;
+    output.as_ms = timings.autosteer_ms;
+    output.asp_ms = timings.autospeed_ms;
+    output.auto_drive = visionpilot_result.inference.auto_drive;
+    output.auto_steer = visionpilot_result.inference.auto_steer;
+    output.auto_speed = visionpilot_result.inference.auto_speed;
+    output.cipo = long_fusion_.update(output.auto_drive, output.auto_speed, warped);
+    output.lateral = lat_fusion_.update(output.auto_steer, output.auto_drive);
+    output.wall_ms = elapsedMilliseconds(wall_start);
+
+    previous_warped_imagenet_ = std::move(current_warped_imagenet);
+
+    stats_.update(
+        preprocess_ms,
+        timings.autodrive_ms,
+        timings.autosteer_ms,
+        timings.autospeed_ms,
+        measured_inference_ms,
+        output.wall_ms);
+
+    return output;
 }
 
 void InferencePipeline::reset()
 {
-    prev_frame_.release();
-    curr_frame_.release();
-    frame_buf_count_ = 0;
+    previous_warped_imagenet_.clear();
     frame_count_ = 0;
     stats_.reset();
     long_fusion_.reset();

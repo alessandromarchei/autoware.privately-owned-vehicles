@@ -3,10 +3,11 @@ cmake_minimum_required(VERSION 3.21.0)
 find_package(OpenCV REQUIRED COMPONENTS core imgproc)
 
 add_library(models
-    src/auto_drive.cpp
-    src/auto_steer.cpp
-    src/auto_speed.cpp
+    # src/auto_drive.cpp
+    # src/auto_steer.cpp
+    # src/auto_speed.cpp
     src/inference.cpp
+    src/visionpilot.cpp
 )
 
 target_include_directories(models

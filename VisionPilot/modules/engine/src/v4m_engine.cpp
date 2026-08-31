@@ -1,15 +1,23 @@
 #include <engine/v4m_engine.hpp>
 
+#include <chrono>
 #include <cstdio>
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
 
 namespace visionpilot::engine {
+namespace {
+
+using Clock = std::chrono::steady_clock;
+using Milliseconds = std::chrono::duration<double, std::milli>;
+
+}  // namespace
 
 V4MEngine::V4MEngine()
 {
-    std::cout << "[V4MEngine] Creating engine" << std::endl;
+    std::cout << "[V4MEngine] Creating reusable single-session engine"
+              << std::endl;
 }
 
 V4MEngine::V4MEngine(const std::string& model_path)
@@ -17,419 +25,201 @@ V4MEngine::V4MEngine(const std::string& model_path)
 {
     if (create_session(model_path) != 0) {
         throw std::runtime_error(
-            "Failed to create V4M session for model: " + model_path
-        );
+            "Failed to create V4M session for: " + model_path);
     }
 }
 
 int V4MEngine::create_session(const std::string& model_path)
 {
-    if (session_initialized_) {
-        std::cerr
-            << "[V4MEngine] Session already initialized for model: "
-            << model_path_
-            << std::endl;
+    if (session_initialized_ || network_ != nullptr || exfwk_ != nullptr) {
+        std::cerr << "[V4MEngine] A model session is already active: "
+                  << model_path_ << std::endl;
         return -1;
     }
 
     model_path_ = model_path;
+    last_run_ms_ = 0.0;
 
-    // -------------------------------------------------------------------------
-    // 1. Initialize OSAL
-    // -------------------------------------------------------------------------
-
-    const auto osal_ret = R_OSAL_Initialize();
-
+    auto osal_ret = R_OSAL_Initialize();
     if (osal_ret != OSAL_RETURN_OK) {
-        std::cerr
-            << "[V4MEngine] OSAL initialization failed: "
-            << static_cast<int>(osal_ret)
-            << std::endl;
+        std::cerr << "[V4MEngine] OSAL initialization failed: "
+                  << static_cast<int>(osal_ret) << std::endl;
+        cleanup();
         return -1;
     }
-
     osal_initialized_ = true;
 
-    // -------------------------------------------------------------------------
-    // 2. Create Buffer Manager
-    // -------------------------------------------------------------------------
-
     buffer_manager_ = createBufferManager();
-
     if (buffer_manager_ == nullptr) {
-        std::cerr
-            << "[V4MEngine] Failed to create BufferManager"
-            << std::endl;
-
+        std::cerr << "[V4MEngine] Failed to create BufferManager" << std::endl;
         cleanup();
         return -1;
     }
-
-    // -------------------------------------------------------------------------
-    // 3. Create execution framework
-    // -------------------------------------------------------------------------
-
-    exfwk_ = createExfwk(buffer_manager_);
-
-    if (exfwk_ == nullptr) {
-        std::cerr
-            << "[V4MEngine] Failed to create ExecFWK"
-            << std::endl;
-
-        cleanup();
-        return -1;
-    }
-
-    exfwk_initialized_ = true;
-
-    // -------------------------------------------------------------------------
-    // 4. Load compiled HyCo network
-    // -------------------------------------------------------------------------
 
     try {
-        network_ = std::make_unique<hycoah::Network>(
-            model_path_.c_str()
-        );
-    }
-    catch (const std::exception& e) {
-        std::cerr
-            << "[V4MEngine] Failed to create Network: "
-            << e.what()
-            << std::endl;
-
+        network_ = std::make_unique<hycoah::Network>(model_path_.c_str());
+    } catch (const std::exception& exception) {
+        std::cerr << "[V4MEngine] Failed to load " << model_path_ << ": "
+                  << exception.what() << std::endl;
         cleanup();
         return -1;
     }
 
-    // -------------------------------------------------------------------------
-    // 5. Read model I/O descriptors
-    // -------------------------------------------------------------------------
+    // Store owned copies. Some HyCoAH SDK versions return descriptor vectors
+    // by value, so references obtained directly from the getter can dangle.
+    input_descs_ = network_->getInputDesc();
+    output_descs_ = network_->getOutputDesc();
 
-    const auto& input_descs = network_->getInputDesc();
-
-    const auto& output_descs = network_->getOutputDesc();
-
-    std::cout
-        << "[V4MEngine] Model: "
-        << model_path_
-        << std::endl;
-
-    std::cout
-        << "[V4MEngine] Inputs: "
-        << input_descs.size()
-        << std::endl;
-
-    for (std::size_t i = 0; i < input_descs.size(); ++i) {
-        const auto& desc = input_descs[i];
-
-        std::cout
-            << "  input[" << i << "]"
-            << " name=" << desc.name
-            << " size=" << desc.size_bytes
-            << " bytes"
-            << std::endl;
-    }
-
-    std::cout
-        << "[V4MEngine] Outputs: "
-        << output_descs.size()
-        << std::endl;
-
-    for (std::size_t i = 0; i < output_descs.size(); ++i) {
-        const auto& desc = output_descs[i];
-
-        std::cout
-            << "  output[" << i << "]"
-            << " name=" << desc.name
-            << " size=" << desc.size_bytes
-            << " bytes"
-            << std::endl;
-    }
-
-    if (input_descs.empty()) {
-        std::cerr
-            << "[V4MEngine] Network has no inputs"
-            << std::endl;
-
+    const auto& input_descs = input_descs_;
+    const auto& output_descs = output_descs_;
+    if (input_descs.empty() || output_descs.empty()) {
+        std::cerr << "[V4MEngine] Model has no inputs or outputs: "
+                  << model_path_ << std::endl;
         cleanup();
         return -1;
     }
 
-    if (output_descs.empty()) {
-        std::cerr
-            << "[V4MEngine] Network has no outputs"
-            << std::endl;
+    input_container_ids_.assign(input_descs.size(), 0);
+    output_container_ids_.assign(output_descs.size(), 0);
 
+    std::unordered_map<hycoah::PipelineId,
+                       std::vector<hycoah::InputMemory>> user_inputs;
+    std::unordered_map<hycoah::PipelineId,
+                       std::vector<hycoah::OutputMemory>> user_outputs;
+
+    auto& pipeline_inputs = user_inputs[PIPELINE_ID];
+    auto& pipeline_outputs = user_outputs[PIPELINE_ID];
+    pipeline_inputs.reserve(input_descs.size());
+    pipeline_outputs.reserve(output_descs.size());
+
+    // Same explicit descriptor-driven allocation used by the working dummy app.
+    for (std::size_t index = 0; index < input_descs.size(); ++index) {
+        const auto bytes =
+            static_cast<std::size_t>(input_descs[index].size_bytes);
+        createBuffer(buffer_manager_, input_container_ids_[index], bytes);
+        pipeline_inputs.push_back({
+            buffer_manager_,
+            input_container_ids_[index],
+            0,
+            static_cast<std::int64_t>(bytes),
+            0
+        });
+    }
+
+    for (std::size_t index = 0; index < output_descs.size(); ++index) {
+        const auto bytes =
+            static_cast<std::size_t>(output_descs[index].size_bytes);
+        createBuffer(buffer_manager_, output_container_ids_[index], bytes);
+        pipeline_outputs.push_back({
+            buffer_manager_,
+            output_container_ids_[index],
+            0,
+            static_cast<std::int64_t>(bytes),
+            0
+        });
+    }
+
+    exfwk_ = createExfwk(buffer_manager_);
+    if (exfwk_ == nullptr) {
+        std::cerr << "[V4MEngine] Failed to create ExecFWK" << std::endl;
         cleanup();
         return -1;
     }
+    exfwk_initialized_ = true;
 
-    // -------------------------------------------------------------------------
-    // 6. Create JobContainer
-    // -------------------------------------------------------------------------
-
-    job_container_ = std::make_unique<JobContainer>();
-
-    // -------------------------------------------------------------------------
-    // 7. Automatic I/O memory management
-    //
-    // IMPORTANT:
-    //
-    // These maps are intentionally EMPTY.
-    //
-    // This tells ArtifactHelper:
-    //
-    //     "Allocate all input and output memories automatically."
-    //
-    // No assumptions are made about:
-    //   - number of inputs
-    //   - number of outputs
-    //   - sizes
-    //   - offsets
-    //   - physical buffer layout
-    // -------------------------------------------------------------------------
-
-    std::unordered_map<
-        hycoah::PipelineId,
-        std::vector<hycoah::InputMemory>
-    > user_input_memories;
-
-    std::unordered_map<
-        hycoah::PipelineId,
-        std::vector<hycoah::OutputMemory>
-    > user_output_memories;
-
-    // -------------------------------------------------------------------------
-    // 8. Configure ArtifactHelper
-    // -------------------------------------------------------------------------
-
-    const auto config_ret = helper_.config(
+    helper_ = std::make_unique<hycoah::ArtifactHelper>();
+    const auto config_ret = helper_->config(
         std::vector<hycoah::Network>{*network_},
-        hycoah::st_hycoah_config_t{}
-    );
-
-    if (config_ret !=
-        hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
-
-        std::cerr
-            << "[V4MEngine] ArtifactHelper config failed: "
-            << static_cast<int>(config_ret)
-            << std::endl;
-
+        hycoah::st_hycoah_config_t{});
+    if (config_ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
+        std::cerr << "[V4MEngine] ArtifactHelper config failed for "
+                  << model_path_ << ": " << static_cast<int>(config_ret)
+                  << std::endl;
         cleanup();
         return -1;
     }
 
-    // -------------------------------------------------------------------------
-    // 9. Initialize ArtifactHelper
-    //
-    // Empty maps => automatic I/O buffer allocation.
-    // -------------------------------------------------------------------------
-
-    const auto init_ret = helper_.init(
+    const auto init_ret = helper_->init(
         *network_,
         buffer_manager_,
         exfwk_,
-        user_input_memories,
-        user_output_memories
-    );
-
-    if (init_ret !=
-        hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
-
-        std::cerr
-            << "[V4MEngine] ArtifactHelper init failed: "
-            << static_cast<int>(init_ret)
-            << std::endl;
-
+        user_inputs,
+        user_outputs);
+    if (init_ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
+        std::cerr << "[V4MEngine] ArtifactHelper init failed for "
+                  << model_path_ << ": " << static_cast<int>(init_ret)
+                  << std::endl;
         cleanup();
         return -1;
     }
-
     helper_initialized_ = true;
 
-    // -------------------------------------------------------------------------
-    // 10. Retrieve ACTUAL buffers allocated by ArtifactHelper
-    // -------------------------------------------------------------------------
-
-    input_memories_ =
-        network_->getInputMemory(PIPELINE_ID);
-
-    output_memories_ =
-        network_->getOutputMemory(PIPELINE_ID);
-
-    if (input_memories_.size() != input_descs.size()) {
-        std::cerr
-            << "[V4MEngine] Input memory count mismatch. "
-            << "Descriptors=" << input_descs.size()
-            << ", memories=" << input_memories_.size()
-            << std::endl;
-
+    input_memories_ = network_->getInputMemory(PIPELINE_ID);
+    output_memories_ = network_->getOutputMemory(PIPELINE_ID);
+    if (input_memories_.size() != input_descs.size() ||
+        output_memories_.size() != output_descs.size()) {
+        std::cerr << "[V4MEngine] Runtime I/O count mismatch for "
+                  << model_path_ << std::endl;
         cleanup();
         return -1;
     }
 
-    if (output_memories_.size() != output_descs.size()) {
-        std::cerr
-            << "[V4MEngine] Output memory count mismatch. "
-            << "Descriptors=" << output_descs.size()
-            << ", memories=" << output_memories_.size()
-            << std::endl;
-
-        cleanup();
-        return -1;
-    }
-
-    std::cout
-        << "[V4MEngine] I/O buffers allocated successfully"
-        << std::endl;
-
-    for (std::size_t i = 0; i < input_memories_.size(); ++i) {
-        const auto& mem = input_memories_[i];
-
-        std::cout
-            << "  input_memory[" << i << "]"
-            << " ptr=" << mem.cpuPtr()
-            << " size=" << mem.size_bytes
-            << " container=" << mem.container_id
-            << " buffer=" << mem.buffer_id
-            << " offset=" << mem.offset
-            << std::endl;
-    }
-
-    for (std::size_t i = 0; i < output_memories_.size(); ++i) {
-        const auto& mem = output_memories_[i];
-
-        std::cout
-            << "  output_memory[" << i << "]"
-            << " ptr=" << mem.cpuPtr()
-            << " size=" << mem.size_bytes
-            << " container=" << mem.container_id
-            << " buffer=" << mem.buffer_id
-            << " offset=" << mem.offset
-            << std::endl;
-    }
-
-    // -------------------------------------------------------------------------
-    // 11. Build execution jobs once
-    // -------------------------------------------------------------------------
-
+    job_container_ = std::make_unique<JobContainer>();
     std::vector<JobId> dependencies;
-
-    const auto job_ret = network_->addJobs(
+    const auto jobs_ret = network_->addJobs(
         job_container_.get(),
         PIPELINE_ID,
         dependencies,
-        job_ids_
-    );
-
-    if (job_ret !=
-        hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
-
-        std::cerr
-            << "[V4MEngine] addJobs failed: "
-            << static_cast<int>(job_ret)
-            << std::endl;
-
+        job_ids_);
+    if (jobs_ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
+        std::cerr << "[V4MEngine] addJobs failed for " << model_path_
+                  << ": " << static_cast<int>(jobs_ret) << std::endl;
         cleanup();
         return -1;
     }
 
-    std::cout
-        << "[V4MEngine] Created "
-        << job_ids_.size()
-        << " execution jobs"
-        << std::endl;
-
-    for (const auto job_id : job_ids_) {
-        std::cout
-            << "  job_id="
-            << static_cast<int>(job_id)
-            << std::endl;
-    }
-
     session_initialized_ = true;
-
-    std::cout
-        << "[V4MEngine] Session ready"
-        << std::endl;
-
+    std::cout << "[V4MEngine] Active model: " << model_path_ << std::endl;
     return 0;
 }
-
-
-// =============================================================================
-// Inference
-// =============================================================================
 
 int V4MEngine::run()
 {
-    if (!session_initialized_ ||
-        network_ == nullptr ||
-        exfwk_ == nullptr ||
-        job_container_ == nullptr) {
-
-        std::cerr
-            << "[V4MEngine] run() called before session initialization"
-            << std::endl;
-
+    if (!session_initialized_ || network_ == nullptr ||
+        exfwk_ == nullptr || job_container_ == nullptr) {
+        std::cerr << "[V4MEngine] run() called without an active session"
+                  << std::endl;
         return -1;
     }
 
-    // CPU-written inputs -> hardware-visible data.
+    const auto start = Clock::now();
+
     auto ret = network_->syncIO(
-        hycoah::e_sync_direction_t::H2D,
-        PIPELINE_ID
-    );
-
+        hycoah::e_sync_direction_t::H2D, PIPELINE_ID);
     if (ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
-        std::cerr
-            << "[V4MEngine] H2D sync failed: "
-            << static_cast<int>(ret)
-            << std::endl;
-
+        std::cerr << "[V4MEngine] H2D sync failed: "
+                  << static_cast<int>(ret) << std::endl;
         return -1;
     }
 
-    // Execute already prepared JobContainer.
-    const auto exec_ret = execute(
-        exfwk_,
-        job_container_.get()
-    );
-
-    if (exec_ret !=
-        hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
-
-        std::cerr
-            << "[V4MEngine] Execution failed: "
-            << static_cast<int>(exec_ret)
-            << std::endl;
-
+    const auto execute_ret = execute(exfwk_, job_container_.get());
+    if (execute_ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
+        std::cerr << "[V4MEngine] Execution failed: "
+                  << static_cast<int>(execute_ret) << std::endl;
         return -1;
     }
 
-    // Hardware-written outputs -> CPU-visible data.
     ret = network_->syncIO(
-        hycoah::e_sync_direction_t::D2H,
-        PIPELINE_ID
-    );
-
+        hycoah::e_sync_direction_t::D2H, PIPELINE_ID);
     if (ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
-        std::cerr
-            << "[V4MEngine] D2H sync failed: "
-            << static_cast<int>(ret)
-            << std::endl;
-
+        std::cerr << "[V4MEngine] D2H sync failed: "
+                  << static_cast<int>(ret) << std::endl;
         return -1;
     }
 
+    last_run_ms_ = Milliseconds(Clock::now() - start).count();
     return 0;
 }
-
-
-// =============================================================================
-// I/O descriptors
-// =============================================================================
 
 std::size_t V4MEngine::num_inputs() const noexcept
 {
@@ -443,151 +233,134 @@ std::size_t V4MEngine::num_outputs() const noexcept
 
 const hycoah::InputDesc& V4MEngine::input_desc(std::size_t index) const
 {
-    if (network_ == nullptr) {
-        throw std::runtime_error(
-            "V4MEngine session is not initialized"
-        );
+    if (!session_initialized_) {
+        throw std::runtime_error("No active V4M model session");
     }
-
-    return network_->getInputDesc().at(index);
+    return input_descs_.at(index);
 }
 
-const hycoah::OutputDesc&
-V4MEngine::output_desc(std::size_t index) const
+const hycoah::OutputDesc& V4MEngine::output_desc(std::size_t index) const
 {
-    if (network_ == nullptr) {
-        throw std::runtime_error(
-            "V4MEngine session is not initialized"
-        );
+    if (!session_initialized_) {
+        throw std::runtime_error("No active V4M model session");
     }
-
-    return network_->getOutputDesc().at(index);
+    return output_descs_.at(index);
 }
-
-
-// =============================================================================
-// Direct I/O access
-// =============================================================================
 
 void* V4MEngine::input_ptr(std::size_t index)
 {
-    return input_memories_.at(index).cpuPtr();
+    auto& memory = input_memories_.at(index);
+    return static_cast<std::uint8_t*>(memory.cpuPtr()) + memory.offset;
 }
 
 const void* V4MEngine::input_ptr(std::size_t index) const
 {
-    return input_memories_.at(index).cpuPtr();
+    const auto& memory = input_memories_.at(index);
+    return static_cast<const std::uint8_t*>(memory.cpuPtr()) + memory.offset;
 }
 
 void* V4MEngine::output_ptr(std::size_t index)
 {
-    return output_memories_.at(index).cpuPtr();
+    auto& memory = output_memories_.at(index);
+    return static_cast<std::uint8_t*>(memory.cpuPtr()) + memory.offset;
 }
 
 const void* V4MEngine::output_ptr(std::size_t index) const
 {
-    return output_memories_.at(index).cpuPtr();
+    const auto& memory = output_memories_.at(index);
+    return static_cast<const std::uint8_t*>(memory.cpuPtr()) + memory.offset;
 }
 
 std::size_t V4MEngine::input_size(std::size_t index) const
 {
-    return static_cast<std::size_t>(
-        input_memories_.at(index).size_bytes
-    );
+    return static_cast<std::size_t>(input_memories_.at(index).size_bytes);
 }
 
 std::size_t V4MEngine::output_size(std::size_t index) const
 {
-    return static_cast<std::size_t>(
-        output_memories_.at(index).size_bytes
-    );
+    return static_cast<std::size_t>(output_memories_.at(index).size_bytes);
 }
 
-
-// =============================================================================
-// Cleanup
-// =============================================================================
+void V4MEngine::close_session() noexcept
+{
+    cleanup();
+}
 
 void V4MEngine::cleanup() noexcept
 {
     session_initialized_ = false;
-
-    // JobContainer belongs to the application.
     job_container_.reset();
     job_ids_.clear();
-
     input_memories_.clear();
     output_memories_.clear();
 
-    // Follow the same teardown ordering used by the Renesas sample:
-    // ExecFWK quit -> ArtifactHelper deinit -> BufferManager close -> OSAL deinit.
-
+    // Exact successful dummy-app teardown order.
     if (exfwk_ != nullptr) {
         if (exfwk_initialized_) {
             const auto ret = exfwk_->exfwk_quit();
-
             if (ret != RETURN_EXFWK_OK) {
-                std::fprintf(
-                    stderr,
-                    "[V4MEngine] ExecFWK quit failed: %d\n",
-                    static_cast<int>(ret)
-                );
+                std::fprintf(stderr, "[V4MEngine] ExecFWK quit failed: %d\n",
+                             static_cast<int>(ret));
             }
         }
-
         delete exfwk_;
         exfwk_ = nullptr;
         exfwk_initialized_ = false;
     }
 
-    if (helper_initialized_) {
-        const auto ret = helper_.deinit();
-
-        if (ret !=
-            hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
-
-            std::fprintf(
-                stderr,
-                "[V4MEngine] ArtifactHelper deinit failed: %d\n",
-                static_cast<int>(ret)
-            );
+    if (helper_ != nullptr && helper_initialized_) {
+        const auto ret = helper_->deinit();
+        if (ret != hycoah::e_hycoah_return_t::RETURN_HYCOAH_OK) {
+            std::fprintf(stderr, "[V4MEngine] Helper deinit failed: %d\n",
+                         static_cast<int>(ret));
         }
-
         helper_initialized_ = false;
     }
-
+    helper_.reset();
     network_.reset();
 
     if (buffer_manager_ != nullptr) {
-        const auto ret = buffer_manager_->R_BufMgr_Close();
-
-        if (ret != RETURN_BUFMNGR_OK) {
-            std::fprintf(
-                stderr,
-                "[V4MEngine] BufferManager close failed: %d\n",
-                static_cast<int>(ret)
-            );
+        for (const int container_id : input_container_ids_) {
+            if (buffer_manager_->R_BufMgr_DeleteContainer(container_id) !=
+                RETURN_BUFMNGR_OK) {
+                std::fprintf(stderr,
+                             "[V4MEngine] Failed deleting input container %d\n",
+                             container_id);
+            }
         }
+        for (const int container_id : output_container_ids_) {
+            if (buffer_manager_->R_BufMgr_DeleteContainer(container_id) !=
+                RETURN_BUFMNGR_OK) {
+                std::fprintf(stderr,
+                             "[V4MEngine] Failed deleting output container %d\n",
+                             container_id);
+            }
+        }
+        input_container_ids_.clear();
+        output_container_ids_.clear();
 
+        const auto ret = buffer_manager_->R_BufMgr_Close();
+        if (ret != RETURN_BUFMNGR_OK) {
+            std::fprintf(stderr, "[V4MEngine] BufferManager close failed: %d\n",
+                         static_cast<int>(ret));
+        }
         delete buffer_manager_;
         buffer_manager_ = nullptr;
     }
 
     if (osal_initialized_) {
         const auto ret = R_OSAL_Deinitialize();
-
         if (ret != OSAL_RETURN_OK) {
-            std::fprintf(
-                stderr,
-                "[V4MEngine] OSAL deinitialization failed: %d\n",
-                static_cast<int>(ret)
-            );
+            std::fprintf(stderr, "[V4MEngine] OSAL deinit failed: %d\n",
+                         static_cast<int>(ret));
         }
-
         osal_initialized_ = false;
     }
-}
 
+    input_descs_.clear();
+    output_descs_.clear();
+    model_path_.clear();
+}
 
 V4MEngine::~V4MEngine()
 {

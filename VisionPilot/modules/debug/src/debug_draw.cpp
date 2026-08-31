@@ -279,7 +279,7 @@ static void paste_rgba(cv::Mat& base, const cv::Mat& overlay, int x, int y)
 // ─── AutoSpeed detections ─────────────────────────────────────────────────────
 
 static void draw_autospeed_detections(cv::Mat& img,
-                                       const common::AutoSpeedOutput& speed)
+                                       const visionpilot::common::AutoSpeedOutput& speed)
 {
     if (!speed.valid) return;
     for (const auto& d : speed.detections) {
@@ -310,7 +310,7 @@ static cv::Point world_to_bev_px(float x_fwd, float y_lat,
 }
 
 static void draw_bev_fused_ego_path(cv::Mat& img,
-                                     const fusion::LateralFusionEstimate& lat,
+                                     const visionpilot::common::LateralFusionEstimate& lat,
                                      const OverlayLayout& L)
 {
     if (!lat.path_valid) return;
@@ -351,7 +351,7 @@ static void draw_bev_fused_ego_path(cv::Mat& img,
 
 // Back-project fused polynomial onto camera image via H⁻¹ (world → pixels).
 static void draw_fused_path_on_image(cv::Mat& img,
-                                      const fusion::LateralFusionEstimate& lat,
+                                      const visionpilot::common::LateralFusionEstimate& lat,
                                       const cv::Mat& H_inv)
 {
     if (!lat.path_valid || H_inv.empty()) return;
@@ -390,7 +390,7 @@ static void draw_fused_path_on_image(cv::Mat& img,
 }
 
 static void draw_autosteer_ego_path(cv::Mat& img,
-                                     const common::AutoSteerOutput& steer)
+                                     const visionpilot::common::AutoSteerOutput& steer)
 {
     if (!steer.valid) return;
 
@@ -591,7 +591,7 @@ void annotate_frame(cv::Mat& frame, const DebugView& view,
 }
 
 bool visualize(cv::Mat& frame,
-               const models::InferenceFrameResult& result,
+               const visionpilot::common::InferenceFrameResult& result,
                const std::string& src_label,
                const std::string& wheel_dir,
                const cv::Mat& H_world_to_px)

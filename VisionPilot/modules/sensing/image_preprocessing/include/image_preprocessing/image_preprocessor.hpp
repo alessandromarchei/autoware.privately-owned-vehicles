@@ -6,7 +6,7 @@
 
 class ImagePreprocessor {
 public:
-    ImagePreprocessor(const std::string& homography_path);
+    ImagePreprocessor();
 
     ~ImagePreprocessor() = default;
 

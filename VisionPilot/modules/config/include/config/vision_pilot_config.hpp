@@ -8,12 +8,13 @@
 namespace vpe = visionpilot::engine;
 namespace vpm = visionpilot::models;
 
-enum class SourceMode { Ros2 = 0, V4l2 = 1, Video = 2 };
+enum class SourceMode { Ros2 = 0, V4l2 = 1, Video = 2 , Frames = 3, TCPIP_Frames = 4};
 
 struct SourceConfig {
-    SourceMode  mode         = SourceMode::Video;
+    SourceMode  mode         = SourceMode::Frames;
     std::string input_video;
     std::string input_vehicle_speed;
+    std::string test_frames_path;
     std::string dataset;
     bool        video_realtime = true;
     bool        video_loop     = false;

@@ -13,7 +13,7 @@ Planner::Planner(const double speed_limit, const double Lf)
 {
 }
 
-Plan Planner::compute_plan(
+visionpilot::common::Plan Planner::compute_plan(
     const double cte,
     const double epsi,
     const double kappa,

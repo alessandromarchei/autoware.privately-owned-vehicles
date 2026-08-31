@@ -2,17 +2,17 @@
 #include <common/utils.hpp>
 #include <image_preprocessing/image_preprocessor.hpp>
 
-ImagePreprocessor::ImagePreprocessor(const std::string& homography_path)
+
+ImagePreprocessor::ImagePreprocessor()
 {
-    VP_INFO("Loading homography matrix from: %s", homography_path.c_str());
-    C_ = load_matrix(homography_path, "C");
+    VP_INFO("Loading homography matrix from: %s", "homography_C_matrix.yaml");
+    C_ = load_matrix("share/config/homography_C_matrix.yaml", "C");
 }
 
 void ImagePreprocessor::preprocess(const cv::Mat& image, cv::Mat& warped_image, cv::Mat& resized_image,
                                    const cv::Size& size) const
 {
-    cv::warpPerspective(image, warped_image, C_, cv::Size(1024, 512), cv::INTER_LINEAR,
-                        cv::BORDER_REFLECT_101);
+    cv::warpPerspective(image, warped_image, C_, cv::Size(1024, 512), cv::INTER_LINEAR, cv::BORDER_REFLECT_101);
 
     // AutoSteer / AutoSpeed: top-crop to 2:1 → resize 1024×512
     // (matches Python --preprocess top-crop-2-1 / auto_steer_infer.py).
