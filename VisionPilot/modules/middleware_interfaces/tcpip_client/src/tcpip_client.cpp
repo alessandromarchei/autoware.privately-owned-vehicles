@@ -1,6 +1,7 @@
 #include <tcp/tcp_frame_client.hpp>
 
 #include <tcp/wire_protocol.hpp>
+#include <tcp/flatbuffer_codec.hpp>
 
 #include <array>
 #include <cerrno>
@@ -612,34 +613,37 @@ bool TCPClient::send_result(
             false);
     }
 
-    const auto payload = detail::encode_result(result);
+    // -------------------------------------------------------------------------
+    // Serialize VisionPilotOutput using FlatBuffers
+    // -------------------------------------------------------------------------
+
+    const std::vector<std::uint8_t> payload = encode_result(result);
 
     if (payload.empty())
     {
-        std::cerr
-            << "[TCPClient] encode_result returned an empty payload"
-            << " frame=" << result.inference.frame_id
-            << " detections="
-            << result.inference.auto_speed.detections.size()
-            << " steering="
-            << result.plan.steering.size()
-            << " warnings="
-            << result.plan.warnings.size()
-            << '\n';
-
-        return false;
+        return fail_socket_locked(
+            result_socket_fd_,
+            "failed to encode VisionPilotOutput",
+            false
+        );
     }
 
+    /*
+     * MessageHeader::payload_size è uint32_t.
+     */
     if (payload.size() >
         std::numeric_limits<std::uint32_t>::max())
     {
-        std::cerr
-            << "[TCPClient] Result payload is too large: "
-            << payload.size()
-            << '\n';
-
-        return false;
+        return fail_socket_locked(
+            result_socket_fd_,
+            "VisionPilotOutput payload exceeds uint32_t",
+            false
+        );
     }
+
+    // -------------------------------------------------------------------------
+    // Create the existing TCP framing header
+    // -------------------------------------------------------------------------
 
     const MessageHeader header{
         MessageType::Result,
@@ -647,23 +651,39 @@ bool TCPClient::send_result(
         result.inference.frame_id
     };
 
-    const auto wireHeader = detail::encode_header(header);
+    const std::array<std::uint8_t, WIRE_HEADER_SIZE>
+        wire_header =
+            detail::encode_header(header);
 
-    //dump every element of VisionPilotOutput
-    dump_visionpilot_result(result);
+    // -------------------------------------------------------------------------
+    // Send header followed by FlatBuffer payload
+    // -------------------------------------------------------------------------
 
     if (!detail::send_all(
             result_socket_fd_,
-            wireHeader.data(),
-            wireHeader.size()) ||
-        !detail::send_all(
+            wire_header.data(),
+            wire_header.size()))
+    {
+        return fail_socket_locked(
+            result_socket_fd_,
+            "failed to send result message header"
+        );
+    }
+
+    if (!detail::send_all(
             result_socket_fd_,
             payload.data(),
             payload.size()))
     {
         return fail_socket_locked(
             result_socket_fd_,
-            "failed to send VisionPilotOutput");
+            "failed to send VisionPilotOutput FlatBuffer"
+        );
+    }
+
+    {
+        std::lock_guard state_lock(state_mutex_);
+        last_error_.clear();
     }
 
     return true;

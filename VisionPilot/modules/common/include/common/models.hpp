@@ -134,9 +134,6 @@ struct VisionPilotOutput {
 };
 
 
-void print_visionpilot_output(const VisionPilotOutput& output, bool verbose = false);
-
-
 }
 
 #endif //VISIONPILOT_MODELS_HPP
