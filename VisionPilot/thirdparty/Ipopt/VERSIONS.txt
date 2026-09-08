@@ -1,8 +1,0 @@
-Target: aarch64-linux-gnu (glibc, libgfortran5, C++11 ABI)
-Ipopt 300.1400.1902
-MUMPS sequential 500.900.0
-SPRAL 2025.9.18
-libblastrampoline 5.11.2
-METIS 5.1.3
-OpenBLAS32 0.3.34
-CompilerSupportLibraries 1.5.7 (libgfortran/libquadmath only)

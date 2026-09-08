@@ -240,3 +240,6 @@ VisionPilot/software_defined_vehicle/OpenADKit/**/model-weights/
 
 #msgpack files from renesas hycoah
 **.msgpack
+
+#thirdparty submodules
+thirdparty/
