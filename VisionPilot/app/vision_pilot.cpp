@@ -463,7 +463,10 @@ int main(int argc, char** argv)
         cv::Mat display_frame = resized;
 
         //execute inference
-        auto inference_result = pipeline.process(warped, resized);
+        cv::Mat& in_autodrive_curr = warped;
+        cv::Mat& in_autosteer_curr = resized;
+
+        auto inference_result = pipeline.process(in_autodrive_curr, in_autosteer_curr);
         if (inference_result != std::nullopt)
         {
             pipeline.latency().print();

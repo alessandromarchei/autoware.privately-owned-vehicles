@@ -121,53 +121,77 @@ void InferencePipeline::set_H_resized(const cv::Mat& H, cv::Size raw_size)
             raw_size.width, raw_size.height, crop_top, sx, sy);
 }
 
-std::optional<visionpilot::common::InferenceFrameResult> InferencePipeline::process(const cv::Mat& warped,
-                           const cv::Mat& resized)
+std::optional<visionpilot::common::InferenceFrameResult> InferencePipeline::process(
+    const cv::Mat& in_autodrive_curr, const cv::Mat& in_autosteer_curr)
 {
+    //warped -> autosteer/autospeed 
+    //resized -> autodrive
+
+
     using Clock = std::chrono::steady_clock;
     using Ms = std::chrono::duration<double, std::milli>;
 
     ++frame_count_;
 
-    const cv::Mat& current_resized = !resized.empty() ? resized : warped;
+    const cv::Mat& current_resized = !in_autosteer_curr.empty() ? in_autosteer_curr : in_autodrive_curr;
 
     auto t0 = Clock::now();
 
     // preprocess the current frame for AutoSteer / AutoSpeed
-    auto curr_warped_imn = chw_imagenet(warped);
+    auto curr_warped_imn = chw_imagenet(in_autodrive_curr);
     auto curr_resized_01 = chw_01(current_resized);
 
     const double ms_pre = Ms(Clock::now() - t0).count();
 
-    // Primo frame: salviamo soltanto lo stato necessario ad AutoDrive.
-    if (prev_warped_imn_.empty()) {
-        prev_warped_imn_ = std::move(curr_warped_imn);
-        return std::nullopt;
+    // first frame is not valid, as autodrive needs the previous frame to compute features.
+    //execute inference but set outputs as not valid. this is to retrieve the current features for next iteration
+    const bool output_valid = !prev_features_autodrive.empty();
+
+    if (prev_features_autodrive.empty()) {
+        prev_features_autodrive.resize(
+            VisionPilot::AUTODRIVE_FEATURE_SIZE,
+            0.0f
+        );
     }
 
     auto t = Clock::now();
 
     //execute inference on the current frame and previous frame
     auto result = visionpilot_.infer(
-        prev_warped_imn_.data(),
+        prev_features_autodrive.data(),
         curr_warped_imn.data(),
         curr_resized_01.data()
     );
 
     const double ms_visionpilot = Ms(Clock::now() - t).count();
 
-    //move the current frame to previous frame for the next iteration
-    prev_warped_imn_ = std::move(curr_warped_imn);
+    
+    //copy the current features from the inference result to the prev_features_autodrive vector for next iteration
+    const float* curr_features = visionpilot_.get_curr_features_autodrive();
 
+    if (curr_features == nullptr) {
+        throw std::runtime_error(
+            "VisionPilot returned null AutoDrive feature pointer"
+        );
+    }
+
+    std::memcpy(prev_features_autodrive.data(), curr_features, VisionPilot::AUTODRIVE_FEATURE_SIZE * sizeof(float));
+
+    //retrieve results
     visionpilot::common::InferenceFrameResult out;
+
+    //set valid flag for the outputs. if this is the first frame, the outputs are not valid as autodrive needs the previous frame to compute features
+    out.auto_drive.valid = output_valid;
+    out.auto_steer.valid = output_valid;
+    out.auto_speed.valid = output_valid;
+    
     out.frame_id = frame_count_;
     out.pre_ms = ms_pre;
     out.visionpilot_ms = ms_visionpilot;
 
     out.cipo = long_fusion_.update(
         out.auto_drive,
-        out.auto_speed,
-        warped
+        out.auto_speed
     );
 
     out.lateral = lat_fusion_.update(
@@ -181,7 +205,7 @@ std::optional<visionpilot::common::InferenceFrameResult> InferencePipeline::proc
 
 void InferencePipeline::reset()
 {
-    prev_warped_imn_.clear();
+    prev_features_autodrive.clear();
     frame_buf_count_ = 0;
     frame_count_ = 0;
     stats_.reset();

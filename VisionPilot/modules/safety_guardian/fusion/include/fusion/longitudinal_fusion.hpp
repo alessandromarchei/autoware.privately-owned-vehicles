@@ -43,7 +43,6 @@ public:
     visionpilot::common::CIPOFusionEstimate update(
         const visionpilot::common::AutoDriveOutput& autodrive,
         const visionpilot::common::AutoSpeedOutput& autospeed,
-        const cv::Mat& preprocessed_frame,
         float dt_s = 0.f);
 
     void reset();

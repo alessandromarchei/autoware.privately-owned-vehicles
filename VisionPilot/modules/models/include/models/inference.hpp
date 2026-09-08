@@ -40,8 +40,7 @@ public:
     // warped  : BEV 1024×512 image → AutoDrive only.
     // resized : plain-resized 1024×512 image → AutoSteer + AutoSpeed.
     //           If empty, falls back to warped for all networks (legacy behaviour).
-    std::optional<visionpilot::common::InferenceFrameResult> process(const cv::Mat& warped,
-                                                                     const cv::Mat& resized = {});
+    std::optional<visionpilot::common::InferenceFrameResult> process(const cv::Mat& in_autodrive_curr, const cv::Mat& in_autosteer_curr);
 
     // Compute and apply H_resized to both fusion modules so that AutoSteer /
     // AutoSpeed outputs are projected correctly when they run on a resized
@@ -74,7 +73,7 @@ private:
     LatencyStats       stats_;
     uint64_t           frame_count_ = 0;
 
-    std::vector<float> prev_warped_imn_;
+    std::vector<float> prev_features_autodrive;   //autodrive features from previous frame
     int     frame_buf_count_ = 0;
 };
 

@@ -15,9 +15,9 @@ VisionPilot::VisionPilot(const std::string& model_path)
 
     /*
         VISION PILOT INPUTS:
-        input[0] previous_frame [1, 3, 512, 1024]   (WARPED)
-        input[1] current_frame  [1, 3, 512, 1024]   (WARPED)
-        input[2] resized_frame  [1, 3, 512, 1024]   (RESIZED)
+        input[0] prev_features [1,256, 16, 32 ]         (from previous AutoDrive output)
+        input[1] current_image  [1, 3, 512, 1024]           (AUtoSpeed and AutoSteer inputs)
+        input[2] warped_current_image  [1, 3, 512, 1024]    (AutoDrive input)
     */
     if (engine_->num_inputs() != 3) {
         throw std::runtime_error(
@@ -27,36 +27,39 @@ VisionPilot::VisionPilot(const std::string& model_path)
 
     /*
         VISIONPILOT comprises :
-        - AutoDrive model (3 outputs)
+        - AutoDrive model (3 + 1 outputs)
         - AutoSteer model (2 outputs)
         - AutoSpeed model (1 output)
         Total outputs = 3 + 2 + 1 = 6
     */
-    if (engine_->num_outputs() != 6) {
+    if (engine_->num_outputs() != 7) {
         throw std::runtime_error(
-            "VisionPilot expects exactly 6 model outputs, got " + std::to_string(engine_->num_outputs())
+            "VisionPilot expects exactly 7 model outputs, got " + std::to_string(engine_->num_outputs())
         );
     }
 
     VP_INFO("[VisionPilot] Created V4MEngine for model: %s\n", model_path.c_str());
 }
 
-visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_chw_warped,const float* curr_chw_warped,const float* resized_chw)
+visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_features,const float* curr_autodrive_input,const float* curr_autosteer_input)
 {
     const std::size_t expected_frame_bytes = CHW_SIZE * sizeof(float);
+    const std::size_t expected_features_bytes = 256 * 16 * 32 * sizeof(float);
 
-    if (engine_->input_size(0) != expected_frame_bytes || engine_->input_size(1) != expected_frame_bytes || engine_->input_size(2) != expected_frame_bytes) {
+    if (engine_->input_size(0) != expected_frame_bytes || engine_->input_size(1) != expected_frame_bytes || engine_->input_size(2) != expected_features_bytes) {
         throw std::runtime_error(
             "VisionPilot input size mismatch"
         );
     }
 
     //copy input data to engine buffers
-    std::memcpy(engine_->input_ptr(0), prev_chw_warped, expected_frame_bytes);
 
-    std::memcpy(engine_->input_ptr(1), curr_chw_warped, expected_frame_bytes);
+    //AUTOSTEER AND AUTOSPEED INPUTS
+    std::memcpy(engine_->input_ptr(0), curr_autodrive_input, expected_frame_bytes);
 
-    std::memcpy(engine_->input_ptr(2), resized_chw, expected_frame_bytes);
+    //AUTODRIVE INPUTS
+    std::memcpy(engine_->input_ptr(1), curr_autosteer_input, expected_frame_bytes);
+    std::memcpy(engine_->input_ptr(2), prev_features, expected_features_bytes);
 
     if (engine_->run() != 0) {
         throw std::runtime_error(
@@ -69,16 +72,19 @@ visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_chw_
         output1 = autodrive(dist_normalized)
         output2 = autodrive(curvature_raw)
         output3 = autodrive(flag_logit)
-        output4 = autosteer(lane_value)
-        output5 = autosteer(height)
-        output6 = autospeed(detections)
+        output4 = autodrive(feature_curr)
+        output5 = autosteer(lane_value)
+        output6 = autosteer(height)
+        output7 = autospeed(detections)
     */
+   
     float* autodrive_dist_normalized = engine_->output<float>(0);
     float* autodrive_curvature_raw = engine_->output<float>(1);
     float* autodrive_flag_logit = engine_->output<float>(2);
-    float* autosteer_lane_value = engine_->output<float>(3);
-    float* autosteer_height = engine_->output<float>(4);
-    float* autospeed_detections = engine_->output<float>(5);
+    float* autodrive_feature_curr = engine_->output<float>(3);
+    float* autosteer_lane_value = engine_->output<float>(4);
+    float* autosteer_height = engine_->output<float>(5);
+    float* autospeed_detections = engine_->output<float>(6);
 
     visionpilot::common::VisionPilotOutput result{};
 
@@ -91,6 +97,9 @@ visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_chw_
     result.inference.auto_speed.valid     = true;
     result.inference.auto_steer.valid     = true;
     result.inference.auto_drive.valid     = true;
+
+    //save the current features for the next iteration. it will be retrieved from the inference class
+    curr_features_autodrive_ = autodrive_feature_curr;
 
     return result;
 }
