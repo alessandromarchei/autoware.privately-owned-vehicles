@@ -21,7 +21,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #----------------------------------------------------------------------------------------------------------------------
-# Default Ipopt and CppAD library paths
+# Default Ipopt CppAD Flatbuffers library paths
 #----------------------------------------------------------------------------------------------------------------------
 
 if(NOT DEFINED IPOPT_ROOT)
@@ -34,6 +34,10 @@ if(NOT DEFINED CPPAD_ROOT)
     message(STATUS "CPPAD_ROOT not defined, using default: ${CPPAD_ROOT}")
 endif()
 
+if(NOT DEFINED FLATBUFFERS_ROOT)
+    set(FLATBUFFERS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/flatbuffers")
+    message(STATUS "FLATBUFFERS_ROOT not defined, using default: ${FLATBUFFERS_ROOT}")
+endif()
 
 
 #----------------------------------------------------------------------------------------------------------------------
