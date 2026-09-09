@@ -22,10 +22,8 @@ install_msgpack() {
     cp "${src}" "${dst}"
 }
 
-install_msgpack "${REACTION_MODEL_DIR}/dummyautodrive/tvm-v4m/tvm_bundle/abundle.msgpack" "${PROJECT_ROOT}/modules/models/weights/autodrive_core0/autodrive.msgpack"
-install_msgpack "${REACTION_MODEL_DIR}/dummyautospeed/tvm-v4m/tvm_bundle/abundle.msgpack" "${PROJECT_ROOT}/modules/models/weights/autospeed_core0/autospeed.msgpack"
-install_msgpack "${REACTION_MODEL_DIR}/dummyautosteer/tvm-v4m/tvm_bundle/abundle.msgpack" "${PROJECT_ROOT}/modules/models/weights/autosteer_core0/autosteer.msgpack"
-install_msgpack "${REACTION_MODEL_DIR}/dummyvisionpilotmerged/tvm-v4m/tvm_bundle/abundle.msgpack" "${PROJECT_ROOT}/modules/models/weights/visionpilot_core0/visionpilot.msgpack"
+
+install_msgpack "${REACTION_MODEL_DIR}/visionpilot_v1/tvm-v4m/tvm_bundle/abundle.msgpack" "${PROJECT_ROOT}/modules/models/weights/visionpilot_v1_core0/visionpilot.msgpack"
 
 
 
@@ -61,14 +59,3 @@ echo "    ${REMOTE}:${REMOTE_DIR}"
 
 #make run_vision_pilot.sh executable on v4m (like chmod +x ${REMOTE_DIR}/run_vision_pilot.sh)
 ssh "${REMOTE}" "chmod +x ${REMOTE_DIR}/run_vision_pilot.sh"
-
-
-#now send the 3 model.msgpack to the respective folders on the v4m
-# echo "==> Copying model.msgpack to V4M"
-# scp "${REACTION_MODEL_DIR}/dummyautodrive/tvm-v4m/tvm_bundle/abundle.msgpack" "${REMOTE}:${REMOTE_DIR}/share/modules/models/weights/autodrive_core0/autodrive.msgpack"
-# scp "${REACTION_MODEL_DIR}/dummyautospeed/tvm-v4m/tvm_bundle/abundle.msgpack" "${REMOTE}:${REMOTE_DIR}/share/modules/models/weights/autospeed_core0/autospeed.msgpack"
-# scp "${REACTION_MODEL_DIR}/dummyautosteer/tvm-v4m/tvm_bundle/abundle.msgpack" "${REMOTE}:${REMOTE_DIR}/share/modules/models/weights/autosteer_core0/autosteer.msgpack"
-
-
-# echo "==> Copying single merged visionpilot.msgpack to V4M"
-# scp "${REACTION_MODEL_DIR}/dummyvisionpilotmerged/tvm-v4m/tvm_bundle/abundle.msgpack" "${REMOTE}:${REMOTE_DIR}/share/modules/models/weights/visionpilot_core0/visionpilot.msgpack"

@@ -243,3 +243,6 @@ VisionPilot/software_defined_vehicle/OpenADKit/**/model-weights/
 
 #thirdparty submodules
 thirdparty/
+
+#config files inside modules
+VisionPilot/config/
