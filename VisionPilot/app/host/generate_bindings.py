@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 HERE = Path(__file__).resolve().parent
-FBS = HERE / "visionpilot.fbs"
+FBS = "/home/sergey/DEV/AI/vision_pilot/VisionPilot/modules/middleware_interfaces/tcpip_client/schema/visionpilot.fbs"
 
 flatc = shutil.which("flatc")
 if flatc is None:

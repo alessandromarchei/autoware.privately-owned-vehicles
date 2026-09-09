@@ -170,25 +170,148 @@ def parse_args():
     return p.parse_args()
 
 
-def print_result(out: VisionPilotOutput):
-    i = out.inference
-    lat = i.lateral
-    c = i.cipo
-    steer_cmd = out.plan.steering[1] if len(out.plan.steering) > 1 else (
-        out.plan.steering[0] if out.plan.steering else 0.0
-    )
+# def print_result(out: VisionPilotOutput):
+#     i = out.inference
+#     lat = i.lateral
+#     c = i.cipo
+#     steer_cmd = out.plan.steering[1] if len(out.plan.steering) > 1 else (
+#         out.plan.steering[0] if out.plan.steering else 0.0
+#     )
+#     print(
+#         f"[V4M #{i.frame_id:06d}] "
+#         f"VP={i.visionpilot_ms:7.2f}ms wall={i.wall_ms:7.2f}ms pre={i.pre_ms:6.2f}ms | "
+#         f"AD(valid={int(i.auto_drive.valid)} p={i.auto_drive.flag_prob:.3f} "
+#         f"curvRaw={i.auto_drive.curvature_raw:+.5f}) | "
+#         f"ASteer(valid={int(i.auto_steer.valid)}) "
+#         f"ASpeed(det={len(i.auto_speed.detections)}) | "
+#         f"CIPO(valid={int(c.valid)} d={c.distance_m:6.1f}m v={c.velocity_ms:+6.2f}m/s) | "
+#         f"LAT(valid={int(lat.valid)} cte={lat.cte_m:+.2f}m yaw={lat.yaw_rad:+.3f} "
+#         f"k={lat.curvature:+.5f}) | "
+#         f"PLAN steer={steer_cmd:+.5f}rad acc={out.plan.acceleration:+.3f}"
+#     )
+
+
+def print_result(out) -> None:
+    """
+    Detailed per-frame dump of the raw VisionPilot model outputs.
+    Intended for inference/debugging, not production logging.
+    """
+
+    print("\n" + "=" * 100)
     print(
-        f"[V4M #{i.frame_id:06d}] "
-        f"VP={i.visionpilot_ms:7.2f}ms wall={i.wall_ms:7.2f}ms pre={i.pre_ms:6.2f}ms | "
-        f"AD(valid={int(i.auto_drive.valid)} p={i.auto_drive.flag_prob:.3f} "
-        f"curvRaw={i.auto_drive.curvature_raw:+.5f}) | "
-        f"ASteer(valid={int(i.auto_steer.valid)}) "
-        f"ASpeed(det={len(i.auto_speed.detections)}) | "
-        f"CIPO(valid={int(c.valid)} d={c.distance_m:6.1f}m v={c.velocity_ms:+6.2f}m/s) | "
-        f"LAT(valid={int(lat.valid)} cte={lat.cte_m:+.2f}m yaw={lat.yaw_rad:+.3f} "
-        f"k={lat.curvature:+.5f}) | "
-        f"PLAN steer={steer_cmd:+.5f}rad acc={out.plan.acceleration:+.3f}"
+        f" FRAME {out.inference.frame_id} "
+        f"| wall={out.inference.wall_ms:.2f} ms "
+        f"| pre={out.inference.pre_ms:.2f} ms "
+        f"| visionpilot={out.inference.visionpilot_ms:.2f} ms"
     )
+    print("=" * 100)
+
+    # ------------------------------------------------------------------
+    # AutoDrive
+    # ------------------------------------------------------------------
+    ad = out.inference.auto_drive
+
+    print("\n[AUTODRIVE]")
+    print(f"  valid            : {ad.valid}")
+    print(f"  dist_normalized  : {ad.dist_normalized:+.8f}")
+    print(f"  curvature_raw    : {ad.curvature_raw:+.8f}")
+    print(f"  flag_prob        : {ad.flag_prob:+.8f}")
+
+    # ------------------------------------------------------------------
+    # AutoSteer
+    # ------------------------------------------------------------------
+    ast = out.inference.auto_steer
+
+    xp = ast.xp
+    hv = ast.h_vector
+
+    print("\n[AUTOSTEER]")
+    print(f"  valid            : {ast.valid}")
+    print(f"  xp count         : {len(xp)}")
+    print(f"  h_vector count   : {len(hv)}")
+
+    if xp:
+        print(
+            f"  xp stats         : "
+            f"min={min(xp):+.8f}  "
+            f"max={max(xp):+.8f}  "
+            f"mean={sum(xp) / len(xp):+.8f}"
+        )
+
+        print("  xp values:")
+        print(
+            "    ["
+            + ", ".join(f"{v:+.6f}" for v in xp)
+            + "]"
+        )
+    else:
+        print("  xp values        : []")
+
+    if hv:
+        print(
+            f"  h_vector stats   : "
+            f"min={min(hv):+.8f}  "
+            f"max={max(hv):+.8f}  "
+            f"mean={sum(hv) / len(hv):+.8f}"
+        )
+
+        active = sum(v >= 0.5 for v in hv)
+
+        print(
+            f"  h >= 0.5         : {active}/{len(hv)}"
+        )
+
+        print("  h_vector values:")
+        print(
+            "    ["
+            + ", ".join(f"{v:+.6f}" for v in hv)
+            + "]"
+        )
+    else:
+        print("  h_vector values  : []")
+
+    # ------------------------------------------------------------------
+    # AutoSpeed
+    # ------------------------------------------------------------------
+    asp = out.inference.auto_speed
+    detections = asp.detections
+
+    print("\n[AUTOSPEED]")
+    print(f"  valid            : {asp.valid}")
+    print(f"  detections count : {len(detections)}")
+
+    if detections:
+        print()
+        print(
+            "  idx | class |   score   |"
+            "       x1       y1       x2       y2"
+            " |       w       h"
+        )
+        print(
+            "  ----+-------+-----------+"
+            "---------------------------------------"
+            "+----------------"
+        )
+
+        for i, det in enumerate(detections):
+            w = det.x2 - det.x1
+            h = det.y2 - det.y1
+
+            print(
+                f"  {i:3d} | "
+                f"{det.class_id:5d} | "
+                f"{det.score:9.6f} | "
+                f"{det.x1:8.2f} "
+                f"{det.y1:8.2f} "
+                f"{det.x2:8.2f} "
+                f"{det.y2:8.2f} | "
+                f"{w:7.2f} "
+                f"{h:7.2f}"
+            )
+    else:
+        print("  detections       : []")
+
+    print("\n" + "-" * 100, flush=True)
 
 
 def main():
