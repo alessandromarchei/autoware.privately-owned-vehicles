@@ -2,11 +2,24 @@
 set -Eeuo pipefail
 
 VISION_PILOT_ROOT="/home/root/vision_pilot"
-
 LOG_FILE="${VISION_PILOT_ROOT}/vision_pilot.log"
 
-# Append stdout and stderr of this script and VisionPilot to the log.
-exec >> "${LOG_FILE}" 2>&1
+CLI_MODE=0
+PASSTHROUGH_ARGS=()
+
+# args parsing
+for arg in "$@"; do
+    if [[ "$arg" == "--cli" ]]; then
+        CLI_MODE=1
+    else
+        PASSTHROUGH_ARGS+=("$arg")
+    fi
+done
+
+# Redireziona l'output sul file log SOLO se non è attiva l'opzione --cli
+if [[ "${CLI_MODE}" -eq 0 ]]; then
+    exec >> "${LOG_FILE}" 2>&1
+fi
 
 echo
 echo "============================================================"
@@ -46,8 +59,8 @@ echo "Starting VisionPilot:"
 echo "  build:      ${BUILD_TYPE}"
 echo "  executable: ${VISION_PILOT_EXECUTABLE}"
 echo "  BLAS:       ${LBT_DEFAULT_LIBS}"
-echo "  arguments:  $*"
+echo "  arguments:  ${PASSTHROUGH_ARGS[*]:-none}"
 
 cd "${VISION_PILOT_ROOT}"
 
-exec "${VISION_PILOT_EXECUTABLE}" "$@"
+exec "${VISION_PILOT_EXECUTABLE}" "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"
