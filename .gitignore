@@ -13,6 +13,7 @@ runs/
 develop-eggs/
 dist/
 downloads/
+tests/
 eggs/
 .eggs/
 lib/
@@ -227,6 +228,7 @@ VisionPilot/software_defined_vehicle/OpenADKit/**/model-weights/
 
 #Ipopt and CppAD
 *.downloads
+
 
 #Renesas debug files
 *VisionPilot_CMake_dependencies_analysis.txt

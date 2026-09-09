@@ -23,7 +23,7 @@ install_msgpack() {
 }
 
 
-install_msgpack "${REACTION_MODEL_DIR}/visionpilot_v1/tvm-v4m/tvm_bundle/abundle.msgpack" "${PROJECT_ROOT}/modules/models/weights/visionpilot_v1_core0/visionpilot.msgpack"
+install_msgpack "${REACTION_MODEL_DIR}/visionpilot_v1_v4m/tvm-v4m/tvm_bundle/abundle.msgpack" "${PROJECT_ROOT}/modules/models/weights/visionpilot_v1_core0/visionpilot.msgpack"
 
 
 
