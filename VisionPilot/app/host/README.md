@@ -1,110 +1,94 @@
-# VisionPilot Remote Host
+# VisionPilot Remote Host — production/debug/occupancy UI
 
-Linux host application for sending raw camera frames + ego speed to a Renesas
-R-Car V4M target, receiving `VisionPilotOutput` over the result TCP channel, and
-rendering the V4M inference/planning output locally.
+This package keeps the existing VPNT v2 / FlatBuffers transport unchanged and replaces only the host-side application/visualization layer.
 
-## 1. Install
+## Files
 
-```bash
-python -m pip install -r requirements.txt
-sudo apt install flatbuffers-compiler
-python generate_bindings.py
-```
+- `host.py` — Linux host application. Frame/result synchronization is kept; adds debug controls, runtime statistics and mouse forwarding to the embedded occupancy panel.
+- `visualization.py` — production camera view, C++-style engineering debug camera view, debug-level side panels and occupancy bridge.
+- `occupancy_view.py` — Python port of the heuristic C++ 3D occupancy renderer, including orbit/pan/zoom.
+- `wire.py` — unchanged copy of the existing wire implementation for completeness.
 
-## 2. Network
+Keep the existing generated `visionpilot/wire/*` FlatBuffers Python bindings next to/in the Python environment exactly as before.
 
-The V4M executable is the TCP **client**. The Linux machine is the TCP **server**.
+## Debug levels
 
-Default channels:
+`--debug-level 0`: production VisionPilot camera HUD + 3D occupancy, no diagnostic side panel.
 
-- `8080`: host -> V4M, raw BGR8 images
-- `8081`: V4M -> host, `VisionPilotOutput` FlatBuffer
+`--debug-level 1`: adds compact runtime, network, fusion and planner telemetry.
 
-On the V4M executable use the Linux host IP, for example:
+`--debug-level 2`: adds per-model AutoDrive / AutoSteer / AutoSpeed detail and useful statistics.
 
-```bash
-./visionpilot \
-  --source-mode tcpip_frames \
-  --tcp-server 10.0.0.1 \
-  --tcp-frame-port 8080 \
-  --tcp-result-port 8081
-```
+`--debug-level 3`: shows the complete values actually transported from V4M to the host: AutoDrive scalars, all AutoSteer `xp` / `h_vector` values, post-NMS AutoSpeed detections, CIPO/lateral fusion and planner state.
 
-Start the Linux host first so both listeners already exist.
+The current protocol does not transport the pre-NMS AutoSpeed tensor or separate per-model `ad_ms/as_ms/asp_ms` timings. Those require a FlatBuffers/V4M-side protocol extension if needed later.
 
-## 3. Video example
+## Typical commands
+
+Clean production dashboard, matching the C++ application structure:
 
 ```bash
-python host_app.py \
-  --video /path/test.mp4 \
-  --speed-file /path/vehicle_speed.csv \
-  --bind 0.0.0.0 \
-  --frame-port 8080 \
-  --result-port 8081 \
-  --realtime
-```
-
-## 4. Extracted frames
-
-```bash
-python host_app.py \
-  --frames /path/frames \
-  --speed 13.9 \
-  --fps 30 \
-  --realtime
-```
-
-## 5. Camera
-
-```bash
-python host_app.py \
-  --camera 0 \
-  --speed 0 \
-  --realtime
-```
-
-## Homography
-
-For the fused RANSAC path, pass the same pixel->world homography used for the
-displayed camera plane if available:
-
-```bash
-python host_app.py \
-  --video test.mp4 \
-  --speed 12 \
+python host.py \
+  --video input.mp4 \
+  --realtime \
+  --speed 15.0 \
+  --speed-limit 22.22 \
   --homography H.yaml \
-  --homography-key H \
-  --homography-space net
+  --debug-level 0
 ```
 
-`--homography-space net` means `H` operates on the 1024x512 VisionPilot image.
-The renderer scales the projection back to the native camera frame.
+Detailed model debugging while preserving the production camera view:
 
-If `--homography` is omitted, the renderer falls back to the hard-coded
-VisionPilot matrix from the existing C++ visualization. If your production
-pipeline's `H_resized` differs from this matrix, pass the actual matrix to get
-pixel-identical fused-path projection.
+```bash
+python host.py \
+  --frames /path/to/frames \
+  --speed-file vehicle_speed.csv \
+  --homography H.yaml \
+  --debug-level 2 \
+  --display-width 2560
+```
 
-## Display
+Maximum GUI debug without flooding stdout:
 
-The camera image contains:
+```bash
+python host.py \
+  --frames /path/to/frames \
+  --homography H.yaml \
+  --debug-level 3 \
+  --console-level 0 \
+  --display-width 2560
+```
 
-- fused RANSAC path/corridor reconstructed from `path_a,b,c`
-- AutoSteer 64-point path
-- AutoSpeed bounding boxes
-- CIPO distance
-- warnings
-- runtime/network top bar
+C++ engineering/debug camera overlay + 3D occupancy + model detail:
 
-The side telemetry panel shows:
+```bash
+python host.py \
+  --video input.mp4 \
+  --homography H.yaml \
+  --camera-view debug \
+  --debug-level 2 \
+  --wheel-dir /path/to/VisionPilot/development_releases/0.9/images
+```
 
-- V4M wall/preprocess/VisionPilot latency
-- AutoDrive raw output
-- AutoSteer valid points
-- AutoSpeed detection count
-- fused CIPO distance/velocity/uncertainty/cut-in
-- fused CTE/yaw/curvature and RANSAC inliers
-- planner steering/acceleration/warnings
+For production warning icons, pass the same directory used by VisionPilot C++:
 
-Press `q` or `Esc` to exit.
+```bash
+--icons-dir /path/to/VisionPilot/assets/icons
+```
+
+## Runtime controls
+
+- `0`, `1`, `2`, `3`: change GUI debug level live.
+- `V`: switch production/debug camera view live.
+- `O`: toggle 3D occupancy.
+- Left-drag inside occupancy: orbit camera.
+- Right/middle-drag inside occupancy: pan.
+- Mouse wheel or `+` / `-`: zoom.
+- `R`: reset occupancy camera.
+- `Q` or `Esc`: quit.
+
+## Notes
+
+The visualizer renders the camera view in the same 1024x512 inference plane used by the C++ application before assembling the host dashboard. `--display-width 0` keeps the canonical dashboard dimensions without final scaling; for a 2560-wide monitor, `--display-width 2560` is recommended for debug level 2/3 readability.
+
+If no `--homography` is supplied, the renderer uses the same hard-coded warped-pixel-to-world fallback matrix already used by the VisionPilot C++ visualization. For accurate detection placement in the 3D panel with a plain-resized input image, use the real `H_resized`-equivalent calibration whenever available.
