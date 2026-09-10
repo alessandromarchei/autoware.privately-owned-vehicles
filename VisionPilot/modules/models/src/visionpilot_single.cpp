@@ -5,6 +5,75 @@
 #include <cstdio>
 #include <models/visionpilot_single.hpp>
 
+#include <limits>
+#include <algorithm>
+static void dump_tensor_stats(
+    const char* name,
+    const float* data,
+    std::size_t n,
+    std::size_t print_n = 16)
+{
+    if (!data || n == 0) {
+        VP_INFO("[RAW] %s: EMPTY", name);
+        return;
+    }
+
+    double sum = 0.0;
+    double sum_abs = 0.0;
+    float min_v = std::numeric_limits<float>::infinity();
+    float max_v = -std::numeric_limits<float>::infinity();
+
+    std::size_t zeros = 0;
+    std::size_t nan_count = 0;
+    std::size_t inf_count = 0;
+
+    for (std::size_t i = 0; i < n; ++i) {
+        const float v = data[i];
+
+        if (std::isnan(v)) {
+            ++nan_count;
+            continue;
+        }
+
+        if (!std::isfinite(v)) {
+            ++inf_count;
+            continue;
+        }
+
+        min_v = std::min(min_v, v);
+        max_v = std::max(max_v, v);
+
+        sum += v;
+        sum_abs += std::abs(v);
+
+        if (v == 0.0f)
+            ++zeros;
+    }
+
+    VP_INFO(
+        "[RAW] %s n=%zu min=%g max=%g mean=%g mean_abs=%g "
+        "zeros=%zu nan=%zu inf=%zu",
+        name,
+        n,
+        min_v,
+        max_v,
+        sum / static_cast<double>(n),
+        sum_abs / static_cast<double>(n),
+        zeros,
+        nan_count,
+        inf_count
+    );
+
+    std::printf("[RAW] %s first:", name);
+
+    for (std::size_t i = 0; i < std::min(n, print_n); ++i) {
+        std::printf(" %.7g", data[i]);
+    }
+
+    std::printf("\n");
+}
+
+
 namespace visionpilot::models {
 
 
@@ -14,24 +83,24 @@ VisionPilot::VisionPilot(const std::string& model_path)
     engine_ = std::make_unique<engine::V4MEngine>(model_path);
 
     /*
-        VISION PILOT INPUTS:
-        input[0] prev_features [1,256, 16, 32 ]         (from previous AutoDrive output)
-        input[1] current_image  [1, 3, 512, 1024]           (AUtoSpeed and AutoSteer inputs)
-        input[2] warped_current_image  [1, 3, 512, 1024]    (AutoDrive input)
+        Inputs: [0] autosteer_image [1, 3, 512, 1024] 
+                [1] autospeed_image [1, 3, 512, 1024]
+                [2] autodrive_image [1, 3, 512, 1024]
+                [3] autodrive_prev_features [1, 256, 16, 32]
+        Outputs: [0] autodrive__distance [1, 1]
+                [1] autodrive__curvature [1, 1]
+                [2] autodrive__flag_logit [1, 1]
+                [3] autodrive__feature_curr [1, 256, 16, 32]
+                [4] autosteer__lane_value [1, 1, 64, 1]
+                [5] autosteer__height [1, 1, 64, 1]
+                [6] autospeed__output [1, 8, 10752]
     */
-    if (engine_->num_inputs() != 3) {
+    if (engine_->num_inputs() != 4) {
         throw std::runtime_error(
-            "VisionPilot expects exactly 3 model inputs, got " + std::to_string(engine_->num_inputs())
+            "VisionPilot expects exactly 4 model inputs, got " + std::to_string(engine_->num_inputs())
         );
     }
 
-    /*
-        VISIONPILOT comprises :
-        - AutoDrive model (3 + 1 outputs)
-        - AutoSteer model (2 outputs)
-        - AutoSpeed model (1 output)
-        Total outputs = 3 + 2 + 1 = 6
-    */
     if (engine_->num_outputs() != 7) {
         throw std::runtime_error(
             "VisionPilot expects exactly 7 model outputs, got " + std::to_string(engine_->num_outputs())
@@ -46,20 +115,22 @@ visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_feat
     const std::size_t expected_frame_bytes = CHW_SIZE * sizeof(float);
     const std::size_t expected_features_bytes = 256 * 16 * 32 * sizeof(float);
 
-    if (engine_->input_size(0) != expected_frame_bytes || engine_->input_size(1) != expected_frame_bytes || engine_->input_size(2) != expected_features_bytes) {
+    if (engine_->input_size(0) != expected_frame_bytes || engine_->input_size(1) != expected_frame_bytes 
+    || engine_->input_size(2) != expected_frame_bytes || engine_->input_size(3) != expected_features_bytes) {
         throw std::runtime_error(
             "VisionPilot input size mismatch"
         );
     }
 
-    //copy input data to engine buffers
 
     //AUTOSTEER AND AUTOSPEED INPUTS
-    std::memcpy(engine_->input_ptr(0), curr_autodrive_input, expected_frame_bytes);
+    std::memcpy(engine_->input_ptr(0), curr_autosteer_input, expected_frame_bytes);
+    std::memcpy(engine_->input_ptr(1), curr_autosteer_input, expected_frame_bytes);
+
 
     //AUTODRIVE INPUTS
-    std::memcpy(engine_->input_ptr(1), curr_autosteer_input, expected_frame_bytes);
-    std::memcpy(engine_->input_ptr(2), prev_features, expected_features_bytes);
+    std::memcpy(engine_->input_ptr(2), curr_autodrive_input, expected_frame_bytes);
+    std::memcpy(engine_->input_ptr(3), prev_features, expected_features_bytes);
 
     if (engine_->run() != 0) {
         throw std::runtime_error(
@@ -69,13 +140,13 @@ visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_feat
 
     // retrieve output from buffers
     /*
-        output1 = autodrive(dist_normalized)
-        output2 = autodrive(curvature_raw)
-        output3 = autodrive(flag_logit)
-        output4 = autodrive(feature_curr)
-        output5 = autosteer(lane_value)
-        output6 = autosteer(height)
-        output7 = autospeed(detections)
+        Outputs: [0] autodrive__distance [1, 1]
+                [1] autodrive__curvature [1, 1]
+                [2] autodrive__flag_logit [1, 1]
+                [3] autodrive__feature_curr [1, 256, 16, 32]
+                [4] autosteer__lane_value [1, 1, 64, 1]
+                [5] autosteer__height [1, 1, 64, 1]
+                [6] autospeed__output [1, 8, 10752]
     */
    
     float* autodrive_dist_normalized = engine_->output<float>(0);
@@ -85,6 +156,50 @@ visionpilot::common::VisionPilotOutput VisionPilot::infer(const float* prev_feat
     float* autosteer_lane_value = engine_->output<float>(4);
     float* autosteer_height = engine_->output<float>(5);
     float* autospeed_detections = engine_->output<float>(6);
+
+
+    dump_tensor_stats(
+        "AutoDrive distance",
+        autodrive_dist_normalized,
+        1
+    );
+
+    dump_tensor_stats(
+        "AutoDrive curvature",
+        autodrive_curvature_raw,
+        1
+    );
+
+    dump_tensor_stats(
+        "AutoDrive flag_logit",
+        autodrive_flag_logit,
+        1
+    );
+
+    dump_tensor_stats(
+        "AutoDrive features",
+        autodrive_feature_curr,
+        256 * 16 * 32
+    );
+
+    dump_tensor_stats(
+        "AutoSteer lane",
+        autosteer_lane_value,
+        64
+    );
+
+    dump_tensor_stats(
+        "AutoSteer height",
+        autosteer_height,
+        64
+    );
+
+    dump_tensor_stats(
+        "AutoSpeed raw",
+        autospeed_detections,
+        8 * 10752
+    );
+
 
     visionpilot::common::VisionPilotOutput result{};
 
@@ -136,8 +251,8 @@ visionpilot::common::AutoSpeedOutput VisionPilot::postprocess_autospeed(const fl
     visionpilot::common::AutoSpeedOutput out;
 
     //analyze shape
-    //get output descriptor data for the output 0 (only output for this model)
-    std::vector<int> shape = engine_->output_desc(0).shape;
+    //get output descriptor data for the output 6 (only output for this model)
+    std::vector<int> shape = engine_->output_desc(6).shape;
 
     const int64_t C           = shape[1];
     const int64_t N           = shape[2];
@@ -219,6 +334,5 @@ std::vector<visionpilot::common::Detection> VisionPilot::nms(
     }
     return keep;
 }
-
 
 }// namespace visionpilot::models

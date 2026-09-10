@@ -4,6 +4,23 @@
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
+#include <vector>
+
+
+void print_shape(std::vector<int> shape)
+{
+    std::cout << "[";
+    for (std::size_t i = 0; i < shape.size(); ++i) {
+        std::cout << shape[i];
+        if (i < shape.size() - 1) {
+            std::cout << ", ";
+        }
+    }
+    std::cout << "]";
+
+    return;
+}
+
 
 namespace visionpilot::engine {
 
@@ -106,19 +123,23 @@ int V4MEngine::create_session(const std::string& model_path)
     // 5. Read model I/O descriptors
     // -------------------------------------------------------------------------
 
-    const std::vector<InputDesc>& input_descs = network_->getInputDesc();
+    input_descs_ = network_->getInputDesc();
 
-    const std::vector<OutputDesc>& output_descs = network_->getOutputDesc();
+    output_descs_ = network_->getOutputDesc();
 
     std::cout << "[V4MEngine] Model: " << model_path_ << std::endl;
 
-    std::cout << "[V4MEngine] Inputs: " << input_descs.size() << std::endl;
+    std::cout << "[V4MEngine] Inputs: " << input_descs_.size() << std::endl;
 
-    for (std::size_t i = 0; i < input_descs.size(); ++i) {
-        const auto& desc = input_descs[i];
+    for (std::size_t i = 0; i < input_descs_.size(); ++i) {
+        const auto& desc = input_descs_[i];
+        std::vector<int> shape = desc.shape;
 
         std::cout
             << "  input[" << i << "]"
+            << " shape=";
+        print_shape(shape);
+        std::cout
             << " name=" << desc.name
             << " size=" << desc.size_bytes
             << " bytes"
@@ -127,21 +148,26 @@ int V4MEngine::create_session(const std::string& model_path)
 
     std::cout
         << "[V4MEngine] Outputs: "
-        << output_descs.size()
+        << output_descs_.size()
         << std::endl;
 
-    for (std::size_t i = 0; i < output_descs.size(); ++i) {
-        const auto& desc = output_descs[i];
+    for (std::size_t i = 0; i < output_descs_.size(); ++i) {
+        const auto& desc = output_descs_[i];
+        std::vector<int> shape = desc.shape;
 
         std::cout
             << "  output[" << i << "]"
+            << " shape=";
+        print_shape(shape);
+
+        std::cout
             << " name=" << desc.name
             << " size=" << desc.size_bytes
             << " bytes"
             << std::endl;
     }
 
-    if (input_descs.empty()) {
+    if (input_descs_.empty()) {
         std::cerr
             << "[V4MEngine] Network has no inputs"
             << std::endl;
@@ -150,7 +176,7 @@ int V4MEngine::create_session(const std::string& model_path)
         return -1;
     }
 
-    if (output_descs.empty()) {
+    if (output_descs_.empty()) {
         std::cerr
             << "[V4MEngine] Network has no outputs"
             << std::endl;
@@ -246,10 +272,10 @@ int V4MEngine::create_session(const std::string& model_path)
 
     output_memories_ = network_->getOutputMemory(0);
 
-    if (input_memories_.size() != input_descs.size()) {
+    if (input_memories_.size() != input_descs_.size()) {
         std::cerr
             << "[V4MEngine] Input memory count mismatch. "
-            << "Descriptors=" << input_descs.size()
+            << "Descriptors=" << input_descs_.size()
             << ", memories=" << input_memories_.size()
             << std::endl;
 
@@ -257,10 +283,10 @@ int V4MEngine::create_session(const std::string& model_path)
         return -1;
     }
 
-    if (output_memories_.size() != output_descs.size()) {
+    if (output_memories_.size() != output_descs_.size()) {
         std::cerr
             << "[V4MEngine] Output memory count mismatch. "
-            << "Descriptors=" << output_descs.size()
+            << "Descriptors=" << output_descs_.size()
             << ", memories=" << output_memories_.size()
             << std::endl;
 
@@ -429,25 +455,12 @@ std::size_t V4MEngine::num_outputs() const noexcept
 
 const hycoah::InputDesc& V4MEngine::input_desc(std::size_t index) const
 {
-    if (network_ == nullptr) {
-        throw std::runtime_error(
-            "V4MEngine session is not initialized"
-        );
-    }
-
-    return network_->getInputDesc().at(index);
+    return input_descs_.at(index);
 }
 
-const hycoah::OutputDesc&
-V4MEngine::output_desc(std::size_t index) const
+const hycoah::OutputDesc& V4MEngine::output_desc(std::size_t index) const
 {
-    if (network_ == nullptr) {
-        throw std::runtime_error(
-            "V4MEngine session is not initialized"
-        );
-    }
-
-    return network_->getOutputDesc().at(index);
+    return output_descs_.at(index);
 }
 
 
@@ -457,22 +470,34 @@ V4MEngine::output_desc(std::size_t index) const
 
 void* V4MEngine::input_ptr(std::size_t index)
 {
-    return input_memories_.at(index).cpuPtr();
+    auto& mem = input_memories_.at(index);
+
+    return reinterpret_cast<std::uint8_t*>(mem.cpuPtr())
+         + mem.offset;
 }
 
 const void* V4MEngine::input_ptr(std::size_t index) const
 {
-    return input_memories_.at(index).cpuPtr();
+    const auto& mem = input_memories_.at(index);
+
+    return reinterpret_cast<const std::uint8_t*>(mem.cpuPtr())
+         + mem.offset;
 }
 
 void* V4MEngine::output_ptr(std::size_t index)
 {
-    return output_memories_.at(index).cpuPtr();
+    auto& mem = output_memories_.at(index);
+
+    return reinterpret_cast<std::uint8_t*>(mem.cpuPtr())
+         + mem.offset;
 }
 
 const void* V4MEngine::output_ptr(std::size_t index) const
 {
-    return output_memories_.at(index).cpuPtr();
+    const auto& mem = output_memories_.at(index);
+
+    return reinterpret_cast<const std::uint8_t*>(mem.cpuPtr())
+         + mem.offset;
 }
 
 std::size_t V4MEngine::input_size(std::size_t index) const

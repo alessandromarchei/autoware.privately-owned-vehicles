@@ -48,11 +48,29 @@ int run_one_model_one_core_one_container_custom_io(std::string msgpack, std::str
   std::cout << "Model: " << msgpack << std::endl;
   std::cout << "Number of inputs: " << input_descs.size() << std::endl;
   for (size_t i = 0; i < input_descs.size(); ++i) {
-    std::cout << "Input " << i << ": size = " << input_descs[i].size_bytes << " bytes" << std::endl;
+    std::vector<int> shape = input_descs[i].shape;
+    std::cout << "Input " << i << ": shape = [";
+    for (size_t j = 0; j < shape.size(); ++j) {
+      std::cout << shape[j];
+      if (j < shape.size() - 1) {
+        std::cout << ", ";
+      }
+    }
+    std::cout << "]" << ", size = " << input_descs[i].size_bytes << " bytes" << std::endl;
   }
+
+
   std::cout << "Number of outputs: " << output_descs.size() << std::endl;
   for (size_t i = 0; i < output_descs.size(); ++i) {
-    std::cout << "Output " << i << ": size = " << output_descs[i].size_bytes << " bytes " << std::endl;
+    std::vector<int> shape = output_descs[i].shape;
+    std::cout << "Output " << i << ": shape = [";
+    for (size_t j = 0; j < shape.size(); ++j) {
+      std::cout << shape[j];
+      if (j < shape.size() - 1) {
+        std::cout << ", ";
+      }
+    }
+    std::cout << "]" << ", size = " << output_descs[i].size_bytes << " bytes" << std::endl;
   }
 
 

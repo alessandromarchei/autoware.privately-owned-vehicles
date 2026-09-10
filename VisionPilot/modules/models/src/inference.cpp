@@ -124,9 +124,8 @@ void InferencePipeline::set_H_resized(const cv::Mat& H, cv::Size raw_size)
 std::optional<visionpilot::common::InferenceFrameResult> InferencePipeline::process(
     const cv::Mat& in_autodrive_curr, const cv::Mat& in_autosteer_curr)
 {
-    //warped -> autosteer/autospeed 
-    //resized -> autodrive
-
+    // warped  -> AutoDrive
+    // resized -> AutoSteer / AutoSpeed
 
     using Clock = std::chrono::steady_clock;
     using Ms = std::chrono::duration<double, std::milli>;
@@ -181,10 +180,14 @@ std::optional<visionpilot::common::InferenceFrameResult> InferencePipeline::proc
     visionpilot::common::InferenceFrameResult out;
 
     //set valid flag for the outputs. if this is the first frame, the outputs are not valid as autodrive needs the previous frame to compute features
+    out.auto_drive = result.inference.auto_drive;
+    out.auto_steer = result.inference.auto_steer;
+    out.auto_speed = result.inference.auto_speed;
+
     out.auto_drive.valid = output_valid;
-    out.auto_steer.valid = output_valid;
-    out.auto_speed.valid = output_valid;
-    
+    out.auto_steer.valid = true;
+    out.auto_speed.valid = true;
+
     out.frame_id = frame_count_;
     out.pre_ms = ms_pre;
     out.visionpilot_ms = ms_visionpilot;

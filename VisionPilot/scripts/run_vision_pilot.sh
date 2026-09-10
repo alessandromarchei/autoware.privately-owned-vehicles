@@ -64,3 +64,4 @@ echo "  arguments:  ${PASSTHROUGH_ARGS[*]:-none}"
 cd "${VISION_PILOT_ROOT}"
 
 exec "${VISION_PILOT_EXECUTABLE}" "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"
+#exec gdb --args "${VISION_PILOT_EXECUTABLE}" "${PASSTHROUGH_ARGS[@]+"${PASSTHROUGH_ARGS[@]}"}"

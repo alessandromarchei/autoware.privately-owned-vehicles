@@ -126,6 +126,9 @@ private:
     std::vector<hycoah::InputMemory> input_memories_;
     std::vector<hycoah::OutputMemory> output_memories_;
 
+    std::vector<hycoah::InputDesc> input_descs_;
+    std::vector<hycoah::OutputDesc> output_descs_;
+
     std::vector<JobId> job_ids_;
 };
 
