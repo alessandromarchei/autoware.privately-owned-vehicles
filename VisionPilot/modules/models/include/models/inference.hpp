@@ -24,7 +24,7 @@ struct Config {
 };
 
 struct LatencyStats {
-    double pre{0}, visionpilot{0}, wall{0};
+    double pre{0}, visionpilot{0}, total{0};
 
     void update(double pre_, double visionpilot_);
     void print() const;

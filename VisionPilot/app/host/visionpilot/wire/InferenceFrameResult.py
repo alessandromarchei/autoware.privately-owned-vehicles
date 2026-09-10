@@ -32,7 +32,7 @@ class InferenceFrameResult(object):
         return 0
 
     # InferenceFrameResult
-    def WallMs(self):
+    def TotalMs(self):
         o = flatbuffers.number_types.UOffsetTFlags.py_type(self._tab.Offset(6))
         if o != 0:
             return self._tab.Get(flatbuffers.number_types.Float64Flags, o + self._tab.Pos)
@@ -109,7 +109,7 @@ class InferenceFrameResult(object):
 
 def InferenceFrameResultStart(builder): builder.StartObject(9)
 def InferenceFrameResultAddFrameId(builder, frameId): builder.PrependUint64Slot(0, frameId, 0)
-def InferenceFrameResultAddWallMs(builder, wallMs): builder.PrependFloat64Slot(1, wallMs, 0.0)
+def InferenceFrameResultAddTotalMs(builder, totalMs): builder.PrependFloat64Slot(1, totalMs, 0.0)
 def InferenceFrameResultAddPreMs(builder, preMs): builder.PrependFloat64Slot(2, preMs, 0.0)
 def InferenceFrameResultAddVisionpilotMs(builder, visionpilotMs): builder.PrependFloat64Slot(3, visionpilotMs, 0.0)
 def InferenceFrameResultAddAutoDrive(builder, autoDrive): builder.PrependUOffsetTRelativeSlot(4, flatbuffers.number_types.UOffsetTFlags.py_type(autoDrive), 0)

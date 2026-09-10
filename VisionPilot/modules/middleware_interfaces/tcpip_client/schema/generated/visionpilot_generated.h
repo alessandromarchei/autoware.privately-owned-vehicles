@@ -690,7 +690,7 @@ struct InferenceFrameResult FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Tab
   typedef InferenceFrameResultBuilder Builder;
   enum FlatBuffersVTableOffset FLATBUFFERS_VTABLE_UNDERLYING_TYPE {
     VT_FRAME_ID = 4,
-    VT_WALL_MS = 6,
+    VT_TOTAL_MS = 6,
     VT_PRE_MS = 8,
     VT_VISIONPILOT_MS = 10,
     VT_AUTO_DRIVE = 12,
@@ -702,8 +702,8 @@ struct InferenceFrameResult FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Tab
   uint64_t frame_id() const {
     return GetField<uint64_t>(VT_FRAME_ID, 0);
   }
-  double wall_ms() const {
-    return GetField<double>(VT_WALL_MS, 0.0);
+  double total_ms() const {
+    return GetField<double>(VT_TOTAL_MS, 0.0);
   }
   double pre_ms() const {
     return GetField<double>(VT_PRE_MS, 0.0);
@@ -730,7 +730,7 @@ struct InferenceFrameResult FLATBUFFERS_FINAL_CLASS : private ::flatbuffers::Tab
   bool Verify(::flatbuffers::VerifierTemplate<B> &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyField<uint64_t>(verifier, VT_FRAME_ID, 8) &&
-           VerifyField<double>(verifier, VT_WALL_MS, 8) &&
+           VerifyField<double>(verifier, VT_TOTAL_MS, 8) &&
            VerifyField<double>(verifier, VT_PRE_MS, 8) &&
            VerifyField<double>(verifier, VT_VISIONPILOT_MS, 8) &&
            VerifyOffset(verifier, VT_AUTO_DRIVE) &&
@@ -754,8 +754,8 @@ struct InferenceFrameResultBuilder {
   void add_frame_id(uint64_t frame_id) {
     fbb_.AddElement<uint64_t>(InferenceFrameResult::VT_FRAME_ID, frame_id, 0);
   }
-  void add_wall_ms(double wall_ms) {
-    fbb_.AddElement<double>(InferenceFrameResult::VT_WALL_MS, wall_ms, 0.0);
+  void add_total_ms(double total_ms) {
+    fbb_.AddElement<double>(InferenceFrameResult::VT_TOTAL_MS, total_ms, 0.0);
   }
   void add_pre_ms(double pre_ms) {
     fbb_.AddElement<double>(InferenceFrameResult::VT_PRE_MS, pre_ms, 0.0);
@@ -792,7 +792,7 @@ struct InferenceFrameResultBuilder {
 inline ::flatbuffers::Offset<InferenceFrameResult> CreateInferenceFrameResult(
     ::flatbuffers::FlatBufferBuilder &_fbb,
     uint64_t frame_id = 0,
-    double wall_ms = 0.0,
+    double total_ms = 0.0,
     double pre_ms = 0.0,
     double visionpilot_ms = 0.0,
     ::flatbuffers::Offset<visionpilot::wire::AutoDriveOutput> auto_drive = 0,
@@ -803,7 +803,7 @@ inline ::flatbuffers::Offset<InferenceFrameResult> CreateInferenceFrameResult(
   InferenceFrameResultBuilder builder_(_fbb);
   builder_.add_visionpilot_ms(visionpilot_ms);
   builder_.add_pre_ms(pre_ms);
-  builder_.add_wall_ms(wall_ms);
+  builder_.add_total_ms(total_ms);
   builder_.add_frame_id(frame_id);
   builder_.add_lateral(lateral);
   builder_.add_cipo(cipo);

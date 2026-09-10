@@ -616,8 +616,8 @@ def _debug_draw_bev(img: np.ndarray, out: VisionPilotOutput) -> None:
 def _debug_draw_top_bar(img: np.ndarray, out: VisionPilotOutput, source_label: str) -> None:
     _alpha_rect(img, (0, 0), (img.shape[1], 22), (0, 0, 0), 0.65)
     inf = out.inference
-    fps = 1000.0 / inf.wall_ms if inf.wall_ms > 0 else 0.0
-    s = f"VisionPilot  #{inf.frame_id}  wall={inf.wall_ms:.1f} ms ({fps:.0f} fps)  pre={inf.pre_ms:.1f} ms  src={source_label}"
+    fps = 1000.0 / inf.total_ms if inf.total_ms > 0 else 0.0
+    s = f"VisionPilot  #{inf.frame_id}  total={inf.total_ms:.1f} ms ({fps:.0f} fps)  pre={inf.pre_ms:.1f} ms  src={source_label}"
     cv2.putText(img, s, (6, 14), cv2.FONT_HERSHEY_SIMPLEX, 0.38, (200, 200, 200), 1, cv2.LINE_AA)
 
 
@@ -845,7 +845,7 @@ def _build_panel_level1(height: int, width: int, out: VisionPilotOutput, speed_m
     w.section("RUNTIME", CLR_ACCENT)
     w.kv("Frame / wire", f"#{inf.frame_id} / {out.wire_sequence}")
     w.kv("VisionPilot", f"{inf.visionpilot_ms:.2f} ms", CLR_ACCENT, True)
-    w.kv("Wall / pre", f"{inf.wall_ms:.2f} / {inf.pre_ms:.2f} ms")
+    w.kv("Total / pre", f"{inf.total_ms:.2f} / {inf.pre_ms:.2f} ms")
     w.kv("Wire RTT", f"{metrics.net_rtt_ms:.2f} ms  ema {metrics.rtt_ema_ms:.2f}")
     w.kv("Result rate", f"{metrics.result_fps:.1f} fps  ema {metrics.result_fps_ema:.1f}")
     w.kv("Pending", f"{metrics.pending_count}")
@@ -883,7 +883,7 @@ def _build_panel_level2(height: int, width: int, out: VisionPilotOutput, speed_m
 
     w.section("RUNTIME", CLR_ACCENT)
     w.kv("Frame", f"#{inf.frame_id}   pending={metrics.pending_count}", label_w=125)
-    w.kv("VP / wall / pre", f"{inf.visionpilot_ms:.2f} / {inf.wall_ms:.2f} / {inf.pre_ms:.2f} ms", label_w=125)
+    w.kv("VP / Total / pre", f"{inf.visionpilot_ms:.2f} / {inf.total_ms:.2f} / {inf.pre_ms:.2f} ms", label_w=125)
     w.kv("RTT / jitter", f"{metrics.net_rtt_ms:.2f} / {metrics.rtt_jitter_ms:.2f} ms", label_w=125)
     w.kv("Wire", f"TX {metrics.tx_bytes/1024:.1f} KiB  RX {out.payload_bytes/1024:.1f} KiB", label_w=125)
     w.kv("Geometry", f"raw={metrics.raw_w}x{metrics.raw_h} top={metrics.crop_top} kept={metrics.crop_h}", label_w=125)

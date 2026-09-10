@@ -105,7 +105,7 @@ class Lateral:
 @dataclass
 class Inference:
     frame_id: int = 0
-    wall_ms: float = 0.0
+    total_ms: float = 0.0
     pre_ms: float = 0.0
     visionpilot_ms: float = 0.0
     auto_drive: AutoDrive = field(default_factory=AutoDrive)
@@ -266,7 +266,7 @@ def decode_flatbuffer(payload: bytes, wire_sequence: int = 0) -> VisionPilotOutp
         raise ValueError("VisionPilotOutput.inference is missing")
 
     out.inference.frame_id = int(inf.FrameId())
-    out.inference.wall_ms = float(inf.WallMs())
+    out.inference.total_ms = float(inf.TotalMs())
     out.inference.pre_ms = float(inf.PreMs())
     out.inference.visionpilot_ms = float(inf.VisionpilotMs())
 

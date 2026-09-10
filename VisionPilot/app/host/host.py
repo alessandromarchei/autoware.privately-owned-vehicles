@@ -279,7 +279,7 @@ def print_result(out: VisionPilotOutput, level: int, *, rtt_ms: float = 0.0, res
     print("\n" + "=" * 112)
     print(
         f" FRAME {i.frame_id} / wire seq {out.wire_sequence} | "
-        f"wall={i.wall_ms:.3f} ms  pre={i.pre_ms:.3f} ms  "
+        f"total={i.total_ms:.3f} ms  pre={i.pre_ms:.3f} ms  "
         f"visionpilot={i.visionpilot_ms:.3f} ms  RTT={rtt_ms:.3f} ms"
     )
     print("=" * 112)

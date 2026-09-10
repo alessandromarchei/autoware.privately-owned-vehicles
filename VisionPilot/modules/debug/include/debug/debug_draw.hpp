@@ -2,9 +2,6 @@
 
 #include <fusion/longitudinal_fusion.hpp>
 #include <fusion/lateral_fusion.hpp>
-#include <models/auto_drive.hpp>
-#include <models/auto_steer.hpp>
-#include <models/auto_speed.hpp>
 #include <models/inference.hpp>
 #include <opencv2/core.hpp>
 #include <common/models.hpp>
@@ -24,7 +21,7 @@ struct VehicleParams {
 // ─── Per-frame bundle passed to annotate_frame ────────────────────────────────
 struct DebugView {
     uint64_t    frame_id   = 0;
-    double      wall_ms    = 0;
+    double      total_ms   = 0;
     double      pre_ms     = 0;
     double      visionpilot_ms = 0;
     std::string src_label;
@@ -47,7 +44,7 @@ inline DebugView debug_view_from(
 {
     return {
         r.frame_id,
-        r.wall_ms,
+        r.total_ms,
         r.pre_ms,
         r.visionpilot_ms,
         src_label,

@@ -69,7 +69,7 @@ inline void dump_visionpilot_result(const visionpilot::common::VisionPilotOutput
     // ─── INFERENCE METADATA ──────────────────────────────────────────────
     std::cout << " [INFERENCE METRICS]\n"
               << "   Frame ID        : " << inf.frame_id << "\n"
-              << "   Wall Time       : " << std::fixed << std::setprecision(2) << inf.wall_ms << " ms\n"
+              << "   Total Time       : " << std::fixed << std::setprecision(2) << inf.total_ms << " ms\n"
               << "   Pre-proc Time   : " << inf.pre_ms << " ms\n"
               << "   VisionPilot Time: " << inf.visionpilot_ms << " ms\n\n";
 

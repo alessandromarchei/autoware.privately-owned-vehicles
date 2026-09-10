@@ -133,7 +133,7 @@ std::vector<std::uint8_t> encode_result(
         wire::CreateInferenceFrameResult(
             builder,
             inference.frame_id,
-            inference.wall_ms,
+            inference.total_ms,
             inference.pre_ms,
             inference.visionpilot_ms,
             autoDrive,
@@ -234,8 +234,8 @@ bool decode_result(
     decoded.inference.frame_id =
         sourceInference->frame_id();
 
-    decoded.inference.wall_ms =
-        sourceInference->wall_ms();
+    decoded.inference.total_ms =
+        sourceInference->total_ms();
 
     decoded.inference.pre_ms =
         sourceInference->pre_ms();

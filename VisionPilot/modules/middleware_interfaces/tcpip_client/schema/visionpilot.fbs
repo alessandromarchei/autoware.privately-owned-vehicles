@@ -90,7 +90,7 @@ table LateralFusionEstimate {
 table InferenceFrameResult {
     frame_id:ulong = 0;
 
-    wall_ms:double = 0.0;
+    total_ms:double = 0.0;
     pre_ms:double = 0.0;
     visionpilot_ms:double = 0.0;
 

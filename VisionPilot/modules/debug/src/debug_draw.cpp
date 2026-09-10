@@ -473,9 +473,9 @@ static void draw_top_bar(cv::Mat& img, const DebugView& v)
     fill_rect(img, cv::Rect(0, 0, img.cols, kTopBarH), kClrHudBg, 0.65);
     char buf[128];
     std::snprintf(buf, sizeof(buf),
-                  "VisionPilot  #%llu  wall=%.1f ms (%.0f fps)  pre=%.1f ms  src=%s",
+                  "VisionPilot  #%llu  total=%.1f ms (%.0f fps)  pre=%.1f ms  src=%s",
                   static_cast<unsigned long long>(v.frame_id),
-                  v.wall_ms, (v.wall_ms > 0) ? 1000.0 / v.wall_ms : 0.0,
+                  v.total_ms, (v.total_ms > 0) ? 1000.0 / v.total_ms : 0.0,
                   v.pre_ms, v.src_label.c_str());
     cv::putText(img, buf, cv::Point(6, 14), kFont, kSmall, kClrTopBar, kThin, cv::LINE_AA);
 }

@@ -108,11 +108,8 @@ struct CIPOFusionEstimate {
 
 struct InferenceFrameResult {
     uint64_t    frame_id = 0;
-    double      wall_ms  = 0;
+    double      total_ms  = 0;
     double      pre_ms   = 0;
-    // double      ad_ms    = 0;
-    // double      as_ms    = 0;
-    // double      asp_ms   = 0;
     double      visionpilot_ms = 0;
 
     //common::VisionPilotOutput              visionpilot;

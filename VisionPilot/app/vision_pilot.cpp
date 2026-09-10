@@ -27,6 +27,11 @@ namespace ve = visionpilot::engine;
 namespace vm = visionpilot::models;
 namespace vd = visionpilot::debug;
 
+
+#define NET_W   1024
+#define NET_H   512
+
+
 int main(int argc, char** argv)
 {
     Config cfg;
@@ -370,7 +375,7 @@ int main(int argc, char** argv)
         }
     }
 
-    const cv::Size net_size(vm::AutoDrive::NET_W, vm::AutoDrive::NET_H);
+    const cv::Size net_size(NET_W, NET_H);
     cv::Mat frame, warped, resized;
     bool h_resized_set = false;
     cv::Mat H = load_matrix(homography_path, "H");
@@ -504,7 +509,7 @@ int main(int argc, char** argv)
                 
                 //pass inference results to tcp_result
                 tcp_result.inference.frame_id = current_frame_id;
-                tcp_result.inference.wall_ms = inference_result->wall_ms;
+                tcp_result.inference.total_ms = inference_result->total_ms;
                 tcp_result.inference.pre_ms = inference_result->pre_ms;
                 tcp_result.inference.visionpilot_ms = inference_result->visionpilot_ms;
                 tcp_result.inference.auto_drive = inference_result->auto_drive;

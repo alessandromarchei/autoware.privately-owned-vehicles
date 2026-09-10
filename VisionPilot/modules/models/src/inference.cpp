@@ -191,6 +191,7 @@ std::optional<visionpilot::common::InferenceFrameResult> InferencePipeline::proc
     out.frame_id = frame_count_;
     out.pre_ms = ms_pre;
     out.visionpilot_ms = ms_visionpilot;
+    out.total_ms = ms_pre + ms_visionpilot;     //total time is considered to be preprocessing + inference time. postprocessing is considered to be negligible
 
     out.cipo = long_fusion_.update(
         out.auto_drive,
